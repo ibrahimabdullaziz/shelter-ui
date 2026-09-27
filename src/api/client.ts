@@ -62,3 +62,5 @@ client.interceptors.response.use(
     return client(originalRequest);
   },
 );
+
+export default client;
