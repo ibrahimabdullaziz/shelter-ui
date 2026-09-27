@@ -1,13 +1,29 @@
 import axios, { type InternalAxiosRequestConfig } from "axios";
 import { useAuthStore } from "../store/authStore";
+import type { RefreshPayload, RefreshResponse } from "../types/api";
 
 type RetryConfig = InternalAxiosRequestConfig & {
   _retry?: boolean;
 };
 
 const client = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || "http://localhost:3000/",
+  baseURL: import.meta.env.VITE_API_URL || import.meta.env.LOCAL_API_URL,
 });
+
+let refreshPromise: Promise<string> | null = null;
+
+function redirectToLogin() {
+  const state = useAuthStore.getState();
+  const wasAuthenticated = Boolean(
+    state.accessToken || state.refreshToken || state.user,
+  );
+
+  state.logout();
+
+  if (wasAuthenticated && typeof window !== "undefined") {
+    window.location.assign("/login");
+  }
+}
 
 client.interceptors.request.use((config) => {
   const token = useAuthStore.getState().accessToken;
@@ -25,7 +41,9 @@ client.interceptors.response.use(
     const originalRequest = error.config as RetryConfig | undefined;
     const url = originalRequest?.url ?? "";
     const isAuthEndpoint =
-      url.includes("/auth/login") || url.includes("/auth/refresh");
+      /\/api\/auth\/(?:login|register|refresh|verify-email|forgot-password|reset-password)(?:\?|$)/.test(
+        url,
+      );
 
     if (
       error.response?.status !== 401 ||
@@ -37,23 +55,37 @@ client.interceptors.response.use(
     }
 
     originalRequest._retry = true;
+    const refreshToken = useAuthStore.getState().refreshToken;
+
+    if (!refreshToken) {
+      redirectToLogin();
+      return Promise.reject(error);
+    }
+
+    if (!refreshPromise) {
+      const payload: RefreshPayload = { token: refreshToken };
+      refreshPromise = axios
+        .post<RefreshResponse>("/api/auth/refresh", payload, {
+          baseURL: client.defaults.baseURL,
+        })
+        .then(({ data }) => {
+          useAuthStore.getState().setAccessToken(data.accessToken);
+          return data.accessToken;
+        })
+        .catch((refreshError: unknown) => {
+          redirectToLogin();
+          throw refreshError;
+        })
+        .finally(() => {
+          refreshPromise = null;
+        });
+    }
 
     let newAccessToken: string;
 
     try {
-      const { data } = await axios.post<{ accessToken: string }>(
-        "/auth/refresh",
-        undefined,
-        {
-          baseURL: client.defaults.baseURL,
-          withCredentials: true,
-        },
-      );
-      newAccessToken = data.accessToken;
-      useAuthStore.getState().setAccessToken(newAccessToken);
+      newAccessToken = await refreshPromise;
     } catch (refreshError) {
-      useAuthStore.getState().logout();
-      window.location.assign("/login");
       return Promise.reject(refreshError);
     }
 
