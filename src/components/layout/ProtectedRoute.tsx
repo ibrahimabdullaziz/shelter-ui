@@ -1,7 +1,7 @@
 import { Navigate, Outlet, useLocation } from "react-router-dom";
-import type { UserRole } from "../../types/api";
 import { useCurrentUserQuery } from "../../hooks/useAuthQueries";
 import { useAuthStore } from "../../store/authStore";
+import type { UserRole } from "../../types/api";
 
 interface ProtectedRouteProps {
   allowedRoles?: UserRole[];
@@ -14,7 +14,7 @@ export function ProtectedRoute({ allowedRoles }: ProtectedRouteProps) {
 
   if (authStatus === "initializing") {
     return (
-      <main aria-busy="true" aria-live="polite">
+      <main className="route-state" aria-busy="true" aria-live="polite">
         Checking your session...
       </main>
     );
@@ -22,7 +22,7 @@ export function ProtectedRoute({ allowedRoles }: ProtectedRouteProps) {
 
   if (authStatus === "error") {
     return (
-      <main role="alert">
+      <main className="route-state" role="alert">
         Your session could not be verified. Please retry the session check.
       </main>
     );
@@ -32,17 +32,21 @@ export function ProtectedRoute({ allowedRoles }: ProtectedRouteProps) {
     return <Navigate to="/login" replace state={{ from: location }} />;
   }
 
+  if (authStatus === "forbidden") {
+    return <Navigate to="/403" replace />;
+  }
+
   const user = currentUserQuery.data;
   if (!user) {
     return (
-      <main aria-busy="true" aria-live="polite">
+      <main className="route-state" aria-busy="true" aria-live="polite">
         Loading your account...
       </main>
     );
   }
 
   if (allowedRoles && !allowedRoles.includes(user.role)) {
-    return <Navigate to="/forbidden" replace />;
+    return <Navigate to="/403" replace />;
   }
 
   return <Outlet />;
