@@ -20,7 +20,7 @@ const user = {
 beforeEach(() => {
   clientMock.reset();
   axiosMock.reset();
-  useAuthStore.setState({ accessToken: null, refreshToken: null, user: null });
+  useAuthStore.setState({ accessToken: null, refreshToken: null });
   vi.stubGlobal("window", { location: { assign: vi.fn() } });
 });
 
@@ -104,7 +104,6 @@ describe("API authentication flow", () => {
     expect(useAuthStore.getState()).toMatchObject({
       accessToken: null,
       refreshToken: null,
-      user: null,
     });
     expect(window.location.assign).toHaveBeenCalledWith("/login");
   });

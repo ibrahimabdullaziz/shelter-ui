@@ -14,9 +14,7 @@ let refreshPromise: Promise<string> | null = null;
 
 function redirectToLogin() {
   const state = useAuthStore.getState();
-  const wasAuthenticated = Boolean(
-    state.accessToken || state.refreshToken || state.user,
-  );
+  const wasAuthenticated = Boolean(state.accessToken || state.refreshToken);
 
   state.logout();
 
