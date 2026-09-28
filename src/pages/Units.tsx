@@ -1,6 +1,8 @@
+import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { UnitCard } from "../components/features/units/UnitCard";
 import { UnitCardSkeleton } from "../components/features/units/UnitCardSkeleton";
+import { useDebounce } from "../hooks/useDebounce";
 import { useUnitsQuery } from "../hooks/useUnitsQuery";
 
 const PAGE_SIZE = 12;
@@ -13,6 +15,20 @@ export default function UnitsPage() {
   const categoryId = searchParams.get("categoryId") ?? "";
   const minPrice = searchParams.get("minPrice") ?? "";
   const maxPrice = searchParams.get("maxPrice") ?? "";
+
+  const [minPriceInput, setMinPriceInput] = useState(minPrice);
+  const [maxPriceInput, setMaxPriceInput] = useState(maxPrice);
+
+  const debouncedMinPrice = useDebounce(minPriceInput, 400);
+  const debouncedMaxPrice = useDebounce(maxPriceInput, 400);
+
+  useEffect(() => {
+    updateParam("minPrice", debouncedMinPrice);
+  }, [debouncedMinPrice]);
+
+  useEffect(() => {
+    updateParam("maxPrice", debouncedMaxPrice);
+  }, [debouncedMaxPrice]);
 
   const safePage = Number.isFinite(page) && page > 0 ? page : 1;
 
@@ -46,6 +62,14 @@ export default function UnitsPage() {
       return next;
     });
   };
+
+  useEffect(() => {
+    setMinPriceInput(minPrice);
+  }, [minPrice]);
+
+  useEffect(() => {
+    setMaxPriceInput(maxPrice);
+  }, [maxPrice]);
 
   const handlePageChange = (nextPage: number) => {
     setSearchParams((current) => {
@@ -99,8 +123,8 @@ export default function UnitsPage() {
           <span>Min price</span>
           <input
             type="number"
-            value={minPrice}
-            onChange={(event) => updateParam("minPrice", event.target.value)}
+            value={minPriceInput}
+            onChange={(event) => setMinPriceInput(event.target.value)}
             placeholder="0"
           />
         </label>
@@ -109,8 +133,8 @@ export default function UnitsPage() {
           <span>Max price</span>
           <input
             type="number"
-            value={maxPrice}
-            onChange={(event) => updateParam("maxPrice", event.target.value)}
+            value={maxPriceInput}
+            onChange={(event) => setMaxPriceInput(event.target.value)}
             placeholder="500"
           />
         </label>
