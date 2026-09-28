@@ -1,14 +1,14 @@
 import { useQuery } from "@tanstack/react-query";
+import type { UnitFilters } from "../types/api";
 import { listUnits } from "../api/units";
 
 export const unitsQueryKeys = {
-  list: (page: number, limit: number) =>
-    ["units", "list", { page, limit }] as const,
+  list: (filters: UnitFilters) => ["units", "list", filters] as const,
 };
 
-export function useUnitsQuery(page: number, limit: number) {
+export function useUnitsQuery(filters: UnitFilters) {
   return useQuery({
-    queryKey: unitsQueryKeys.list(page, limit),
-    queryFn: () => listUnits({ page, limit }),
+    queryKey: unitsQueryKeys.list(filters),
+    queryFn: () => listUnits(filters),
   });
 }
