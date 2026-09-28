@@ -1,4 +1,5 @@
-export type UserRole = "GUEST" | "HOST" | "ADMIN";
+export type Role = "GUEST" | "HOST" | "ADMIN";
+export type UserRole = Role;
 
 export type BookingStatus =
   | "PENDING"
@@ -21,12 +22,16 @@ export interface LoginPayload {
   password: string;
 }
 
+export type LoginRequest = LoginPayload;
+
 export interface RegisterPayload {
   email: string;
   password: string;
   firstName: string;
   lastName: string;
 }
+
+export type RegisterRequest = RegisterPayload;
 
 export interface RefreshPayload {
   token: string;

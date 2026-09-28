@@ -1,6 +1,7 @@
 import axios, { type InternalAxiosRequestConfig } from "axios";
 import { useAuthStore } from "../store/authStore";
 import type { RefreshPayload, RefreshResponse } from "../types/api";
+import { clearAuthSession } from "../lib/clearAuthSession";
 
 type RetryConfig = InternalAxiosRequestConfig & {
   _retry?: boolean;
@@ -11,17 +12,6 @@ const client = axios.create({
 });
 
 let refreshPromise: Promise<string> | null = null;
-
-function redirectToLogin() {
-  const state = useAuthStore.getState();
-  const wasAuthenticated = Boolean(state.accessToken || state.refreshToken);
-
-  state.logout();
-
-  if (wasAuthenticated && typeof window !== "undefined") {
-    window.location.assign("/login");
-  }
-}
 
 client.interceptors.request.use((config) => {
   const token = useAuthStore.getState().accessToken;
@@ -56,7 +46,7 @@ client.interceptors.response.use(
     const refreshToken = useAuthStore.getState().refreshToken;
 
     if (!refreshToken) {
-      redirectToLogin();
+      clearAuthSession({ redirect: true });
       return Promise.reject(error);
     }
 
@@ -71,7 +61,7 @@ client.interceptors.response.use(
           return data.accessToken;
         })
         .catch((refreshError: unknown) => {
-          redirectToLogin();
+          clearAuthSession({ redirect: true });
           throw refreshError;
         })
         .finally(() => {

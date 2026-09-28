@@ -2,11 +2,10 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { login, register, getCurrentUser } from "../api/auth";
 import type { LoginPayload, RegisterPayload } from "../types/api";
 import { useAuthStore } from "../store/authStore";
+import { clearAuthSession } from "../lib/clearAuthSession";
+import { authQueryKeys } from "../queries/authKeys";
 
-export const authQueryKeys = {
-  all: ["auth"] as const,
-  currentUser: ["auth", "currentUser"] as const,
-};
+export { authQueryKeys } from "../queries/authKeys";
 
 export function useCurrentUserQuery() {
   const accessToken = useAuthStore((state) => state.accessToken);
@@ -26,6 +25,12 @@ export function useLoginMutation() {
 
   return useMutation({
     mutationFn: (payload: LoginPayload) => login(payload),
+    onMutate: async () => {
+      await queryClient.cancelQueries({
+        queryKey: authQueryKeys.currentUser,
+      });
+      queryClient.removeQueries({ queryKey: authQueryKeys.currentUser });
+    },
     onSuccess: async () => {
       await queryClient.invalidateQueries({
         queryKey: authQueryKeys.currentUser,
@@ -39,6 +44,12 @@ export function useRegisterMutation() {
 
   return useMutation({
     mutationFn: (payload: RegisterPayload) => register(payload),
+    onMutate: async () => {
+      await queryClient.cancelQueries({
+        queryKey: authQueryKeys.currentUser,
+      });
+      queryClient.removeQueries({ queryKey: authQueryKeys.currentUser });
+    },
     onSuccess: async () => {
       await queryClient.invalidateQueries({
         queryKey: authQueryKeys.currentUser,
@@ -48,14 +59,7 @@ export function useRegisterMutation() {
 }
 
 export function useLogoutMutation() {
-  const queryClient = useQueryClient();
-
   return useMutation({
-    mutationFn: async () => {
-      useAuthStore.getState().logout();
-    },
-    onSuccess: () => {
-      queryClient.removeQueries({ queryKey: authQueryKeys.currentUser });
-    },
+    mutationFn: async () => clearAuthSession({ redirect: true }),
   });
 }
