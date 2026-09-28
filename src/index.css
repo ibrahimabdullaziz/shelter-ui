@@ -1,31 +1,31 @@
 @import url("https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Serif+Display&display=swap");
 
 :root {
-	font-family: "DM Sans", "Segoe UI", sans-serif;
-	color: #172724;
-	background: #f6f5f0;
-	font-synthesis: none;
-	text-rendering: optimizeLegibility;
-	-webkit-font-smoothing: antialiased;
-	-moz-osx-font-smoothing: grayscale;
-	font-weight: 400;
+  font-family: "DM Sans", "Segoe UI", sans-serif;
+  color: #172724;
+  background: #f6f5f0;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-weight: 400;
 }
 
 * {
-	box-sizing: border-box;
+  box-sizing: border-box;
 }
 
 body {
-	min-width: 320px;
-	min-height: 100vh;
-	margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+  margin: 0;
 }
 
 button,
 input {
-	font: inherit;
+  font: inherit;
 }
 
 a {
-	color: inherit;
+  color: inherit;
 }
