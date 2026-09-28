@@ -2,9 +2,11 @@ import type { Unit } from "../../../types/api";
 
 interface UnitCardProps {
   unit: Unit;
+  cityName?: string;
+  categoryName?: string;
 }
 
-export function UnitCard({ unit }: UnitCardProps) {
+export function UnitCard({ unit, cityName, categoryName }: UnitCardProps) {
   return (
     <article
       style={{
@@ -30,18 +32,22 @@ export function UnitCard({ unit }: UnitCardProps) {
           textAlign: "center",
         }}
       >
-        Unit
+        Listing
       </div>
 
       <div style={{ padding: "16px" }}>
         <h3 style={{ margin: "0 0 8px", color: "#173b34" }}>{unit.title}</h3>
 
+        <p style={{ margin: "0 0 12px", color: "#536760", lineHeight: 1.5 }}>
+          {unit.description}
+        </p>
+
         <p style={{ margin: "0 0 6px", color: "#536760" }}>
-          City: {unit.cityId}
+          City: {cityName ?? unit.cityId}
         </p>
 
         <p style={{ margin: "0 0 12px", color: "#536760" }}>
-          Category: {unit.categoryId}
+          Category: {categoryName ?? unit.categoryId}
         </p>
 
         <div

@@ -1,5 +1,7 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { listCategories, listCities } from "../api/catalog";
 import { UnitCard } from "../components/features/units/UnitCard";
 import { UnitCardSkeleton } from "../components/features/units/UnitCardSkeleton";
 import { useDebounce } from "../hooks/useDebounce";
@@ -8,6 +10,7 @@ import { useUnitsQuery } from "../hooks/useUnitsQuery";
 const PAGE_SIZE = 12;
 
 export default function UnitsPage() {
+  const queryClient = useQueryClient();
   const [searchParams, setSearchParams] = useSearchParams();
 
   const page = Number(searchParams.get("page") ?? "1");
@@ -22,13 +25,27 @@ export default function UnitsPage() {
   const debouncedMinPrice = useDebounce(minPriceInput, 400);
   const debouncedMaxPrice = useDebounce(maxPriceInput, 400);
 
-  useEffect(() => {
-    updateParam("minPrice", debouncedMinPrice);
-  }, [debouncedMinPrice]);
+  const { data: cities = [] } = useQuery({
+    queryKey: ["cities"],
+    queryFn: listCities,
+    staleTime: 5 * 60_000,
+  });
 
-  useEffect(() => {
-    updateParam("maxPrice", debouncedMaxPrice);
-  }, [debouncedMaxPrice]);
+  const { data: categories = [] } = useQuery({
+    queryKey: ["unit-categories"],
+    queryFn: listCategories,
+    staleTime: 5 * 60_000,
+  });
+
+  const cityNameMap = useMemo(
+    () => new Map(cities.map((city) => [city.id, city.name])),
+    [cities],
+  );
+
+  const categoryNameMap = useMemo(
+    () => new Map(categories.map((category) => [category.id, category.name])),
+    [categories],
+  );
 
   const safePage = Number.isFinite(page) && page > 0 ? page : 1;
 
@@ -48,6 +65,10 @@ export default function UnitsPage() {
     error,
   } = useUnitsQuery(filters);
 
+  const hasActiveFilters = Boolean(
+    cityId || categoryId || minPrice || maxPrice,
+  );
+
   const updateParam = (key: string, value: string) => {
     setSearchParams((current) => {
       const next = new URLSearchParams(current);
@@ -62,6 +83,14 @@ export default function UnitsPage() {
       return next;
     });
   };
+
+  useEffect(() => {
+    updateParam("minPrice", debouncedMinPrice);
+  }, [debouncedMinPrice]);
+
+  useEffect(() => {
+    updateParam("maxPrice", debouncedMaxPrice);
+  }, [debouncedMaxPrice]);
 
   useEffect(() => {
     setMinPriceInput(minPrice);
@@ -79,11 +108,46 @@ export default function UnitsPage() {
     });
   };
 
+  const clearFilters = () => {
+    setSearchParams((current) => {
+      const next = new URLSearchParams(current);
+      next.delete("cityId");
+      next.delete("categoryId");
+      next.delete("minPrice");
+      next.delete("maxPrice");
+      next.set("page", "1");
+      return next;
+    });
+  };
+
+  const retryQuery = async () => {
+    await queryClient.refetchQueries({
+      queryKey: ["units", "list"],
+      type: "active",
+    });
+  };
+
   if (error) {
     return (
       <main style={{ padding: "24px" }}>
         <h1>Units</h1>
-        <p>Unable to load units right now.</p>
+        <div
+          style={{
+            marginTop: "20px",
+            padding: "20px",
+            border: "1px solid #f1d6d1",
+            borderRadius: "12px",
+            background: "#fff5f4",
+            color: "#7a2b25",
+          }}
+        >
+          <p style={{ margin: 0, marginBottom: "12px" }}>
+            Unable to load units right now.
+          </p>
+          <button type="button" onClick={() => void retryQuery()}>
+            Retry
+          </button>
+        </div>
       </main>
     );
   }
@@ -103,20 +167,32 @@ export default function UnitsPage() {
       >
         <label style={{ display: "grid", gap: "6px" }}>
           <span>City</span>
-          <input
+          <select
             value={cityId}
             onChange={(event) => updateParam("cityId", event.target.value)}
-            placeholder="city id"
-          />
+          >
+            <option value="">All cities</option>
+            {cities.map((city) => (
+              <option key={city.id} value={city.id}>
+                {city.name}
+              </option>
+            ))}
+          </select>
         </label>
 
         <label style={{ display: "grid", gap: "6px" }}>
           <span>Category</span>
-          <input
+          <select
             value={categoryId}
             onChange={(event) => updateParam("categoryId", event.target.value)}
-            placeholder="category id"
-          />
+          >
+            <option value="">All categories</option>
+            {categories.map((category) => (
+              <option key={category.id} value={category.id}>
+                {category.name}
+              </option>
+            ))}
+          </select>
         </label>
 
         <label style={{ display: "grid", gap: "6px" }}>
@@ -140,6 +216,14 @@ export default function UnitsPage() {
         </label>
       </div>
 
+      {hasActiveFilters && (
+        <div style={{ marginBottom: "20px" }}>
+          <button type="button" onClick={clearFilters}>
+            Clear filters
+          </button>
+        </div>
+      )}
+
       {isLoading ? (
         <div
           style={{
@@ -153,7 +237,25 @@ export default function UnitsPage() {
           ))}
         </div>
       ) : !units.length ? (
-        <p style={{ marginTop: "20px" }}>No units found.</p>
+        <div
+          style={{
+            marginTop: "20px",
+            padding: "24px",
+            border: "1px solid #dfe6e3",
+            borderRadius: "12px",
+            background: "#f8faf9",
+            color: "#355045",
+          }}
+        >
+          <p style={{ margin: 0, marginBottom: "12px" }}>
+            No units match your current filters.
+          </p>
+          {hasActiveFilters && (
+            <button type="button" onClick={clearFilters}>
+              Clear filters
+            </button>
+          )}
+        </div>
       ) : (
         <>
           <div
@@ -164,7 +266,14 @@ export default function UnitsPage() {
             }}
           >
             {units.map((unit) => (
-              <UnitCard key={unit.id} unit={unit} />
+              <UnitCard
+                key={unit.id}
+                unit={unit}
+                cityName={cityNameMap.get(unit.cityId) ?? unit.cityId}
+                categoryName={
+                  categoryNameMap.get(unit.categoryId) ?? unit.categoryId
+                }
+              />
             ))}
           </div>
 
