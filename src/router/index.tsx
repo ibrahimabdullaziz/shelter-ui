@@ -3,6 +3,7 @@ import App from "../App";
 import { ProtectedRoute } from "../components/layout/ProtectedRoute";
 import Login from "../pages/Login";
 import Register from "../pages/Register";
+import UnitsPage from "../pages/Units";
 
 export const router = createBrowserRouter([
   {
@@ -37,7 +38,8 @@ export const router = createBrowserRouter([
           },
         ],
       },
-      { index: true, element: <Navigate to="/account" replace /> },
+      { index: true, element: <UnitsPage /> },
+      { path: "units", element: <UnitsPage /> },
       { path: "*", element: <Navigate to="/" replace /> },
     ],
   },
