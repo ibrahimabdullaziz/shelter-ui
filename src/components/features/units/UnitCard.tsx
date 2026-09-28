@@ -22,13 +22,15 @@ export function UnitCard({ unit }: UnitCardProps) {
           display: "grid",
           placeItems: "center",
           color: "#173b34",
-          fontSize: "14px",
+          fontSize: "12px",
           fontWeight: 700,
           letterSpacing: "0.08em",
           textTransform: "uppercase",
+          padding: "12px",
+          textAlign: "center",
         }}
       >
-        Image
+        Unit
       </div>
 
       <div style={{ padding: "16px" }}>
