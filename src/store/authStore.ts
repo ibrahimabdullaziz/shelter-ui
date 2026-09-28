@@ -6,6 +6,7 @@ export type AuthStatus =
   | "initializing"
   | "authenticated"
   | "unauthenticated"
+  | "forbidden"
   | "error";
 
 interface AuthState {

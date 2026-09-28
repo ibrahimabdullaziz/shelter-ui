@@ -41,7 +41,11 @@ export function AuthBootstrap({ children }: AuthBootstrapProps) {
         ? currentUserQuery.error.response?.status
         : undefined;
       setAuthStatus(
-        status === 401 || status === 403 ? "unauthenticated" : "error",
+        status === 401
+          ? "unauthenticated"
+          : status === 403
+            ? "forbidden"
+            : "error",
       );
       return;
     }
