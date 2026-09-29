@@ -1,0 +1,273 @@
+.host-dashboard {
+  min-height: 100vh;
+  background: #f6f5f0;
+}
+
+.host-header {
+  display: flex;
+  min-height: 112px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 20px max(24px, calc((100vw - 1180px) / 2));
+  border-bottom: 1px solid #dfe6e3;
+  background: #fff;
+}
+
+.host-header h1 {
+  margin: 4px 0 0;
+  color: #173b34;
+  font-family: "DM Serif Display", Georgia, serif;
+  font-size: 30px;
+  font-weight: 400;
+}
+
+.host-kicker {
+  margin: 0;
+  color: #9b5537;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.host-marketplace-link {
+  color: #1f594c;
+  font-size: 13px;
+  font-weight: 700;
+  text-underline-offset: 3px;
+}
+
+.host-layout {
+  display: grid;
+  width: min(100% - 48px, 1180px);
+  min-height: calc(100vh - 112px);
+  grid-template-columns: 210px minmax(0, 1fr);
+  gap: 48px;
+  margin: 0 auto;
+}
+
+.host-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 32px 0;
+}
+
+.host-nav-link {
+  padding: 12px 14px;
+  border-left: 3px solid transparent;
+  color: #536760;
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.host-nav-link:hover {
+  background: #eeeee7;
+  color: #173b34;
+}
+
+.host-nav-link.is-active {
+  border-left-color: #d26a43;
+  background: #fff;
+  color: #173b34;
+}
+
+.host-content {
+  min-width: 0;
+  padding: 40px 0 64px;
+}
+
+.host-page-heading {
+  margin-bottom: 28px;
+}
+
+.host-page-heading h2 {
+  margin: 7px 0 8px;
+  color: #173b34;
+  font-family: "DM Serif Display", Georgia, serif;
+  font-size: 32px;
+  font-weight: 400;
+}
+
+.host-page-heading > p:last-child {
+  margin: 0;
+  color: #62716c;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.host-stat-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.host-stat {
+  display: grid;
+  min-height: 152px;
+  align-content: start;
+  gap: 10px;
+  padding: 20px;
+  border: 1px solid #dfe6e3;
+  background: #fff;
+  text-decoration: none;
+}
+
+.host-stat:hover {
+  border-color: #9caf9f;
+}
+
+.host-stat-label {
+  color: #62716c;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.host-stat strong {
+  color: #173b34;
+  font-size: 28px;
+  font-weight: 600;
+}
+
+.host-stat-link {
+  color: #1f594c;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.host-list {
+  display: grid;
+  border-top: 1px solid #dfe6e3;
+}
+
+.host-list-row {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 18px 0;
+  border-bottom: 1px solid #dfe6e3;
+}
+
+.host-list-row h3 {
+  margin: 0;
+  color: #173b34;
+  font-size: 15px;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.host-list-row p {
+  margin: 6px 0 0;
+  color: #62716c;
+  font-size: 13px;
+}
+
+.host-status {
+  flex: 0 0 auto;
+  padding: 5px 8px;
+  background: #e5efe8;
+  color: #285c43;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: capitalize;
+}
+
+.host-status.is-inactive {
+  background: #eeeae4;
+  color: #665e53;
+}
+
+.host-booking-actions {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 14px;
+}
+
+.host-booking-actions > div {
+  margin-top: 0 !important;
+}
+
+.host-empty-state {
+  padding: 18px;
+  border: 1px solid #dfe6e3;
+  background: #fff;
+  color: #536760;
+}
+
+.host-empty-state p {
+  margin: 0 0 12px;
+}
+
+.host-empty-state button {
+  min-height: 38px;
+  padding: 0 12px;
+  border: 1px solid #b9c9c2;
+  border-radius: 4px;
+  background: #fff;
+  color: #173b34;
+  cursor: pointer;
+}
+
+@media (max-width: 720px) {
+  .host-header {
+    min-height: 96px;
+    padding: 16px 20px;
+  }
+
+  .host-header h1 {
+    font-size: 26px;
+  }
+
+  .host-layout {
+    width: min(100% - 40px, 560px);
+    min-height: calc(100vh - 96px);
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+
+  .host-nav {
+    flex-direction: row;
+    gap: 0;
+    overflow-x: auto;
+    padding: 12px 0 0;
+    border-bottom: 1px solid #dfe6e3;
+  }
+
+  .host-nav-link {
+    flex: 0 0 auto;
+    border-bottom: 3px solid transparent;
+    border-left: 0;
+    padding: 12px;
+  }
+
+  .host-nav-link.is-active {
+    border-bottom-color: #d26a43;
+  }
+
+  .host-content {
+    padding: 28px 0 48px;
+  }
+}
+
+@media (max-width: 480px) {
+  .host-header {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .host-stat-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .host-list-row,
+  .host-booking-actions {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}

@@ -4,6 +4,12 @@ import { ProtectedRoute } from "../components/layout/ProtectedRoute";
 import Login from "../pages/Login";
 import Register from "../pages/Register";
 import BookingConfirmationPage from "../pages/BookingConfirmation";
+import {
+  HostBookingsPage,
+  HostOverviewPage,
+  HostUnitsPage,
+} from "../pages/HostDashboard";
+import HostDashboard from "../pages/HostDashboard";
 import MyBookingsPage from "../pages/MyBookings";
 import UnitDetailPage from "../pages/UnitDetail";
 import UnitsPage from "../pages/Units";
@@ -35,8 +41,15 @@ export const router = createBrowserRouter([
           {
             element: <ProtectedRoute allowedRoles={["HOST", "ADMIN"]} />,
             children: [
-              { path: "host", element: <p>Host dashboard</p> },
-              { path: "host/units", element: <p>Your listings</p> },
+              {
+                path: "host",
+                element: <HostDashboard />,
+                children: [
+                  { index: true, element: <HostOverviewPage /> },
+                  { path: "units", element: <HostUnitsPage /> },
+                  { path: "bookings", element: <HostBookingsPage /> },
+                ],
+              },
             ],
           },
           {
