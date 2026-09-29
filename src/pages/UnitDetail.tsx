@@ -1,11 +1,29 @@
 import { Link, useParams } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
+import { listCategories, listCities, listCurrencies } from "../api/catalog";
 import { BookingWidget } from "../components/features/bookings/BookingWidget";
+import { UnitReviews } from "../components/features/reviews/UnitReviews";
 import { Gallery } from "../components/features/units/Gallery";
 import { useUnitQuery } from "../hooks/useUnitsQuery";
 
 export default function UnitDetailPage() {
   const { id } = useParams();
   const { data: unit, isLoading, error } = useUnitQuery(id ?? "");
+  const { data: cities = [], isError: citiesError } = useQuery({
+    queryKey: ["cities"],
+    queryFn: listCities,
+    staleTime: 5 * 60_000,
+  });
+  const { data: categories = [], isError: categoriesError } = useQuery({
+    queryKey: ["unit-categories"],
+    queryFn: listCategories,
+    staleTime: 5 * 60_000,
+  });
+  const { data: currencies = [], isError: currenciesError } = useQuery({
+    queryKey: ["currencies"],
+    queryFn: listCurrencies,
+    staleTime: 5 * 60_000,
+  });
 
   if (isLoading) {
     return (
@@ -34,6 +52,21 @@ export default function UnitDetailPage() {
       </main>
     );
   }
+
+  const cityName = cities.find((city) => city.id === unit.cityId)?.name;
+  const categoryName = categories.find(
+    (category) => category.id === unit.categoryId,
+  )?.name;
+  const currencyCode = currencies.find(
+    (currency) => currency.id === unit.currencyId,
+  )?.code;
+  const formatPrice = (amount: number) =>
+    currencyCode
+      ? new Intl.NumberFormat(undefined, {
+          style: "currency",
+          currency: currencyCode,
+        }).format(amount)
+      : `${amount.toFixed(2)}${currenciesError ? " (currency unavailable)" : ""}`;
 
   return (
     <main style={{ padding: "24px", maxWidth: "800px", margin: "0 auto" }}>
@@ -73,12 +106,20 @@ export default function UnitDetailPage() {
             }}
           >
             <div>
-              <strong>City ID:</strong>
-              <div>{unit.cityId}</div>
+              <strong>City:</strong>
+              <div>
+                {cityName ??
+                  (citiesError ? "City unavailable" : "Loading city...")}
+              </div>
             </div>
             <div>
-              <strong>Category ID:</strong>
-              <div>{unit.categoryId}</div>
+              <strong>Category:</strong>
+              <div>
+                {categoryName ??
+                  (categoriesError
+                    ? "Category unavailable"
+                    : "Loading category...")}
+              </div>
             </div>
             <div>
               <strong>Max guests:</strong>
@@ -86,19 +127,24 @@ export default function UnitDetailPage() {
             </div>
             <div>
               <strong>Price:</strong>
-              <div>${unit.pricePerNight} / night</div>
+              <div>{formatPrice(unit.pricePerNight)} / night</div>
             </div>
           </div>
 
           <div
             style={{ color: "#1f594c", fontWeight: 700, fontSize: "1.4rem" }}
           >
-            ${unit.pricePerNight}
+            {formatPrice(unit.pricePerNight)}
           </div>
         </div>
       </article>
 
-      <BookingWidget />
+      <BookingWidget
+        unitId={unit.id}
+        pricePerNight={unit.pricePerNight}
+        currencyCode={currencyCode}
+      />
+      <UnitReviews unitId={unit.id} />
     </main>
   );
 }
