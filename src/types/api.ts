@@ -179,6 +179,15 @@ export interface Review {
   comment?: string;
 }
 
+export interface UnitReviews {
+  reviews: Review[];
+  avgRating?: {
+    _avg?: {
+      rating?: number | null;
+    };
+  };
+}
+
 export interface Favorite {
   userId: string;
   unitId: string;
