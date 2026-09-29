@@ -1,6 +1,8 @@
 import { Link, useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { listCategories, listCities, listCurrencies } from "../api/catalog";
+import { ErrorBoundary } from "../components/errors/ErrorBoundary";
+import { BookingWidgetError } from "../components/features/bookings/BookingWidgetError";
 import { BookingWidget } from "../components/features/bookings/BookingWidget";
 import { UnitReviews } from "../components/features/reviews/UnitReviews";
 import { Gallery } from "../components/features/units/Gallery";
@@ -139,11 +141,18 @@ export default function UnitDetailPage() {
         </div>
       </article>
 
-      <BookingWidget
-        unitId={unit.id}
-        pricePerNight={unit.pricePerNight}
-        currencyCode={currencyCode}
-      />
+      <ErrorBoundary
+        key={unit.id}
+        fallback={({ error, resetErrorBoundary }) => (
+          <BookingWidgetError error={error} onRetry={resetErrorBoundary} />
+        )}
+      >
+        <BookingWidget
+          unitId={unit.id}
+          pricePerNight={unit.pricePerNight}
+          currencyCode={currencyCode}
+        />
+      </ErrorBoundary>
       <UnitReviews unitId={unit.id} />
     </main>
   );
