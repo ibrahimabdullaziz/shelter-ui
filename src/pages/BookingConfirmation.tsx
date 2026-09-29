@@ -1,6 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
 import { Link, useLocation, useParams } from "react-router-dom";
 import { listMyBookings } from "../api/bookings";
+import { useUnitQuery } from "../hooks/useUnitsQuery";
+import { calculateBookingPrice } from "../components/features/bookings/bookingDateUtils";
 import type { Booking } from "../types/api";
 
 interface BookingConfirmationState {
@@ -8,12 +10,54 @@ interface BookingConfirmationState {
   currencyCode?: string;
 }
 
+function formatBookingTotal(
+  totalPrice: number | string,
+  currencyCode?: string,
+): string {
+  const amount = Number(totalPrice);
+  if (!Number.isFinite(amount)) return "Amount unavailable";
+  if (!currencyCode) return amount.toFixed(2);
+
+  try {
+    return new Intl.NumberFormat(undefined, {
+      style: "currency",
+      currency: currencyCode,
+    }).format(amount);
+  } catch {
+    return `${amount.toFixed(2)} ${currencyCode}`;
+  }
+}
+
+function isValidBooking(value: unknown, expectedId?: string): value is Booking {
+  if (!value || typeof value !== "object") return false;
+
+  const booking = value as Partial<Booking>;
+  const nights =
+    typeof booking.checkIn === "string" && typeof booking.checkOut === "string"
+      ? calculateBookingPrice(booking.checkIn, booking.checkOut, 1).nights
+      : 0;
+  const totalPrice = Number(booking.totalPrice);
+
+  return Boolean(
+    expectedId &&
+    booking.id === expectedId &&
+    typeof booking.unitId === "string" &&
+    booking.unitId &&
+    typeof booking.guestId === "string" &&
+    typeof booking.status === "string" &&
+    nights > 0 &&
+    Number.isFinite(totalPrice) &&
+    totalPrice >= 0,
+  );
+}
+
 export default function BookingConfirmationPage() {
   const { id } = useParams();
   const location = useLocation();
   const state = location.state as BookingConfirmationState | null;
-  const bookingFromState =
-    state?.booking?.id === id ? state?.booking : undefined;
+  const bookingFromState = isValidBooking(state?.booking, id)
+    ? state?.booking
+    : undefined;
 
   const bookingsQuery = useQuery({
     queryKey: ["bookings", "mine"],
@@ -22,8 +66,13 @@ export default function BookingConfirmationPage() {
     retry: false,
   });
 
-  const booking =
-    bookingFromState ?? bookingsQuery.data?.find((item) => item.id === id);
+  const bookingFromApi = bookingsQuery.data?.find((item) =>
+    isValidBooking(item, id),
+  );
+  const booking = bookingFromState ?? bookingFromApi;
+  const { data: unit, isLoading: isUnitLoading } = useUnitQuery(
+    booking?.unitId ?? "",
+  );
 
   if (!booking && bookingsQuery.isLoading) {
     return (
@@ -37,6 +86,9 @@ export default function BookingConfirmationPage() {
     return (
       <main className="route-state" role="alert">
         <p>We could not load this booking confirmation.</p>
+        <button type="button" onClick={() => void bookingsQuery.refetch()}>
+          Retry
+        </button>
         <Link to="/bookings">View your bookings</Link>
       </main>
     );
@@ -46,25 +98,34 @@ export default function BookingConfirmationPage() {
     return (
       <main className="route-state">
         <h1>Booking not found</h1>
-        <p>This booking may no longer be available.</p>
+        <p>The booking data is missing or invalid.</p>
         <Link to="/bookings">View your bookings</Link>
       </main>
     );
   }
 
-  const amount = state?.currencyCode
-    ? new Intl.NumberFormat(undefined, {
-        style: "currency",
-        currency: state.currencyCode,
-      }).format(booking.totalPrice)
-    : booking.totalPrice.toFixed(2);
+  const amount = formatBookingTotal(booking.totalPrice, state?.currencyCode);
+  const nights = calculateBookingPrice(
+    booking.checkIn,
+    booking.checkOut,
+    1,
+  ).nights;
+  const unitName =
+    unit?.title ??
+    (isUnitLoading ? "Loading unit..." : `Unit ${booking.unitId}`);
 
   return (
     <main className="route-state">
       <section aria-labelledby="booking-confirmation-title">
-        <h1 id="booking-confirmation-title">Booking request submitted</h1>
+        <h1 id="booking-confirmation-title">Booking confirmation</h1>
         <p>Your booking is currently {booking.status.toLowerCase()}.</p>
         <dl>
+          <div>
+            <dt>Unit</dt>
+            <dd>
+              <Link to={`/units/${booking.unitId}`}>{unitName}</Link>
+            </dd>
+          </div>
           <div>
             <dt>Confirmation</dt>
             <dd>{booking.id}</dd>
@@ -76,6 +137,10 @@ export default function BookingConfirmationPage() {
           <div>
             <dt>Check-out</dt>
             <dd>{booking.checkOut}</dd>
+          </div>
+          <div>
+            <dt>Number of nights</dt>
+            <dd>{nights}</dd>
           </div>
           <div>
             <dt>Total</dt>

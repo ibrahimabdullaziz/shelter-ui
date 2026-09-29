@@ -142,7 +142,7 @@ export interface Booking {
   guestId: string;
   checkIn: string;
   checkOut: string;
-  totalPrice: number;
+  totalPrice: number | string;
   status: BookingStatus;
 }
 
