@@ -16,8 +16,18 @@ export const unitsQueryKeys = {
         maxPrice: filters.maxPrice ?? null,
       },
     ] as const,
-  detail: (id: string) => ["units", "detail", id] as const,
+  detail: (id: string) => ["unit", id] as const,
 };
+
+export function unitQueryOptions(id: string) {
+  return {
+    queryKey: unitsQueryKeys.detail(id),
+    queryFn: () => getUnit(id),
+    staleTime: 30_000,
+    gcTime: 5 * 60_000,
+    retry: false,
+  } as const;
+}
 
 export function useUnitsQuery(filters: UnitFilters) {
   return useQuery({
@@ -30,11 +40,7 @@ export function useUnitsQuery(filters: UnitFilters) {
 
 export function useUnitQuery(id: string) {
   return useQuery({
-    queryKey: unitsQueryKeys.detail(id),
-    queryFn: () => getUnit(id),
+    ...unitQueryOptions(id),
     enabled: Boolean(id),
-    staleTime: 30_000,
-    gcTime: 5 * 60_000,
-    retry: false,
   });
 }

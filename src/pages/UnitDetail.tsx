@@ -1,4 +1,5 @@
 import { Link, useParams } from "react-router-dom";
+import { BookingWidget } from "../components/features/bookings/BookingWidget";
 import { Gallery } from "../components/features/units/Gallery";
 import { useUnitQuery } from "../hooks/useUnitsQuery";
 
@@ -96,6 +97,8 @@ export default function UnitDetailPage() {
           </div>
         </div>
       </article>
+
+      <BookingWidget />
     </main>
   );
 }
