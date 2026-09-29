@@ -1,37 +1,21 @@
 import { useMutation } from "@tanstack/react-query";
-import { useState } from "react";
+import { useId, useState, type FormEvent } from "react";
 import { createBooking } from "../../../api/bookings";
 import { getApiErrorMessage } from "../../../lib/getApiErrorMessage";
-
-interface BookingPrice {
-  nights: number;
-  totalPrice: number;
-}
-
-export function calculateBookingPrice(
-  checkIn: string,
-  checkOut: string,
-  pricePerNight: number,
-): BookingPrice {
-  if (!checkIn || !checkOut || !Number.isFinite(pricePerNight)) {
-    return { nights: 0, totalPrice: 0 };
-  }
-
-  const checkInTime = Date.parse(`${checkIn}T00:00:00Z`);
-  const checkOutTime = Date.parse(`${checkOut}T00:00:00Z`);
-  if (
-    !Number.isFinite(checkInTime) ||
-    !Number.isFinite(checkOutTime) ||
-    new Date(checkInTime).toISOString().slice(0, 10) !== checkIn ||
-    new Date(checkOutTime).toISOString().slice(0, 10) !== checkOut ||
-    checkOutTime <= checkInTime
-  ) {
-    return { nights: 0, totalPrice: 0 };
-  }
-
-  const nights = (checkOutTime - checkInTime) / 86_400_000;
-  return { nights, totalPrice: nights * pricePerNight };
-}
+import type { CreateBookingPayload } from "../../../types/api";
+import { BookingDateField } from "./BookingDateField";
+import { BookingPriceSummary } from "./BookingPriceSummary";
+import {
+  calculateBookingPrice,
+  formatCurrency,
+  getBookingDateErrors,
+  getLocalDateToday,
+  getTomorrow,
+  isDateRangeValid,
+  parseDateOnlyUtc,
+  toApiDateOnly,
+} from "./bookingDateUtils";
+import { useLocalToday } from "./useLocalToday";
 
 interface BookingWidgetProps {
   unitId: string;
@@ -39,58 +23,93 @@ interface BookingWidgetProps {
   currencyCode?: string;
 }
 
-function formatLocalDate(date: Date): string {
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, "0");
-  const day = String(date.getDate()).padStart(2, "0");
-  return `${year}-${month}-${day}`;
-}
-
-function getTomorrow(dateValue: string): string {
-  const [year, month, day] = dateValue.split("-").map(Number);
-  return formatLocalDate(new Date(year, month - 1, day + 1));
-}
-
 export function BookingWidget({
   unitId,
   pricePerNight,
   currencyCode,
 }: BookingWidgetProps) {
-  const today = formatLocalDate(new Date());
+  const id = useId();
+  const titleId = `${id}-title`;
+  const checkInErrorId = `${id}-check-in-error`;
+  const checkOutErrorId = `${id}-check-out-error`;
+  const { today, refreshToday } = useLocalToday();
   const [checkIn, setCheckIn] = useState("");
   const [checkOut, setCheckOut] = useState("");
   const bookingMutation = useMutation({
-    mutationFn: () => createBooking({ unitId, checkIn, checkOut }),
+    mutationFn: (payload: CreateBookingPayload) => createBooking(payload),
   });
 
-  const checkInError =
-    checkIn && checkIn < today ? "Check-in cannot be in the past." : "";
-  const checkOutError =
-    checkOut && checkOut < today
-      ? "Check-out cannot be in the past."
-      : checkIn && checkOut && checkOut <= checkIn
-        ? "Check-out must be after check-in."
-        : "";
+  const checkOutTime = parseDateOnlyUtc(checkOut);
+  const { checkInError, checkOutError } = getBookingDateErrors(
+    checkIn,
+    checkOut,
+    today,
+  );
+  const priceError =
+    !Number.isFinite(pricePerNight) || pricePerNight < 0
+      ? "Price is unavailable. Booking cannot be submitted."
+      : "";
   const validRange = Boolean(
-    checkIn && checkOut && !checkInError && !checkOutError,
+    unitId &&
+    isDateRangeValid(checkIn, checkOut, today) &&
+    !checkInError &&
+    !checkOutError &&
+    !priceError,
   );
   const { nights, totalPrice } = calculateBookingPrice(
     checkIn,
     checkOut,
     pricePerNight,
   );
-  const formattedTotal = currencyCode
-    ? new Intl.NumberFormat(undefined, {
-        style: "currency",
-        currency: currencyCode,
-      }).format(totalPrice)
-    : `${totalPrice.toFixed(2)} (currency unavailable)`;
+  const formattedTotal = formatCurrency(totalPrice, currencyCode);
 
-  const resetBookingState = () => bookingMutation.reset();
+  const handleCheckInChange = (nextCheckIn: string) => {
+    const nextCheckInTime = parseDateOnlyUtc(nextCheckIn);
+    if (
+      nextCheckInTime !== null &&
+      checkOutTime !== null &&
+      nextCheckInTime >= checkOutTime
+    ) {
+      setCheckOut("");
+    }
+    setCheckIn(nextCheckIn);
+    refreshToday();
+    bookingMutation.reset();
+  };
+
+  const handleCheckOutChange = (nextCheckOut: string) => {
+    setCheckOut(nextCheckOut);
+    refreshToday();
+    bookingMutation.reset();
+  };
+
+  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const currentToday = getLocalDateToday();
+    refreshToday();
+
+    const apiCheckIn = toApiDateOnly(checkIn);
+    const apiCheckOut = toApiDateOnly(checkOut);
+    if (
+      !unitId ||
+      priceError ||
+      !isDateRangeValid(checkIn, checkOut, currentToday) ||
+      !apiCheckIn ||
+      !apiCheckOut
+    ) {
+      return;
+    }
+
+    bookingMutation.mutate({
+      unitId,
+      checkIn: apiCheckIn,
+      checkOut: apiCheckOut,
+    });
+  };
 
   return (
     <section
-      aria-labelledby="booking-widget-title"
+      aria-labelledby={titleId}
       style={{
         marginTop: "24px",
         padding: "20px",
@@ -99,19 +118,11 @@ export function BookingWidget({
         background: "#fff",
       }}
     >
-      <h2
-        id="booking-widget-title"
-        style={{ margin: "0 0 16px", color: "#173b34" }}
-      >
+      <h2 id={titleId} style={{ margin: "0 0 16px", color: "#173b34" }}>
         Choose your dates
       </h2>
 
-      <form
-        onSubmit={(event) => {
-          event.preventDefault();
-          if (validRange) bookingMutation.mutate();
-        }}
-      >
+      <form onSubmit={handleSubmit}>
         <div
           style={{
             display: "grid",
@@ -119,60 +130,36 @@ export function BookingWidget({
             gap: "16px",
           }}
         >
-          <label style={{ display: "grid", gap: "6px", color: "#34443f" }}>
-            <span>Check-in</span>
-            <input
-              type="date"
-              value={checkIn}
-              min={today}
-              onChange={(event) => {
-                setCheckIn(event.target.value);
-                resetBookingState();
-              }}
-              aria-invalid={Boolean(checkInError)}
-              aria-describedby={checkInError ? "check-in-error" : undefined}
-            />
-            {checkInError && (
-              <span
-                id="check-in-error"
-                role="alert"
-                style={{ color: "#a43129" }}
-              >
-                {checkInError}
-              </span>
-            )}
-          </label>
-
-          <label style={{ display: "grid", gap: "6px", color: "#34443f" }}>
-            <span>Check-out</span>
-            <input
-              type="date"
-              value={checkOut}
-              min={checkIn && checkIn >= today ? getTomorrow(checkIn) : today}
-              onChange={(event) => {
-                setCheckOut(event.target.value);
-                resetBookingState();
-              }}
-              aria-invalid={Boolean(checkOutError)}
-              aria-describedby={checkOutError ? "check-out-error" : undefined}
-            />
-            {checkOutError && (
-              <span
-                id="check-out-error"
-                role="alert"
-                style={{ color: "#a43129" }}
-              >
-                {checkOutError}
-              </span>
-            )}
-          </label>
+          <BookingDateField
+            label="Check-in"
+            value={checkIn}
+            min={today}
+            error={checkInError}
+            errorId={checkInErrorId}
+            disabled={bookingMutation.isPending}
+            onFocus={refreshToday}
+            onChange={handleCheckInChange}
+          />
+          <BookingDateField
+            label="Check-out"
+            value={checkOut}
+            min={checkIn && checkIn >= today ? getTomorrow(checkIn) : today}
+            error={checkOutError}
+            errorId={checkOutErrorId}
+            disabled={bookingMutation.isPending}
+            onFocus={refreshToday}
+            onChange={handleCheckOutChange}
+          />
         </div>
 
-        {validRange && (
-          <p style={{ margin: "16px 0", color: "#1f594c" }}>
-            {nights} {nights === 1 ? "night" : "nights"} · Estimated total:{" "}
-            {formattedTotal}
+        {priceError && (
+          <p role="alert" style={{ color: "#a43129" }}>
+            {priceError}
           </p>
+        )}
+
+        {validRange && (
+          <BookingPriceSummary nights={nights} total={formattedTotal} />
         )}
 
         <button
