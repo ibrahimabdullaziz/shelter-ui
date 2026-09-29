@@ -3,6 +3,7 @@ import App from "../App";
 import { ProtectedRoute } from "../components/layout/ProtectedRoute";
 import Login from "../pages/Login";
 import Register from "../pages/Register";
+import UnitDetailPage from "../pages/UnitDetail";
 import UnitsPage from "../pages/Units";
 
 export const router = createBrowserRouter([
@@ -40,6 +41,7 @@ export const router = createBrowserRouter([
       },
       { index: true, element: <UnitsPage /> },
       { path: "units", element: <UnitsPage /> },
+      { path: "units/:id", element: <UnitDetailPage /> },
       { path: "*", element: <Navigate to="/" replace /> },
     ],
   },
