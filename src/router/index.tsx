@@ -4,6 +4,7 @@ import { ProtectedRoute } from "../components/layout/ProtectedRoute";
 import Login from "../pages/Login";
 import Register from "../pages/Register";
 import BookingConfirmationPage from "../pages/BookingConfirmation";
+import MyBookingsPage from "../pages/MyBookings";
 import UnitDetailPage from "../pages/UnitDetail";
 import UnitsPage from "../pages/Units";
 
@@ -30,7 +31,7 @@ export const router = createBrowserRouter([
             path: "bookings/:id/confirmation",
             element: <BookingConfirmationPage />,
           },
-          { path: "bookings", element: <p>Your bookings</p> },
+          { path: "bookings", element: <MyBookingsPage /> },
           {
             element: <ProtectedRoute allowedRoles={["HOST", "ADMIN"]} />,
             children: [
