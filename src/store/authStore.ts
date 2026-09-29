@@ -14,7 +14,7 @@ interface AuthState {
   refreshToken: string | null;
   authStatus: AuthStatus;
   setAuth: (auth: AuthTokens) => void;
-  setAccessToken: (accessToken: string | null) => void;
+  setTokens: (tokens: Pick<AuthTokens, "accessToken" | "refreshToken">) => void;
   logout: () => void;
   hasHydrated: boolean;
   setHasHydrated: (hasHydrated: boolean) => void;
@@ -31,7 +31,8 @@ export const useAuthStore = create<AuthState>()(
 
       setAuth: ({ accessToken, refreshToken }) =>
         set({ accessToken, refreshToken, authStatus: "initializing" }),
-      setAccessToken: (accessToken) => set({ accessToken }),
+      setTokens: ({ accessToken, refreshToken }) =>
+        set({ accessToken, refreshToken }),
       logout: () =>
         set({
           accessToken: null,
@@ -44,7 +45,10 @@ export const useAuthStore = create<AuthState>()(
     {
       name: "shelter-auth",
       storage: createJSONStorage(() => localStorage),
-      partialize: (state) => ({ refreshToken: state.refreshToken }),
+      partialize: (state) => ({
+        accessToken: state.accessToken,
+        refreshToken: state.refreshToken,
+      }),
       skipHydration: true,
       onRehydrateStorage: () => (state) => {
         state?.setHasHydrated(true);

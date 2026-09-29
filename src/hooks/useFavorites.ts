@@ -17,6 +17,7 @@ export function useFavoriteUnitIds(enabled: boolean) {
     queryFn: listFavoriteUnitIds,
     enabled,
     staleTime: 30_000,
+    retry: false,
   });
 }
 

@@ -33,12 +33,12 @@ client.interceptors.response.use(
         url,
       );
 
-    if (
-      error.response?.status !== 401 ||
-      !originalRequest ||
-      originalRequest._retry ||
-      isAuthEndpoint
-    ) {
+    if (error.response?.status !== 401 || !originalRequest || isAuthEndpoint) {
+      return Promise.reject(error);
+    }
+
+    if (originalRequest._retry) {
+      clearAuthSession({ redirect: true });
       return Promise.reject(error);
     }
 
@@ -57,7 +57,10 @@ client.interceptors.response.use(
           baseURL: client.defaults.baseURL,
         })
         .then(({ data }) => {
-          useAuthStore.getState().setAccessToken(data.accessToken);
+          useAuthStore.getState().setTokens({
+            accessToken: data.accessToken,
+            refreshToken: data.refreshToken,
+          });
           return data.accessToken;
         })
         .catch((refreshError: unknown) => {

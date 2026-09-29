@@ -68,6 +68,7 @@ describe("API authentication flow", () => {
           status: 200,
           message: "Token refreshed successfully",
           accessToken: "fresh-access-token",
+          refreshToken: "rotated-refresh-token",
         },
       ];
     });
@@ -84,6 +85,7 @@ describe("API authentication flow", () => {
 
     expect(protectedRequestCount).toBe(2);
     expect(useAuthStore.getState().accessToken).toBe("fresh-access-token");
+    expect(useAuthStore.getState().refreshToken).toBe("rotated-refresh-token");
   });
 
   it("clears auth and redirects to login when refresh fails", async () => {
@@ -110,6 +112,34 @@ describe("API authentication flow", () => {
       refreshToken: null,
     });
     expect(queryClient.getQueryData(authQueryKeys.currentUser)).toBeUndefined();
+    expect(window.location.assign).toHaveBeenCalledWith("/login");
+  });
+
+  it("clears auth when a request is still unauthorized after token refresh", async () => {
+    useAuthStore.getState().setAuth({
+      accessToken: "expired-access-token",
+      refreshToken: "valid-refresh-token",
+      user,
+    });
+    clientMock
+      .onGet("/api/favorites")
+      .reply(401, { success: false, message: "Unauthorized" });
+    axiosMock.onPost("/api/auth/refresh").reply(200, {
+      status: 200,
+      message: "Token refreshed successfully",
+      accessToken: "fresh-access-token",
+      refreshToken: "rotated-refresh-token",
+    });
+
+    await expect(client.get("/api/favorites")).rejects.toMatchObject({
+      response: { status: 401 },
+    });
+
+    expect(useAuthStore.getState()).toMatchObject({
+      accessToken: null,
+      refreshToken: null,
+      authStatus: "unauthenticated",
+    });
     expect(window.location.assign).toHaveBeenCalledWith("/login");
   });
 
@@ -150,6 +180,7 @@ describe("API authentication flow", () => {
           status: 200,
           message: "Token refreshed successfully",
           accessToken: "fresh-access-token",
+          refreshToken: "rotated-refresh-token",
         },
       ];
     });

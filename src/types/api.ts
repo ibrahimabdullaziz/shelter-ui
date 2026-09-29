@@ -70,6 +70,7 @@ export interface RefreshResponse {
   status: number;
   message: string;
   accessToken: string;
+  refreshToken: string;
 }
 
 export interface Country {

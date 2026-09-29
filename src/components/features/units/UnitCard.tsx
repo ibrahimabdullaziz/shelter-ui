@@ -110,15 +110,14 @@ export function UnitCard({ unit, cityName, categoryName }: UnitCardProps) {
       <button
         type="button"
         aria-pressed={isFavorite}
+        aria-busy={isFavoritePending}
         aria-label={
           isFavorite
             ? `Remove ${unit.title} from favorites`
             : `Add ${unit.title} to favorites`
         }
         title={isAuthenticated ? undefined : "Sign in to save this unit"}
-        disabled={
-          (isAuthenticated && !favoritesQuery.isSuccess) || isFavoritePending
-        }
+        disabled={isFavoritePending}
         onClick={() => {
           if (!isAuthenticated) {
             navigate("/login", { state: { from: location } });
@@ -140,13 +139,7 @@ export function UnitCard({ unit, cityName, categoryName }: UnitCardProps) {
           cursor: isAuthenticated ? "pointer" : "pointer",
         }}
       >
-        {favoriteMutation.isPending
-          ? isFavorite
-            ? "Removing..."
-            : "Saving..."
-          : isFavorite
-            ? "Saved"
-            : "Save"}
+        {isFavorite ? "Saved" : "Save"}
       </button>
 
       {favoritesQuery.isError && isAuthenticated && (
