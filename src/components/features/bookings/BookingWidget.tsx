@@ -1,5 +1,6 @@
 import { useMutation } from "@tanstack/react-query";
 import { useId, useState, type FormEvent } from "react";
+import { useNavigate } from "react-router-dom";
 import { createBooking } from "../../../api/bookings";
 import { getApiErrorMessage } from "../../../lib/getApiErrorMessage";
 import type { CreateBookingPayload } from "../../../types/api";
@@ -28,6 +29,7 @@ export function BookingWidget({
   pricePerNight,
   currencyCode,
 }: BookingWidgetProps) {
+  const navigate = useNavigate();
   const id = useId();
   const titleId = `${id}-title`;
   const checkInErrorId = `${id}-check-in-error`;
@@ -37,6 +39,11 @@ export function BookingWidget({
   const [checkOut, setCheckOut] = useState("");
   const bookingMutation = useMutation({
     mutationFn: (payload: CreateBookingPayload) => createBooking(payload),
+    onSuccess: (booking) => {
+      navigate(`/bookings/${booking.id}/confirmation`, {
+        state: { booking, currencyCode },
+      });
+    },
   });
 
   const checkOutTime = parseDateOnlyUtc(checkOut);
@@ -185,11 +192,6 @@ export function BookingWidget({
         {bookingMutation.isError && (
           <p role="alert" style={{ color: "#a43129" }}>
             {getApiErrorMessage(bookingMutation.error)}
-          </p>
-        )}
-        {bookingMutation.isSuccess && (
-          <p role="status" style={{ color: "#1f594c" }}>
-            Booking request submitted. Status: {bookingMutation.data.status}.
           </p>
         )}
       </form>

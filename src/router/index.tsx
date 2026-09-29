@@ -3,6 +3,7 @@ import App from "../App";
 import { ProtectedRoute } from "../components/layout/ProtectedRoute";
 import Login from "../pages/Login";
 import Register from "../pages/Register";
+import BookingConfirmationPage from "../pages/BookingConfirmation";
 import UnitDetailPage from "../pages/UnitDetail";
 import UnitsPage from "../pages/Units";
 
@@ -25,6 +26,10 @@ export const router = createBrowserRouter([
         element: <ProtectedRoute />,
         children: [
           { path: "account", element: <p>Account page</p> },
+          {
+            path: "bookings/:id/confirmation",
+            element: <BookingConfirmationPage />,
+          },
           { path: "bookings", element: <p>Your bookings</p> },
           {
             element: <ProtectedRoute allowedRoles={["HOST", "ADMIN"]} />,
