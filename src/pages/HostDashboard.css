@@ -83,6 +83,13 @@
   margin-bottom: 28px;
 }
 
+.host-page-heading-row {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 20px;
+}
+
 .host-page-heading h2 {
   margin: 7px 0 8px;
   color: #173b34;
@@ -166,6 +173,134 @@
   font-size: 13px;
 }
 
+.host-unit-controls {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 16px;
+}
+
+.host-unit-actions,
+.host-unit-form-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.host-unit-actions button,
+.host-unit-form-heading button,
+.host-operation-error button {
+  min-height: 36px;
+  padding: 0 10px;
+  border: 1px solid #b9c9c2;
+  border-radius: 4px;
+  background: #fff;
+  color: #173b34;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.host-unit-actions button:disabled,
+.host-unit-form-heading button:disabled {
+  cursor: wait;
+  opacity: 0.6;
+}
+
+.host-unit-actions .host-danger-button {
+  border-color: #e0b8b0;
+  color: #9a382d;
+}
+
+.host-primary-button {
+  min-height: 40px;
+  padding: 0 14px;
+  border: 0;
+  border-radius: 4px;
+  background: #1f594c;
+  color: #fff;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.host-primary-button:disabled {
+  cursor: wait;
+  opacity: 0.65;
+}
+
+.host-unit-form {
+  margin: 0 0 24px;
+  padding: 20px;
+  border: 1px solid #dfe6e3;
+  background: #fff;
+}
+
+.host-unit-form-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 18px;
+}
+
+.host-unit-form-heading h3 {
+  margin: 0;
+  color: #173b34;
+  font-size: 18px;
+}
+
+.host-unit-form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.host-form-field {
+  display: grid;
+  min-width: 0;
+  gap: 7px;
+  color: #34443f;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.host-form-field input,
+.host-form-field select,
+.host-form-field textarea {
+  width: 100%;
+  min-height: 42px;
+  padding: 9px 10px;
+  border: 1px solid #ccd5d0;
+  border-radius: 4px;
+  background: #fff;
+  color: #172724;
+  font: inherit;
+  font-weight: 400;
+}
+
+.host-form-field textarea {
+  resize: vertical;
+}
+
+.host-form-field-wide {
+  grid-column: 1 / -1;
+}
+
+.host-unit-form-actions {
+  justify-content: flex-end;
+  margin-top: 18px;
+}
+
+.host-operation-error {
+  margin: 0 0 16px;
+  padding: 12px;
+  border-left: 3px solid #b43c32;
+  background: #fff0ec;
+  color: #7a2b25;
+  font-size: 13px;
+}
+
 .host-status {
   flex: 0 0 auto;
   padding: 5px 8px;
@@ -178,6 +313,11 @@
 
 .host-status.is-inactive {
   background: #eeeae4;
+  color: #665e53;
+}
+
+.host-status.is-unknown {
+  background: #f1eee6;
   color: #665e53;
 }
 
@@ -269,5 +409,23 @@
   .host-booking-actions {
     align-items: flex-start;
     flex-direction: column;
+  }
+
+  .host-page-heading-row {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .host-unit-controls {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .host-unit-form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .host-form-field-wide {
+    grid-column: auto;
   }
 }
