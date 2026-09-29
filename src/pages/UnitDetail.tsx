@@ -1,4 +1,5 @@
 import { Link, useParams } from "react-router-dom";
+import { Gallery } from "../components/features/units/Gallery";
 import { useUnitQuery } from "../hooks/useUnitsQuery";
 
 export default function UnitDetailPage() {
@@ -51,20 +52,8 @@ export default function UnitDetailPage() {
           boxShadow: "0 8px 28px rgba(17, 24, 39, 0.06)",
         }}
       >
-        <div
-          style={{
-            height: "220px",
-            background: "linear-gradient(135deg, #dfeae6, #c9d9d3)",
-            display: "grid",
-            placeItems: "center",
-            color: "#173b34",
-            fontSize: "18px",
-            fontWeight: 700,
-            letterSpacing: "0.08em",
-            textTransform: "uppercase",
-          }}
-        >
-          Unit Listing
+        <div style={{ padding: "20px" }}>
+          <Gallery alt={unit.title} />
         </div>
 
         <div style={{ padding: "24px" }}>
