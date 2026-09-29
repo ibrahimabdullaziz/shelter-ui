@@ -1,6 +1,13 @@
-import { useQueryClient } from "@tanstack/react-query";
-import { Link } from "react-router-dom";
+import { useIsMutating, useQueryClient } from "@tanstack/react-query";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { unitQueryOptions } from "../../../hooks/useUnitsQuery";
+import {
+  favoriteQueryKeys,
+  useFavoriteUnitIds,
+  useToggleFavoriteMutation,
+} from "../../../hooks/useFavorites";
+import { useAuthStore } from "../../../store/authStore";
+import { getApiErrorMessage } from "../../../lib/getApiErrorMessage";
 import type { Unit } from "../../../types/api";
 
 interface UnitCardProps {
@@ -11,26 +18,45 @@ interface UnitCardProps {
 
 export function UnitCard({ unit, cityName, categoryName }: UnitCardProps) {
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const isAuthenticated = useAuthStore(
+    (state) => state.authStatus === "authenticated",
+  );
+  const favoritesQuery = useFavoriteUnitIds(isAuthenticated);
+  const favoriteMutation = useToggleFavoriteMutation();
+  const isFavoritePending =
+    useIsMutating({
+      mutationKey: favoriteQueryKeys.toggle(),
+      predicate: (mutation) => {
+        const variables = mutation.state.variables as
+          | { unitId?: string }
+          | undefined;
+        return variables?.unitId === unit.id;
+      },
+    }) > 0;
+  const isFavorite = favoritesQuery.data?.includes(unit.id) ?? false;
 
   const prefetchUnit = () => {
     void queryClient.prefetchQuery(unitQueryOptions(unit.id));
   };
 
   return (
-    <Link
-      to={`/units/${unit.id}`}
+    <article
       onMouseEnter={prefetchUnit}
-      onFocus={prefetchUnit}
-      style={{ display: "block", color: "inherit", textDecoration: "none" }}
+      style={{
+        position: "relative",
+        border: "1px solid #dfe6e3",
+        borderRadius: "12px",
+        background: "#fff",
+        overflow: "hidden",
+        boxShadow: "0 4px 14px rgba(17, 24, 39, 0.04)",
+      }}
     >
-      <article
-        style={{
-          border: "1px solid #dfe6e3",
-          borderRadius: "12px",
-          background: "#fff",
-          overflow: "hidden",
-          boxShadow: "0 4px 14px rgba(17, 24, 39, 0.04)",
-        }}
+      <Link
+        to={`/units/${unit.id}`}
+        onFocus={prefetchUnit}
+        style={{ display: "block", color: "inherit", textDecoration: "none" }}
       >
         <div
           style={{
@@ -79,7 +105,63 @@ export function UnitCard({ unit, cityName, categoryName }: UnitCardProps) {
             <span style={{ color: "#6b7a75", fontSize: "12px" }}>/ night</span>
           </div>
         </div>
-      </article>
-    </Link>
+      </Link>
+
+      <button
+        type="button"
+        aria-pressed={isFavorite}
+        aria-label={
+          isFavorite
+            ? `Remove ${unit.title} from favorites`
+            : `Add ${unit.title} to favorites`
+        }
+        title={isAuthenticated ? undefined : "Sign in to save this unit"}
+        disabled={
+          (isAuthenticated && !favoritesQuery.isSuccess) || isFavoritePending
+        }
+        onClick={() => {
+          if (!isAuthenticated) {
+            navigate("/login", { state: { from: location } });
+            return;
+          }
+          favoriteMutation.mutate({ unitId: unit.id, isFavorite });
+        }}
+        style={{
+          position: "absolute",
+          top: "12px",
+          right: "12px",
+          zIndex: 1,
+          minWidth: "72px",
+          minHeight: "36px",
+          border: "1px solid #dfe6e3",
+          borderRadius: "18px",
+          background: isFavorite ? "#1f594c" : "#fff",
+          color: isFavorite ? "#fff" : "#173b34",
+          cursor: isAuthenticated ? "pointer" : "pointer",
+        }}
+      >
+        {favoriteMutation.isPending
+          ? isFavorite
+            ? "Removing..."
+            : "Saving..."
+          : isFavorite
+            ? "Saved"
+            : "Save"}
+      </button>
+
+      {favoritesQuery.isError && isAuthenticated && (
+        <p role="alert" style={{ margin: "0 12px 12px", color: "#a43129" }}>
+          {getApiErrorMessage(favoritesQuery.error)}{" "}
+          <button type="button" onClick={() => void favoritesQuery.refetch()}>
+            Retry favorites
+          </button>
+        </p>
+      )}
+      {favoriteMutation.isError && (
+        <p role="alert" style={{ margin: "0 12px 12px", color: "#a43129" }}>
+          {getApiErrorMessage(favoriteMutation.error)}
+        </p>
+      )}
+    </article>
   );
 }
