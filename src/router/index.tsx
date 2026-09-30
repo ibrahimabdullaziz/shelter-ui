@@ -1,15 +1,16 @@
+import { Suspense } from "react";
 import { createBrowserRouter, Navigate } from "react-router-dom";
 import App from "../App";
 import { ProtectedRoute } from "../components/layout/ProtectedRoute";
+import {
+  HostBookingsPage,
+  HostDashboard,
+  HostOverviewPage,
+  HostUnitsPage,
+} from "./hostPages";
 import Login from "../pages/Login";
 import Register from "../pages/Register";
 import BookingConfirmationPage from "../pages/BookingConfirmation";
-import {
-  HostBookingsPage,
-  HostOverviewPage,
-  HostUnitsPage,
-} from "../pages/HostDashboard";
-import HostDashboard from "../pages/HostDashboard";
 import MyBookingsPage from "../pages/MyBookings";
 import UnitDetailPage from "../pages/UnitDetail";
 import UnitsPage from "../pages/Units";
@@ -43,7 +44,21 @@ export const router = createBrowserRouter([
             children: [
               {
                 path: "host",
-                element: <HostDashboard />,
+                element: (
+                  <Suspense
+                    fallback={
+                      <main
+                        className="route-state"
+                        aria-busy="true"
+                        aria-live="polite"
+                      >
+                        Loading host dashboard...
+                      </main>
+                    }
+                  >
+                    <HostDashboard />
+                  </Suspense>
+                ),
                 children: [
                   { index: true, element: <HostOverviewPage /> },
                   { path: "units", element: <HostUnitsPage /> },
