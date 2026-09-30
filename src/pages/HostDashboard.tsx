@@ -12,6 +12,10 @@ import {
   updateUnit,
 } from "../api/units";
 import { BookingActions } from "../components/features/bookings/BookingActions";
+import {
+  UnitPhotoUpload,
+  type UploadedUnitPhoto,
+} from "../components/features/units/UnitPhotoUpload";
 import { getApiErrorMessage } from "../lib/getApiErrorMessage";
 import type { Booking, CreateUnitPayload, Unit } from "../types/api";
 import { HostUnitForm } from "../components/features/units/HostUnitForm";
@@ -117,6 +121,9 @@ export function HostUnitsPage() {
   const queryClient = useQueryClient();
   const [isCreating, setIsCreating] = useState(false);
   const [editingUnit, setEditingUnit] = useState<Unit | null>(null);
+  const [uploadedPhotosByUnit, setUploadedPhotosByUnit] = useState<
+    Record<string, UploadedUnitPhoto[]>
+  >({});
   const unitsQuery = useQuery({
     queryKey: ["units", "mine"],
     queryFn: listMyUnits,
@@ -289,6 +296,13 @@ export function HostUnitsPage() {
                   ?.code
               }
               isMutating={isMutating}
+              uploadedPhotos={uploadedPhotosByUnit[unit.id] ?? []}
+              onPhotoUploaded={(uploadedPhoto) => {
+                setUploadedPhotosByUnit((current) => ({
+                  ...current,
+                  [unit.id]: [...(current[unit.id] ?? []), uploadedPhoto],
+                }));
+              }}
               onEdit={() => {
                 createMutation.reset();
                 updateMutation.reset();
@@ -368,6 +382,8 @@ interface UnitRowProps {
   unit: Unit;
   currencyCode?: string;
   isMutating: boolean;
+  uploadedPhotos: UploadedUnitPhoto[];
+  onPhotoUploaded: (photo: UploadedUnitPhoto) => void;
   onEdit: () => void;
   onActivate: () => void;
   onDeactivate: () => void;
@@ -378,6 +394,8 @@ function UnitRow({
   unit,
   currencyCode,
   isMutating,
+  uploadedPhotos,
+  onPhotoUploaded,
   onEdit,
   onActivate,
   onDeactivate,
@@ -397,49 +415,60 @@ function UnitRow({
     : unit.pricePerNight.toFixed(2);
 
   return (
-    <article className="host-list-row">
-      <div>
-        <h3>{unit.title}</h3>
-        <p>
-          {price} / night · {unit.maxGuests} guests
-        </p>
-      </div>
-      <div className="host-unit-controls">
-        <span
-          className={`host-status${
-            unit.isActive === undefined
-              ? " is-unknown"
-              : unit.isActive
-                ? ""
-                : " is-inactive"
-          }`}
-        >
-          {status}
-        </span>
-        <div className="host-unit-actions">
-          <button type="button" disabled={isMutating} onClick={onEdit}>
-            Edit
-          </button>
-          {unit.isActive ? (
-            <button type="button" disabled={isMutating} onClick={onDeactivate}>
-              Deactivate
-            </button>
-          ) : (
-            <button type="button" disabled={isMutating} onClick={onActivate}>
-              Activate
-            </button>
-          )}
-          <button
-            className="host-danger-button"
-            type="button"
-            disabled={isMutating}
-            onClick={onDelete}
+    <div className="host-unit-entry">
+      <div className="host-list-row">
+        <div>
+          <h3>{unit.title}</h3>
+          <p>
+            {price} / night · {unit.maxGuests} guests
+          </p>
+        </div>
+        <div className="host-unit-controls">
+          <span
+            className={`host-status${
+              unit.isActive === undefined
+                ? " is-unknown"
+                : unit.isActive
+                  ? ""
+                  : " is-inactive"
+            }`}
           >
-            Delete
-          </button>
+            {status}
+          </span>
+          <div className="host-unit-actions">
+            <button type="button" disabled={isMutating} onClick={onEdit}>
+              Edit
+            </button>
+            {unit.isActive ? (
+              <button
+                type="button"
+                disabled={isMutating}
+                onClick={onDeactivate}
+              >
+                Deactivate
+              </button>
+            ) : (
+              <button type="button" disabled={isMutating} onClick={onActivate}>
+                Activate
+              </button>
+            )}
+            <button
+              className="host-danger-button"
+              type="button"
+              disabled={isMutating}
+              onClick={onDelete}
+            >
+              Delete
+            </button>
+            <UnitPhotoUpload
+              unitId={unit.id}
+              photos={uploadedPhotos}
+              onPhotoUploaded={onPhotoUploaded}
+            />
+          </div>
         </div>
       </div>
-    </article>
+    </div>
   );
 }
 

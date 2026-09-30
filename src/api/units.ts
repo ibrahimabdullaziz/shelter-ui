@@ -52,6 +52,7 @@ export async function deactivateUnit(id: string): Promise<void> {
 export async function uploadUnitPhoto(
   unitId: string,
   photo: File,
+  onProgress?: (progress: number) => void,
 ): Promise<UnitPhoto> {
   const formData = new FormData();
   formData.append("photo", photo);
@@ -59,6 +60,13 @@ export async function uploadUnitPhoto(
   const response = await client.post<ApiResponse<UnitPhoto>>(
     `/api/units/${unitId}/photos`,
     formData,
+    {
+      onUploadProgress: ({ loaded, total }) => {
+        if (total) {
+          onProgress?.(Math.min(100, Math.round((loaded / total) * 100)));
+        }
+      },
+    },
   );
   return response.data.data;
 }
