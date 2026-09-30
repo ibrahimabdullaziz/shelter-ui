@@ -1,22 +1,10 @@
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useEffect, useRef, useState, type ChangeEvent } from "react";
-import { uploadUnitPhoto } from "../../../api/units";
-import { getApiErrorMessage } from "../../../lib/getApiErrorMessage";
-import type { UnitPhoto } from "../../../types/api";
+import { useState, type ChangeEvent } from "react";
+import {
+  useUnitPhotoUpload,
+  type UploadedUnitPhoto,
+} from "./useUnitPhotoUpload";
 
-const maxFileSize = 10 * 1024 * 1024;
-const allowedTypes = new Set(["image/jpeg", "image/png", "image/webp"]);
-
-interface SelectedPhoto {
-  id: string;
-  file: File;
-  previewUrl: string;
-}
-
-export interface UploadedUnitPhoto {
-  photo: UnitPhoto;
-  fileName: string;
-}
+export type { UploadedUnitPhoto } from "./useUnitPhotoUpload";
 
 interface UnitPhotoUploadProps {
   unitId: string;
@@ -29,116 +17,24 @@ export function UnitPhotoUpload({
   photos,
   onPhotoUploaded,
 }: UnitPhotoUploadProps) {
-  const queryClient = useQueryClient();
   const [isOpen, setIsOpen] = useState(false);
-  const [selectedPhotos, setSelectedPhotos] = useState<SelectedPhoto[]>([]);
-  const selectedPhotosRef = useRef<SelectedPhoto[]>([]);
-  const [validationErrors, setValidationErrors] = useState<string[]>([]);
-  const [uploadErrors, setUploadErrors] = useState<Record<string, string>>({});
-  const [progressByPhoto, setProgressByPhoto] = useState<
-    Record<string, number>
-  >({});
-
-  const uploadMutation = useMutation({
-    mutationFn: ({
-      file,
-      onProgress,
-    }: {
-      file: File;
-      onProgress: (progress: number) => void;
-    }) => uploadUnitPhoto(unitId, file, onProgress),
-    onSuccess: async (photo, { file }) => {
-      onPhotoUploaded({ photo, fileName: file.name });
-      await Promise.all([
-        queryClient.invalidateQueries({ queryKey: ["units"] }),
-        queryClient.invalidateQueries({ queryKey: ["unit", unitId] }),
-      ]);
-    },
+  const {
+    selectedPhotos,
+    validationErrors,
+    uploadErrors,
+    progressByPhoto,
+    isUploading,
+    appendFiles,
+    removeSelected,
+    uploadSelected,
+  } = useUnitPhotoUpload({
+    unitId,
+    onPhotoUploaded,
   });
 
-  useEffect(
-    () => () => {
-      selectedPhotosRef.current.forEach(({ previewUrl }) => {
-        URL.revokeObjectURL(previewUrl);
-      });
-    },
-    [],
-  );
-
   const handleSelection = (event: ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(event.currentTarget.files ?? []);
+    appendFiles(event.currentTarget.files);
     event.currentTarget.value = "";
-
-    selectedPhotosRef.current.forEach(({ previewUrl }) => {
-      URL.revokeObjectURL(previewUrl);
-    });
-
-    const nextSelection: SelectedPhoto[] = [];
-    const nextValidationErrors: string[] = [];
-
-    files.forEach((file, index) => {
-      if (!allowedTypes.has(file.type)) {
-        nextValidationErrors.push(
-          `${file.name}: choose a JPEG, PNG, or WebP image.`,
-        );
-      } else if (file.size > maxFileSize) {
-        nextValidationErrors.push(
-          `${file.name}: images must be 10 MB or less.`,
-        );
-      } else {
-        nextSelection.push({
-          id: `${file.name}-${file.lastModified}-${index}`,
-          file,
-          previewUrl: URL.createObjectURL(file),
-        });
-      }
-    });
-
-    selectedPhotosRef.current = nextSelection;
-    setSelectedPhotos(nextSelection);
-    setValidationErrors(nextValidationErrors);
-    setUploadErrors({});
-    setProgressByPhoto({});
-  };
-
-  const removeSelection = (id: string) => {
-    const removed = selectedPhotosRef.current.find((photo) => photo.id === id);
-    if (removed) URL.revokeObjectURL(removed.previewUrl);
-
-    const nextSelection = selectedPhotosRef.current.filter(
-      (photo) => photo.id !== id,
-    );
-    selectedPhotosRef.current = nextSelection;
-    setSelectedPhotos(nextSelection);
-    setProgressByPhoto((current) => {
-      const next = { ...current };
-      delete next[id];
-      return next;
-    });
-  };
-
-  const uploadSelected = async () => {
-    setUploadErrors({});
-
-    for (const selected of selectedPhotosRef.current) {
-      setProgressByPhoto((current) => ({ ...current, [selected.id]: 0 }));
-      try {
-        await uploadMutation.mutateAsync({
-          file: selected.file,
-          onProgress: (progress) =>
-            setProgressByPhoto((current) => ({
-              ...current,
-              [selected.id]: progress,
-            })),
-        });
-        removeSelection(selected.id);
-      } catch (error) {
-        setUploadErrors((current) => ({
-          ...current,
-          [selected.id]: getApiErrorMessage(error),
-        }));
-      }
-    }
   };
 
   return (
@@ -162,12 +58,12 @@ export function UnitPhotoUpload({
               type="file"
               accept="image/jpeg,image/png,image/webp"
               multiple
-              disabled={uploadMutation.isPending}
+              disabled={isUploading}
               onChange={handleSelection}
             />
           </label>
           <p className="unit-photo-help">
-            JPEG, PNG, or WebP · up to 10 MB per image
+            JPEG, PNG, or WebP · up to 5 MB per image
           </p>
 
           {validationErrors.length > 0 && (
@@ -205,8 +101,8 @@ export function UnitPhotoUpload({
                     )}
                     <button
                       type="button"
-                      disabled={uploadMutation.isPending}
-                      onClick={() => removeSelection(selected.id)}
+                      disabled={isUploading}
+                      onClick={() => removeSelected(selected.id)}
                     >
                       Remove
                     </button>
@@ -216,10 +112,10 @@ export function UnitPhotoUpload({
               <button
                 className="host-primary-button"
                 type="button"
-                disabled={uploadMutation.isPending || !selectedPhotos.length}
+                disabled={isUploading || !selectedPhotos.length}
                 onClick={() => void uploadSelected()}
               >
-                {uploadMutation.isPending ? "Uploading..." : "Upload photos"}
+                {isUploading ? "Uploading..." : "Upload photos"}
               </button>
             </>
           )}

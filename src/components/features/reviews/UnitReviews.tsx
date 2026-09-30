@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { getUnitReviews } from "../../../api/reviews";
+import { reviewKeys } from "../../../queries/reviewKeys";
 
 interface UnitReviewsProps {
   unitId: string;
@@ -7,7 +8,7 @@ interface UnitReviewsProps {
 
 export function UnitReviews({ unitId }: UnitReviewsProps) {
   const { data, isLoading, isError, refetch } = useQuery({
-    queryKey: ["unit-reviews", unitId],
+    queryKey: reviewKeys.byUnit(unitId),
     queryFn: () => getUnitReviews(unitId),
     enabled: Boolean(unitId),
     staleTime: 30_000,

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { listCategories, listCities } from "../api/catalog";
@@ -6,6 +6,8 @@ import { UnitCard } from "../components/features/units/UnitCard";
 import { UnitCardSkeleton } from "../components/features/units/UnitCardSkeleton";
 import { useDebounce } from "../hooks/useDebounce";
 import { useUnitsQuery } from "../hooks/useUnitsQuery";
+import { catalogKeys } from "../queries/catalogKeys";
+import { unitKeys } from "../queries/unitKeys";
 
 const PAGE_SIZE = 12;
 
@@ -26,13 +28,13 @@ export default function UnitsPage() {
   const debouncedMaxPrice = useDebounce(maxPriceInput, 400);
 
   const { data: cities = [] } = useQuery({
-    queryKey: ["cities"],
+    queryKey: catalogKeys.cities(),
     queryFn: listCities,
     staleTime: 5 * 60_000,
   });
 
   const { data: categories = [] } = useQuery({
-    queryKey: ["unit-categories"],
+    queryKey: catalogKeys.categories(),
     queryFn: listCategories,
     staleTime: 5 * 60_000,
   });
@@ -69,36 +71,42 @@ export default function UnitsPage() {
     cityId || categoryId || minPrice || maxPrice,
   );
 
-  const updateParam = (key: string, value: string) => {
-    setSearchParams((current) => {
-      const next = new URLSearchParams(current);
+  const updateParam = useCallback(
+    (key: string, value: string) => {
+      setSearchParams((current) => {
+        const next = new URLSearchParams(current);
 
-      if (value) {
-        next.set(key, value);
-      } else {
-        next.delete(key);
-      }
+        if (value) {
+          next.set(key, value);
+        } else {
+          next.delete(key);
+        }
 
-      next.set("page", "1");
-      return next;
-    });
-  };
+        next.set("page", "1");
+        return next;
+      });
+    },
+    [setSearchParams],
+  );
 
   useEffect(() => {
     updateParam("minPrice", debouncedMinPrice);
-  }, [debouncedMinPrice]);
+  }, [debouncedMinPrice, updateParam]);
 
   useEffect(() => {
     updateParam("maxPrice", debouncedMaxPrice);
-  }, [debouncedMaxPrice]);
+  }, [debouncedMaxPrice, updateParam]);
 
   useEffect(() => {
-    setMinPriceInput(minPrice);
-  }, [minPrice]);
+    const syncDraftsFromHistory = () => {
+      const params = new URLSearchParams(window.location.search);
+      setMinPriceInput(params.get("minPrice") ?? "");
+      setMaxPriceInput(params.get("maxPrice") ?? "");
+    };
 
-  useEffect(() => {
-    setMaxPriceInput(maxPrice);
-  }, [maxPrice]);
+    window.addEventListener("popstate", syncDraftsFromHistory);
+    return () => window.removeEventListener("popstate", syncDraftsFromHistory);
+  }, []);
 
   const handlePageChange = (nextPage: number) => {
     setSearchParams((current) => {
@@ -109,6 +117,8 @@ export default function UnitsPage() {
   };
 
   const clearFilters = () => {
+    setMinPriceInput("");
+    setMaxPriceInput("");
     setSearchParams((current) => {
       const next = new URLSearchParams(current);
       next.delete("cityId");
@@ -122,7 +132,7 @@ export default function UnitsPage() {
 
   const retryQuery = async () => {
     await queryClient.refetchQueries({
-      queryKey: ["units", "list"],
+      queryKey: unitKeys.lists(),
       type: "active",
     });
   };

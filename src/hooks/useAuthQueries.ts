@@ -24,6 +24,7 @@ export function useLoginMutation() {
   const queryClient = useQueryClient();
 
   return useMutation({
+    mutationKey: authQueryKeys.login,
     mutationFn: (payload: LoginPayload) => login(payload),
     onMutate: async () => {
       await queryClient.cancelQueries({
@@ -43,6 +44,7 @@ export function useRegisterMutation() {
   const queryClient = useQueryClient();
 
   return useMutation({
+    mutationKey: authQueryKeys.register,
     mutationFn: (payload: RegisterPayload) => register(payload),
     onMutate: async () => {
       await queryClient.cancelQueries({
@@ -60,6 +62,7 @@ export function useRegisterMutation() {
 
 export function useLogoutMutation() {
   return useMutation({
+    mutationKey: authQueryKeys.logout,
     mutationFn: async () => clearAuthSession({ redirect: true }),
   });
 }

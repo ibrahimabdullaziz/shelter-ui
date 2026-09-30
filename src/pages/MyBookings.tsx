@@ -1,17 +1,14 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
 import { listCurrencies } from "../api/catalog";
-import {
-  cancelBooking,
-  confirmBooking,
-  listHostBookings,
-  listMyBookings,
-  rejectBooking,
-} from "../api/bookings";
+import { listHostBookings, listMyBookings } from "../api/bookings";
+import { BookingActions } from "../components/features/bookings/BookingActions";
+import { BookingStatusBadge } from "../components/features/bookings/BookingStatusBadge";
 import { useCurrentUserQuery } from "../hooks/useAuthQueries";
 import { useUnitQuery } from "../hooks/useUnitsQuery";
 import { formatCurrency } from "../components/features/bookings/bookingDateUtils";
-import { getApiErrorMessage } from "../lib/getApiErrorMessage";
+import { bookingKeys } from "../queries/bookingKeys";
+import { catalogKeys } from "../queries/catalogKeys";
 import type { Booking, Currency } from "../types/api";
 
 type BookingActionsMode = "guest" | "host";
@@ -20,106 +17,6 @@ interface MyBookingCardProps {
   booking: Booking;
   currencies: Currency[];
   actionsMode: BookingActionsMode;
-}
-
-function BookingActions({
-  booking,
-  mode,
-}: {
-  booking: Booking;
-  mode: BookingActionsMode;
-}) {
-  const queryClient = useQueryClient();
-  const refreshBookings = () =>
-    queryClient.invalidateQueries({ queryKey: ["bookings"] });
-  const cancelMutation = useMutation({
-    mutationFn: () => cancelBooking(booking.id),
-    onSuccess: refreshBookings,
-  });
-  const confirmMutation = useMutation({
-    mutationFn: () => confirmBooking(booking.id),
-    onSuccess: refreshBookings,
-  });
-  const rejectMutation = useMutation({
-    mutationFn: () => rejectBooking(booking.id),
-    onSuccess: refreshBookings,
-  });
-
-  const isPending =
-    cancelMutation.isPending ||
-    confirmMutation.isPending ||
-    rejectMutation.isPending;
-  const buttonStyle = {
-    minHeight: "38px",
-    padding: "0 12px",
-    border: "1px solid #b9c9c2",
-    borderRadius: "4px",
-    background: "#fff",
-    color: "#173b34",
-    cursor: isPending ? "wait" : "pointer",
-  };
-
-  if (mode === "guest" && ["PENDING", "CONFIRMED"].includes(booking.status)) {
-    return (
-      <div style={{ marginTop: "16px" }}>
-        <button
-          type="button"
-          style={buttonStyle}
-          disabled={isPending}
-          onClick={() => cancelMutation.mutate()}
-        >
-          {cancelMutation.isPending ? "Cancelling..." : "Cancel booking"}
-        </button>
-        {cancelMutation.isError && (
-          <p role="alert" style={{ color: "#a43129" }}>
-            {getApiErrorMessage(cancelMutation.error)}
-          </p>
-        )}
-      </div>
-    );
-  }
-
-  if (mode === "host" && booking.status === "PENDING") {
-    return (
-      <div
-        style={{
-          display: "flex",
-          flexWrap: "wrap",
-          gap: "8px",
-          marginTop: "16px",
-        }}
-      >
-        <button
-          type="button"
-          style={buttonStyle}
-          disabled={isPending}
-          onClick={() => confirmMutation.mutate()}
-        >
-          {confirmMutation.isPending ? "Confirming..." : "Confirm"}
-        </button>
-        <button
-          type="button"
-          style={buttonStyle}
-          disabled={isPending}
-          onClick={() => rejectMutation.mutate()}
-        >
-          {rejectMutation.isPending ? "Rejecting..." : "Reject"}
-        </button>
-        {confirmMutation.isError && (
-          <p role="alert" style={{ flexBasis: "100%", color: "#a43129" }}>
-            {getApiErrorMessage(confirmMutation.error)}
-          </p>
-        )}
-        {rejectMutation.isError && (
-          <p role="alert" style={{ flexBasis: "100%", color: "#a43129" }}>
-            {getApiErrorMessage(rejectMutation.error)}
-          </p>
-        )}
-      </div>
-    );
-  }
-
-  return null;
 }
 
 function MyBookingCard({
@@ -180,11 +77,11 @@ function MyBookingCard({
         <div>
           <dt style={{ color: "#6b7a75", fontSize: "13px" }}>Status</dt>
           <dd style={{ margin: "4px 0 0", color: "#34443f" }}>
-            {booking.status.toLowerCase()}
+            <BookingStatusBadge status={booking.status} />
           </dd>
         </div>
       </dl>
-      <BookingActions booking={booking} mode={actionsMode} />
+      <BookingActions booking={booking} actor={actionsMode} />
     </article>
   );
 }
@@ -195,18 +92,18 @@ export default function MyBookingsPage() {
     currentUserQuery.data?.role ?? "GUEST",
   );
   const bookingsQuery = useQuery({
-    queryKey: ["bookings", "mine"],
+    queryKey: bookingKeys.mine(),
     queryFn: listMyBookings,
     staleTime: 30_000,
   });
   const hostBookingsQuery = useQuery({
-    queryKey: ["bookings", "host"],
+    queryKey: bookingKeys.host(),
     queryFn: listHostBookings,
     enabled: canManageBookings,
     staleTime: 30_000,
   });
   const { data: currencies = [] } = useQuery({
-    queryKey: ["currencies"],
+    queryKey: catalogKeys.currencies(),
     queryFn: listCurrencies,
     staleTime: 5 * 60_000,
   });

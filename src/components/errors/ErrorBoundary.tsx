@@ -6,19 +6,42 @@ interface ErrorBoundaryProps {
     | ReactNode
     | ((props: { error: Error; resetErrorBoundary: () => void }) => ReactNode);
   onError?: (error: Error, info: ErrorInfo) => void;
+  resetKeys?: readonly unknown[];
 }
 
 interface ErrorBoundaryState {
   error: Error | null;
+  resetKeys: readonly unknown[];
+}
+
+function haveResetKeysChanged(
+  previous: readonly unknown[],
+  next: readonly unknown[],
+) {
+  return (
+    previous.length !== next.length ||
+    previous.some((key, index) => !Object.is(key, next[index]))
+  );
 }
 
 export class ErrorBoundary extends Component<
   ErrorBoundaryProps,
   ErrorBoundaryState
 > {
-  state: ErrorBoundaryState = { error: null };
+  state: ErrorBoundaryState = { error: null, resetKeys: [] };
 
-  static getDerivedStateFromError(error: Error): ErrorBoundaryState {
+  static getDerivedStateFromProps(
+    props: ErrorBoundaryProps,
+    state: ErrorBoundaryState,
+  ): Partial<ErrorBoundaryState> | null {
+    const resetKeys = props.resetKeys ?? [];
+    if (haveResetKeysChanged(state.resetKeys, resetKeys)) {
+      return { error: null, resetKeys };
+    }
+    return null;
+  }
+
+  static getDerivedStateFromError(error: Error): Partial<ErrorBoundaryState> {
     return { error };
   }
 
@@ -28,7 +51,11 @@ export class ErrorBoundary extends Component<
       error,
       info.componentStack,
     );
-    this.props.onError?.(error, info);
+    try {
+      this.props.onError?.(error, info);
+    } catch (reportingError) {
+      console.error("Error reporter failed", reportingError);
+    }
   }
 
   resetErrorBoundary = () => {

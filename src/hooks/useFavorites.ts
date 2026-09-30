@@ -8,7 +8,8 @@ import {
 export const favoriteQueryKeys = {
   all: () => ["favorites"] as const,
   mine: () => [...favoriteQueryKeys.all(), "mine"] as const,
-  toggle: () => [...favoriteQueryKeys.all(), "toggle"] as const,
+  mutations: () => [...favoriteQueryKeys.all(), "mutation"] as const,
+  toggle: () => [...favoriteQueryKeys.mutations(), "toggle"] as const,
 };
 
 export function useFavoriteUnitIds(enabled: boolean) {

@@ -7,22 +7,23 @@ import { BookingWidget } from "../components/features/bookings/BookingWidget";
 import { UnitReviews } from "../components/features/reviews/UnitReviews";
 import { Gallery } from "../components/features/units/Gallery";
 import { useUnitQuery } from "../hooks/useUnitsQuery";
+import { catalogKeys } from "../queries/catalogKeys";
 
 export default function UnitDetailPage() {
   const { id } = useParams();
   const { data: unit, isLoading, error } = useUnitQuery(id ?? "");
   const { data: cities = [], isError: citiesError } = useQuery({
-    queryKey: ["cities"],
+    queryKey: catalogKeys.cities(),
     queryFn: listCities,
     staleTime: 5 * 60_000,
   });
   const { data: categories = [], isError: categoriesError } = useQuery({
-    queryKey: ["unit-categories"],
+    queryKey: catalogKeys.categories(),
     queryFn: listCategories,
     staleTime: 5 * 60_000,
   });
   const { data: currencies = [], isError: currenciesError } = useQuery({
-    queryKey: ["currencies"],
+    queryKey: catalogKeys.currencies(),
     queryFn: listCurrencies,
     staleTime: 5 * 60_000,
   });
@@ -142,7 +143,7 @@ export default function UnitDetailPage() {
       </article>
 
       <ErrorBoundary
-        key={unit.id}
+        resetKeys={[unit.id]}
         fallback={({ error, resetErrorBoundary }) => (
           <BookingWidgetError error={error} onRetry={resetErrorBoundary} />
         )}
