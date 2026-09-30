@@ -3,6 +3,7 @@ import { Link, useLocation, useParams } from "react-router-dom";
 import { listMyBookings } from "../api/bookings";
 import { useUnitQuery } from "../hooks/useUnitsQuery";
 import { calculateBookingPrice } from "../components/features/bookings/bookingDateUtils";
+import { bookingKeys } from "../queries/bookingKeys";
 import type { Booking } from "../types/api";
 
 interface BookingConfirmationState {
@@ -60,7 +61,7 @@ export default function BookingConfirmationPage() {
     : undefined;
 
   const bookingsQuery = useQuery({
-    queryKey: ["bookings", "mine"],
+    queryKey: bookingKeys.mine(),
     queryFn: listMyBookings,
     enabled: Boolean(id && !bookingFromState),
     retry: false,

@@ -1,16 +1,7 @@
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import {
-  cancelBooking,
-  confirmBooking,
-  rejectBooking,
-} from "../../../api/bookings";
 import { getApiErrorMessage } from "../../../lib/getApiErrorMessage";
 import type { Booking } from "../../../types/api";
-import {
-  getAvailableBookingActions,
-  type BookingActor,
-  type BookingAction,
-} from "./bookingStatus";
+import type { BookingActor, BookingAction } from "./bookingStatus";
+import { useBookingActions } from "./useBookingActions";
 
 interface BookingActionsProps {
   booking: Booking;
@@ -24,43 +15,12 @@ const actionLabels: Record<BookingAction, string> = {
 };
 
 export function BookingActions({ booking, actor }: BookingActionsProps) {
-  const queryClient = useQueryClient();
-  const availableActions = getAvailableBookingActions(booking.status, actor);
-  const refreshBookings = () =>
-    queryClient.invalidateQueries({ queryKey: ["bookings"] });
-
-  const cancelMutation = useMutation({
-    mutationFn: () => cancelBooking(booking.id),
-    onSuccess: refreshBookings,
-  });
-  const confirmMutation = useMutation({
-    mutationFn: () => confirmBooking(booking.id),
-    onSuccess: refreshBookings,
-  });
-  const rejectMutation = useMutation({
-    mutationFn: () => rejectBooking(booking.id),
-    onSuccess: refreshBookings,
-  });
-
-  const mutations = {
-    cancel: cancelMutation,
-    confirm: confirmMutation,
-    reject: rejectMutation,
-  };
-  const isPending = Object.values(mutations).some(
-    (mutation) => mutation.isPending,
+  const { availableActions, isPending, error, runAction } = useBookingActions(
+    booking.id,
+    booking.status,
+    actor,
   );
-  const actionErrors = availableActions.flatMap((action) => {
-    const mutation = mutations[action];
-    return mutation.isError ? [getApiErrorMessage(mutation.error)] : [];
-  });
-
-  if (!availableActions.length) return null;
-
-  const runAction = (action: BookingAction) => {
-    if (!availableActions.includes(action) || isPending) return;
-    mutations[action].mutate();
-  };
+  if (!availableActions.length && !isPending && !error) return null;
 
   return (
     <div
@@ -71,16 +31,9 @@ export function BookingActions({ booking, actor }: BookingActionsProps) {
         marginTop: "16px",
       }}
     >
+      {isPending && <p role="status">Updating booking...</p>}
       {availableActions.map((action) => {
-        const mutation = mutations[action];
-        const label =
-          action === "cancel" && mutation.isPending
-            ? "Cancelling..."
-            : action === "confirm" && mutation.isPending
-              ? "Confirming..."
-              : action === "reject" && mutation.isPending
-                ? "Rejecting..."
-                : actionLabels[action];
+        const label = actionLabels[action];
 
         return (
           <button
@@ -102,15 +55,11 @@ export function BookingActions({ booking, actor }: BookingActionsProps) {
           </button>
         );
       })}
-      {actionErrors.map((message, index) => (
-        <p
-          key={`${message}-${index}`}
-          role="alert"
-          style={{ flexBasis: "100%", color: "#a43129" }}
-        >
-          {message}
+      {error != null && (
+        <p role="alert" style={{ flexBasis: "100%", color: "#a43129" }}>
+          {getApiErrorMessage(error)}
         </p>
-      ))}
+      )}
     </div>
   );
 }
