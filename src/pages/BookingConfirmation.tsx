@@ -3,6 +3,7 @@ import { Link, useLocation, useParams } from "react-router-dom";
 import { listMyBookings } from "../api/bookings";
 import { useUnitQuery } from "../hooks/useUnitsQuery";
 import { calculateBookingPrice } from "../components/features/bookings/bookingDateUtils";
+import { QueryErrorState } from "../components/ui/QueryErrorState";
 import { bookingKeys } from "../queries/bookingKeys";
 import type { Booking } from "../types/api";
 
@@ -71,9 +72,13 @@ export default function BookingConfirmationPage() {
     isValidBooking(item, id),
   );
   const booking = bookingFromState ?? bookingFromApi;
-  const { data: unit, isLoading: isUnitLoading } = useUnitQuery(
-    booking?.unitId ?? "",
-  );
+  const {
+    data: unit,
+    isLoading: isUnitLoading,
+    isError: isUnitError,
+    error: unitError,
+    refetch: refetchUnit,
+  } = useUnitQuery(booking?.unitId ?? "");
 
   if (!booking && bookingsQuery.isLoading) {
     return (
@@ -85,11 +90,11 @@ export default function BookingConfirmationPage() {
 
   if (!booking && bookingsQuery.isError) {
     return (
-      <main className="route-state" role="alert">
-        <p>We could not load this booking confirmation.</p>
-        <button type="button" onClick={() => void bookingsQuery.refetch()}>
-          Retry
-        </button>
+      <main className="route-state">
+        <QueryErrorState
+          error={bookingsQuery.error}
+          onRetry={() => void bookingsQuery.refetch()}
+        />
         <Link to="/bookings">View your bookings</Link>
       </main>
     );
@@ -148,6 +153,12 @@ export default function BookingConfirmationPage() {
             <dd>{amount}</dd>
           </div>
         </dl>
+        {isUnitError && (
+          <QueryErrorState
+            error={unitError}
+            onRetry={() => void refetchUnit()}
+          />
+        )}
         <Link to={`/units/${booking.unitId}`}>Return to the listing</Link>
       </section>
     </main>

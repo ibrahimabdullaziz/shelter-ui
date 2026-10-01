@@ -6,27 +6,43 @@ import { BookingWidgetError } from "../components/features/bookings/BookingWidge
 import { BookingWidget } from "../components/features/bookings/BookingWidget";
 import { UnitReviews } from "../components/features/reviews/UnitReviews";
 import { Gallery } from "../components/features/units/Gallery";
+import { QueryErrorState } from "../components/ui/QueryErrorState";
 import { useUnitQuery } from "../hooks/useUnitsQuery";
 import { catalogKeys } from "../queries/catalogKeys";
 
 export default function UnitDetailPage() {
   const { id } = useParams();
-  const { data: unit, isLoading, error } = useUnitQuery(id ?? "");
-  const { data: cities = [], isError: citiesError } = useQuery({
+  const { data: unit, isLoading, error, refetch } = useUnitQuery(id ?? "");
+  const citiesQuery = useQuery({
     queryKey: catalogKeys.cities(),
     queryFn: listCities,
     staleTime: 5 * 60_000,
   });
-  const { data: categories = [], isError: categoriesError } = useQuery({
+  const categoriesQuery = useQuery({
     queryKey: catalogKeys.categories(),
     queryFn: listCategories,
     staleTime: 5 * 60_000,
   });
-  const { data: currencies = [], isError: currenciesError } = useQuery({
+  const currenciesQuery = useQuery({
     queryKey: catalogKeys.currencies(),
     queryFn: listCurrencies,
     staleTime: 5 * 60_000,
   });
+  const cities = citiesQuery.data ?? [];
+  const categories = categoriesQuery.data ?? [];
+  const currencies = currenciesQuery.data ?? [];
+  const citiesError = citiesQuery.isError;
+  const categoriesError = categoriesQuery.isError;
+  const currenciesError = currenciesQuery.isError;
+  const catalogError =
+    citiesQuery.error ?? categoriesQuery.error ?? currenciesQuery.error;
+  const retryCatalogQueries = () => {
+    void Promise.all([
+      citiesQuery.refetch(),
+      categoriesQuery.refetch(),
+      currenciesQuery.refetch(),
+    ]);
+  };
 
   if (isLoading) {
     return (
@@ -40,7 +56,7 @@ export default function UnitDetailPage() {
     return (
       <main style={{ padding: "24px" }}>
         <h1>Unit detail</h1>
-        <p>Unable to load this unit.</p>
+        <QueryErrorState error={error} onRetry={() => void refetch()} />
         <Link to="/units">Back to listings</Link>
       </main>
     );
@@ -79,6 +95,9 @@ export default function UnitDetailPage() {
       >
         ← Back to listings
       </Link>
+      {catalogError && (
+        <QueryErrorState error={catalogError} onRetry={retryCatalogQueries} />
+      )}
 
       <article
         style={{
@@ -144,8 +163,8 @@ export default function UnitDetailPage() {
 
       <ErrorBoundary
         resetKeys={[unit.id]}
-        fallback={({ error, resetErrorBoundary }) => (
-          <BookingWidgetError error={error} onRetry={resetErrorBoundary} />
+        fallback={({ resetErrorBoundary }) => (
+          <BookingWidgetError onRetry={resetErrorBoundary} />
         )}
       >
         <BookingWidget

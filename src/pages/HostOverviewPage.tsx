@@ -1,5 +1,6 @@
 import { useQueries } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
+import { QueryErrorState } from "../components/ui/QueryErrorState";
 import { listHostBookings } from "../api/bookings";
 import { listMyUnits } from "../api/units";
 import { bookingKeys } from "../queries/bookingKeys";
@@ -57,6 +58,18 @@ export default function HostOverviewPage() {
           <span className="host-stat-link">Review bookings</span>
         </Link>
       </div>
+      {unitsQuery.isError && (
+        <QueryErrorState
+          error={unitsQuery.error}
+          onRetry={() => void unitsQuery.refetch()}
+        />
+      )}
+      {bookingsQuery.isError && (
+        <QueryErrorState
+          error={bookingsQuery.error}
+          onRetry={() => void bookingsQuery.refetch()}
+        />
+      )}
     </section>
   );
 }

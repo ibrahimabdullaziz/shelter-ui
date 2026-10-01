@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { getUnitReviews } from "../../../api/reviews";
+import { QueryErrorState } from "../../ui/QueryErrorState";
 import { reviewKeys } from "../../../queries/reviewKeys";
 
 interface UnitReviewsProps {
@@ -7,7 +8,7 @@ interface UnitReviewsProps {
 }
 
 export function UnitReviews({ unitId }: UnitReviewsProps) {
-  const { data, isLoading, isError, refetch } = useQuery({
+  const { data, isLoading, isError, error, refetch } = useQuery({
     queryKey: reviewKeys.byUnit(unitId),
     queryFn: () => getUnitReviews(unitId),
     enabled: Boolean(unitId),
@@ -26,12 +27,7 @@ export function UnitReviews({ unitId }: UnitReviewsProps) {
       {isLoading ? (
         <p role="status">Loading reviews...</p>
       ) : isError ? (
-        <div role="alert">
-          <p>Reviews could not be loaded.</p>
-          <button type="button" onClick={() => void refetch()}>
-            Retry
-          </button>
-        </div>
+        <QueryErrorState error={error} onRetry={() => void refetch()} />
       ) : !data?.reviews.length ? (
         <p>No reviews yet.</p>
       ) : (

@@ -3,6 +3,7 @@ import { listHostBookings } from "../api/bookings";
 import { BookingActions } from "../components/features/bookings/BookingActions";
 import { BookingStatusBadge } from "../components/features/bookings/BookingStatusBadge";
 import { EmptyState } from "../components/ui/EmptyState";
+import { QueryErrorState } from "../components/ui/QueryErrorState";
 import { bookingKeys } from "../queries/bookingKeys";
 import type { Booking } from "../types/api";
 
@@ -27,12 +28,10 @@ export default function HostBookingsPage() {
       {bookingsQuery.isLoading ? (
         <p role="status">Loading booking requests...</p>
       ) : bookingsQuery.isError ? (
-        <div className="host-empty-state" role="alert">
-          <p>Booking requests could not be loaded.</p>
-          <button type="button" onClick={() => void bookingsQuery.refetch()}>
-            Retry
-          </button>
-        </div>
+        <QueryErrorState
+          error={bookingsQuery.error}
+          onRetry={() => void bookingsQuery.refetch()}
+        />
       ) : bookings.length === 0 ? (
         <EmptyState
           icon="▤"

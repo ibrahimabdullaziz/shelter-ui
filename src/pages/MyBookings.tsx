@@ -5,6 +5,7 @@ import { listHostBookings, listMyBookings } from "../api/bookings";
 import { BookingActions } from "../components/features/bookings/BookingActions";
 import { BookingStatusBadge } from "../components/features/bookings/BookingStatusBadge";
 import { EmptyState } from "../components/ui/EmptyState";
+import { QueryErrorState } from "../components/ui/QueryErrorState";
 import { useCurrentUserQuery } from "../hooks/useAuthQueries";
 import { useUnitQuery } from "../hooks/useUnitsQuery";
 import { formatCurrency } from "../components/features/bookings/bookingDateUtils";
@@ -25,7 +26,13 @@ function MyBookingCard({
   currencies,
   actionsMode,
 }: MyBookingCardProps) {
-  const { data: unit, isLoading: isUnitLoading } = useUnitQuery(booking.unitId);
+  const {
+    data: unit,
+    isLoading: isUnitLoading,
+    isError: isUnitError,
+    error: unitError,
+    refetch: refetchUnit,
+  } = useUnitQuery(booking.unitId);
   const currencyCode = currencies.find(
     (currency) => currency.id === unit?.currencyId,
   )?.code;
@@ -48,6 +55,9 @@ function MyBookingCard({
           {unitLabel}
         </Link>
       </h2>
+      {isUnitError && (
+        <QueryErrorState error={unitError} onRetry={() => void refetchUnit()} />
+      )}
 
       <dl
         style={{
@@ -105,15 +115,22 @@ export default function MyBookingsPage() {
     enabled: canManageBookings,
     staleTime: 30_000,
   });
-  const { data: currencies = [] } = useQuery({
+  const currenciesQuery = useQuery({
     queryKey: catalogKeys.currencies(),
     queryFn: listCurrencies,
     staleTime: 5 * 60_000,
   });
+  const currencies = currenciesQuery.data ?? [];
 
   return (
     <main style={{ maxWidth: "960px", margin: "0 auto", padding: "24px" }}>
       <h1 style={{ margin: "0 0 20px", color: "#173b34" }}>My bookings</h1>
+      {currenciesQuery.isError && (
+        <QueryErrorState
+          error={currenciesQuery.error}
+          onRetry={() => void currenciesQuery.refetch()}
+        />
+      )}
 
       {isGuest && (
         <section aria-labelledby="my-bookings-title">
@@ -123,15 +140,10 @@ export default function MyBookingsPage() {
           {bookingsQuery.isLoading ? (
             <p role="status">Loading your bookings...</p>
           ) : bookingsQuery.isError ? (
-            <div role="alert">
-              <p>Your bookings could not be loaded.</p>
-              <button
-                type="button"
-                onClick={() => void bookingsQuery.refetch()}
-              >
-                Retry
-              </button>
-            </div>
+            <QueryErrorState
+              error={bookingsQuery.error}
+              onRetry={() => void bookingsQuery.refetch()}
+            />
           ) : !bookingsQuery.data?.length ? (
             <EmptyState
               icon="▤"
@@ -165,15 +177,10 @@ export default function MyBookingsPage() {
           {hostBookingsQuery.isLoading ? (
             <p role="status">Loading booking requests...</p>
           ) : hostBookingsQuery.isError ? (
-            <div role="alert">
-              <p>Booking requests could not be loaded.</p>
-              <button
-                type="button"
-                onClick={() => void hostBookingsQuery.refetch()}
-              >
-                Retry
-              </button>
-            </div>
+            <QueryErrorState
+              error={hostBookingsQuery.error}
+              onRetry={() => void hostBookingsQuery.refetch()}
+            />
           ) : !hostBookingsQuery.data?.length ? (
             <EmptyState
               icon="▤"

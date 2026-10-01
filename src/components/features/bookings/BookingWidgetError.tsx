@@ -1,14 +1,10 @@
 import { Link } from "react-router-dom";
 
 interface BookingWidgetErrorProps {
-  error: Error;
   onRetry: () => void;
 }
 
-export function BookingWidgetError({
-  error,
-  onRetry,
-}: BookingWidgetErrorProps) {
+export function BookingWidgetError({ onRetry }: BookingWidgetErrorProps) {
   return (
     <section
       role="alert"
@@ -26,14 +22,8 @@ export function BookingWidgetError({
         This booking section encountered a problem. The rest of the listing is
         still available.
       </p>
-      {import.meta.env.DEV && (
-        <details style={{ marginBottom: "12px" }}>
-          <summary>Error details</summary>
-          <pre style={{ whiteSpace: "pre-wrap" }}>{error.message}</pre>
-        </details>
-      )}
       <button type="button" onClick={onRetry}>
-        Try again
+        Retry
       </button>{" "}
       <Link to="/bookings">View your bookings</Link>
     </section>

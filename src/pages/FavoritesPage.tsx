@@ -3,8 +3,8 @@ import { Link } from "react-router-dom";
 import { getUnit } from "../api/units";
 import { UnitCard } from "../components/features/units/UnitCard";
 import { EmptyState } from "../components/ui/EmptyState";
+import { QueryErrorState } from "../components/ui/QueryErrorState";
 import { useFavoriteUnitIds } from "../hooks/useFavorites";
-import { getApiErrorMessage } from "../lib/getApiErrorMessage";
 
 export default function FavoritesPage() {
   const favoritesQuery = useFavoriteUnitIds(true);
@@ -23,12 +23,10 @@ export default function FavoritesPage() {
       {favoritesQuery.isLoading ? (
         <p role="status">Loading saved stays...</p>
       ) : favoritesQuery.isError ? (
-        <div role="alert">
-          <p>{getApiErrorMessage(favoritesQuery.error)}</p>
-          <button type="button" onClick={() => void favoritesQuery.refetch()}>
-            Retry
-          </button>
-        </div>
+        <QueryErrorState
+          error={favoritesQuery.error}
+          onRetry={() => void favoritesQuery.refetch()}
+        />
       ) : favoriteIds.length === 0 ? (
         <EmptyState
           icon="♡"
@@ -39,12 +37,10 @@ export default function FavoritesPage() {
       ) : unitsQuery.isLoading ? (
         <p role="status">Loading saved stays...</p>
       ) : unitsQuery.isError ? (
-        <div role="alert">
-          <p>{getApiErrorMessage(unitsQuery.error)}</p>
-          <button type="button" onClick={() => void unitsQuery.refetch()}>
-            Retry
-          </button>
-        </div>
+        <QueryErrorState
+          error={unitsQuery.error}
+          onRetry={() => void unitsQuery.refetch()}
+        />
       ) : (
         <div
           style={{

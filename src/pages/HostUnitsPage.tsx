@@ -8,6 +8,7 @@ import {
   type UploadedUnitPhoto,
 } from "../components/features/units/UnitPhotoUpload";
 import { EmptyState } from "../components/ui/EmptyState";
+import { QueryErrorState } from "../components/ui/QueryErrorState";
 import { useHostUnitMutations } from "../hooks/useHostUnitMutations";
 import { getApiErrorMessage } from "../lib/getApiErrorMessage";
 import { catalogKeys } from "../queries/catalogKeys";
@@ -133,22 +134,20 @@ export default function HostUnitsPage() {
         </p>
       )}
       {catalogsHaveError && !isCreating && !editingUnit && (
-        <div className="host-operation-error" role="alert">
-          <span>Unit form options could not be loaded.</span>{" "}
-          <button type="button" onClick={retryCatalogQueries}>
-            Retry options
-          </button>
-        </div>
+        <QueryErrorState
+          error={
+            citiesQuery.error ?? categoriesQuery.error ?? currenciesQuery.error
+          }
+          onRetry={retryCatalogQueries}
+        />
       )}
       {unitsQuery.isLoading ? (
         <p role="status">Loading your units...</p>
       ) : unitsQuery.isError ? (
-        <div className="host-empty-state" role="alert">
-          <p>Your units could not be loaded.</p>
-          <button type="button" onClick={() => void unitsQuery.refetch()}>
-            Retry
-          </button>
-        </div>
+        <QueryErrorState
+          error={unitsQuery.error}
+          onRetry={() => void unitsQuery.refetch()}
+        />
       ) : units.length === 0 ? (
         <EmptyState
           icon="⌂"

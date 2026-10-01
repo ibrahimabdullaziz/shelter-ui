@@ -1,19 +1,18 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { listCategories, listCities } from "../api/catalog";
 import { UnitCard } from "../components/features/units/UnitCard";
 import { UnitCardSkeleton } from "../components/features/units/UnitCardSkeleton";
 import { EmptyState } from "../components/ui/EmptyState";
+import { QueryErrorState } from "../components/ui/QueryErrorState";
 import { useDebounce } from "../hooks/useDebounce";
 import { useUnitsQuery } from "../hooks/useUnitsQuery";
 import { catalogKeys } from "../queries/catalogKeys";
-import { unitKeys } from "../queries/unitKeys";
 
 const PAGE_SIZE = 12;
 
 export default function UnitsPage() {
-  const queryClient = useQueryClient();
   const [searchParams, setSearchParams] = useSearchParams();
 
   const page = Number(searchParams.get("page") ?? "1");
@@ -28,17 +27,23 @@ export default function UnitsPage() {
   const debouncedMinPrice = useDebounce(minPriceInput, 400);
   const debouncedMaxPrice = useDebounce(maxPriceInput, 400);
 
-  const { data: cities = [] } = useQuery({
+  const citiesQuery = useQuery({
     queryKey: catalogKeys.cities(),
     queryFn: listCities,
     staleTime: 5 * 60_000,
   });
 
-  const { data: categories = [] } = useQuery({
+  const categoriesQuery = useQuery({
     queryKey: catalogKeys.categories(),
     queryFn: listCategories,
     staleTime: 5 * 60_000,
   });
+  const cities = citiesQuery.data ?? [];
+  const categories = categoriesQuery.data ?? [];
+  const catalogError = citiesQuery.error ?? categoriesQuery.error;
+  const retryCatalogQueries = () => {
+    void Promise.all([citiesQuery.refetch(), categoriesQuery.refetch()]);
+  };
 
   const cityNameMap = useMemo(
     () => new Map(cities.map((city) => [city.id, city.name])),
@@ -66,6 +71,7 @@ export default function UnitsPage() {
     isLoading,
     isFetching,
     error,
+    refetch,
   } = useUnitsQuery(filters);
 
   const hasActiveFilters = Boolean(
@@ -131,34 +137,11 @@ export default function UnitsPage() {
     });
   };
 
-  const retryQuery = async () => {
-    await queryClient.refetchQueries({
-      queryKey: unitKeys.lists(),
-      type: "active",
-    });
-  };
-
   if (error) {
     return (
       <main style={{ padding: "24px" }}>
         <h1>Units</h1>
-        <div
-          style={{
-            marginTop: "20px",
-            padding: "20px",
-            border: "1px solid #f1d6d1",
-            borderRadius: "12px",
-            background: "#fff5f4",
-            color: "#7a2b25",
-          }}
-        >
-          <p style={{ margin: 0, marginBottom: "12px" }}>
-            Unable to load units right now.
-          </p>
-          <button type="button" onClick={() => void retryQuery()}>
-            Retry
-          </button>
-        </div>
+        <QueryErrorState error={error} onRetry={() => void refetch()} />
       </main>
     );
   }
@@ -166,6 +149,9 @@ export default function UnitsPage() {
   return (
     <main style={{ padding: "24px" }}>
       <h1>Units</h1>
+      {catalogError && (
+        <QueryErrorState error={catalogError} onRetry={retryCatalogQueries} />
+      )}
 
       <div
         style={{
