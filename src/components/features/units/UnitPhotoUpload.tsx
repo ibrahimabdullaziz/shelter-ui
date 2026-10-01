@@ -80,9 +80,12 @@ export function UnitPhotoUpload({
                 className="unit-photo-grid"
                 aria-label="Selected photo previews"
               >
-                {selectedPhotos.map((selected) => (
+                {selectedPhotos.map((selected, index) => (
                   <div className="unit-photo-item" key={selected.id}>
-                    <img src={selected.previewUrl} alt={selected.file.name} />
+                    <img
+                      src={selected.previewUrl}
+                      alt={`Selected photo preview ${index + 1}`}
+                    />
                     <p title={selected.file.name}>{selected.file.name}</p>
                     {progressByPhoto[selected.id] !== undefined && (
                       <div className="unit-photo-progress">
@@ -124,9 +127,12 @@ export function UnitPhotoUpload({
             <div className="unit-uploaded-photos">
               <h4>Uploaded photos</h4>
               <div className="unit-photo-grid">
-                {photos.map(({ photo, fileName }) => (
+                {photos.map(({ photo, fileName }, index) => (
                   <figure className="unit-photo-item" key={photo.id}>
-                    <img src={photo.url} alt={fileName} />
+                    <img
+                      src={photo.url}
+                      alt={`Uploaded photo preview ${index + 1}`}
+                    />
                     <figcaption title={fileName}>{fileName}</figcaption>
                   </figure>
                 ))}

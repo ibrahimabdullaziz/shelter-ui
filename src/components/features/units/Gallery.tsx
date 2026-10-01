@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 interface GalleryProps {
   images?: string[];
@@ -17,32 +17,6 @@ export function Gallery({
   alt = "Unit gallery image",
 }: GalleryProps) {
   const [activeIndex, setActiveIndex] = useState(0);
-
-  useEffect(() => {
-    if (!images.length) {
-      return;
-    }
-
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "ArrowRight") {
-        event.preventDefault();
-        setActiveIndex((current) => (current + 1) % images.length);
-      }
-
-      if (event.key === "ArrowLeft") {
-        event.preventDefault();
-        setActiveIndex(
-          (current) => (current - 1 + images.length) % images.length,
-        );
-      }
-    };
-
-    window.addEventListener("keydown", handleKeyDown);
-
-    return () => {
-      window.removeEventListener("keydown", handleKeyDown);
-    };
-  }, [images]);
 
   if (!images.length) {
     return (
@@ -72,6 +46,16 @@ export function Gallery({
     <div
       role="region"
       aria-label="Photo gallery"
+      onKeyDown={(event) => {
+        if (event.key === "ArrowRight") {
+          event.preventDefault();
+          showNext();
+        }
+        if (event.key === "ArrowLeft") {
+          event.preventDefault();
+          showPrevious();
+        }
+      }}
       style={{ display: "grid", gap: "12px" }}
     >
       <div
@@ -103,7 +87,7 @@ export function Gallery({
             left: "12px",
             top: "50%",
             transform: "translateY(-50%)",
-            background: "rgba(15, 23, 42, 0.45)",
+            background: "#173b34",
             color: "#fff",
             border: "none",
             borderRadius: "999px",
@@ -125,7 +109,7 @@ export function Gallery({
             right: "12px",
             top: "50%",
             transform: "translateY(-50%)",
-            background: "rgba(15, 23, 42, 0.45)",
+            background: "#173b34",
             color: "#fff",
             border: "none",
             borderRadius: "999px",
