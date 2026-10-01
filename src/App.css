@@ -1,3 +1,13 @@
+.site-shell {
+  display: flex;
+  min-height: 100vh;
+  flex-direction: column;
+}
+
+.site-content {
+  flex: 1;
+}
+
 .site-header {
   position: relative;
   z-index: 2;
@@ -80,6 +90,55 @@
 
 .site-nav-join:hover {
   background: #17483d;
+}
+
+.site-footer {
+  border-top: 1px solid #e3e8e3;
+  background: #edf1ec;
+}
+
+.site-footer-inner {
+  display: grid;
+  width: min(100% - 48px, 1240px);
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 20px 40px;
+  margin: 0 auto;
+  padding: 28px 0;
+}
+
+.site-footer-brand-block p {
+  margin: 6px 0 0;
+  color: #62716c;
+  font-size: 12px;
+}
+
+.site-footer-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 24px;
+}
+
+.site-footer-nav a {
+  color: #43544e;
+  font-size: 12px;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.site-footer-nav a:hover {
+  color: #1f594c;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.site-footer-copyright {
+  grid-column: 1 / -1;
+  margin: 0;
+  padding-top: 16px;
+  border-top: 1px solid #d9e0da;
+  color: #718079;
+  font-size: 11px;
 }
 
 .auth-page {
@@ -307,6 +366,16 @@
     flex-wrap: wrap;
     gap: 10px 20px;
     padding: 12px 0;
+  }
+
+  .site-footer-inner {
+    width: min(100% - 32px, 1240px);
+    grid-template-columns: 1fr;
+    gap: 18px;
+  }
+
+  .site-footer-copyright {
+    padding-top: 14px;
   }
 
   .site-nav {
