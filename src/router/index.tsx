@@ -11,6 +11,7 @@ import {
 import Login from "../pages/Login";
 import Register from "../pages/Register";
 import BookingConfirmationPage from "../pages/BookingConfirmation";
+import FavoritesPage from "../pages/FavoritesPage";
 import MyBookingsPage from "../pages/MyBookings";
 import UnitDetailPage from "../pages/UnitDetail";
 import UnitsPage from "../pages/Units";
@@ -34,6 +35,7 @@ export const router = createBrowserRouter([
         element: <ProtectedRoute />,
         children: [
           { path: "account", element: <p>Account page</p> },
+          { path: "favorites", element: <FavoritesPage /> },
           {
             path: "bookings/:id/confirmation",
             element: <BookingConfirmationPage />,

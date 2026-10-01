@@ -40,6 +40,16 @@ export function Navbar() {
               My bookings
             </NavLink>
           )}
+          {isAuthenticated && (
+            <NavLink
+              className={({ isActive }) =>
+                `site-nav-link${isActive ? " is-active" : ""}`
+              }
+              to="/favorites"
+            >
+              Favorites
+            </NavLink>
+          )}
           {isAuthenticated && canHost && (
             <NavLink
               className={({ isActive }) =>

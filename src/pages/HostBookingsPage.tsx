@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { listHostBookings } from "../api/bookings";
 import { BookingActions } from "../components/features/bookings/BookingActions";
 import { BookingStatusBadge } from "../components/features/bookings/BookingStatusBadge";
+import { EmptyState } from "../components/ui/EmptyState";
 import { bookingKeys } from "../queries/bookingKeys";
 import type { Booking } from "../types/api";
 
@@ -33,7 +34,11 @@ export default function HostBookingsPage() {
           </button>
         </div>
       ) : bookings.length === 0 ? (
-        <p className="host-empty-state">There are no booking requests yet.</p>
+        <EmptyState
+          icon="▤"
+          title="No booking requests"
+          description="Guest requests for your units will appear here."
+        />
       ) : (
         <div className="host-list">
           {bookings.map((booking) => (

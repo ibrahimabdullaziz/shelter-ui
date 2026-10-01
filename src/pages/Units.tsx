@@ -4,6 +4,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { listCategories, listCities } from "../api/catalog";
 import { UnitCard } from "../components/features/units/UnitCard";
 import { UnitCardSkeleton } from "../components/features/units/UnitCardSkeleton";
+import { EmptyState } from "../components/ui/EmptyState";
 import { useDebounce } from "../hooks/useDebounce";
 import { useUnitsQuery } from "../hooks/useUnitsQuery";
 import { catalogKeys } from "../queries/catalogKeys";
@@ -247,25 +248,18 @@ export default function UnitsPage() {
           ))}
         </div>
       ) : !units.length ? (
-        <div
-          style={{
-            marginTop: "20px",
-            padding: "24px",
-            border: "1px solid #dfe6e3",
-            borderRadius: "12px",
-            background: "#f8faf9",
-            color: "#355045",
-          }}
-        >
-          <p style={{ margin: 0, marginBottom: "12px" }}>
-            No units match your current filters.
-          </p>
-          {hasActiveFilters && (
-            <button type="button" onClick={clearFilters}>
-              Clear filters
-            </button>
-          )}
-        </div>
+        <EmptyState
+          icon="⌕"
+          title="No units found"
+          description="No stays match your current filters. Try changing them."
+          action={
+            hasActiveFilters ? (
+              <button type="button" onClick={clearFilters}>
+                Clear filters
+              </button>
+            ) : undefined
+          }
+        />
       ) : (
         <>
           <div

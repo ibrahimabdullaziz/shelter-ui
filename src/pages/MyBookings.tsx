@@ -4,6 +4,7 @@ import { listCurrencies } from "../api/catalog";
 import { listHostBookings, listMyBookings } from "../api/bookings";
 import { BookingActions } from "../components/features/bookings/BookingActions";
 import { BookingStatusBadge } from "../components/features/bookings/BookingStatusBadge";
+import { EmptyState } from "../components/ui/EmptyState";
 import { useCurrentUserQuery } from "../hooks/useAuthQueries";
 import { useUnitQuery } from "../hooks/useUnitsQuery";
 import { formatCurrency } from "../components/features/bookings/bookingDateUtils";
@@ -91,9 +92,11 @@ export default function MyBookingsPage() {
   const canManageBookings = ["HOST", "ADMIN"].includes(
     currentUserQuery.data?.role ?? "GUEST",
   );
+  const isGuest = currentUserQuery.data?.role === "GUEST";
   const bookingsQuery = useQuery({
     queryKey: bookingKeys.mine(),
     queryFn: listMyBookings,
+    enabled: isGuest,
     staleTime: 30_000,
   });
   const hostBookingsQuery = useQuery({
@@ -112,37 +115,44 @@ export default function MyBookingsPage() {
     <main style={{ maxWidth: "960px", margin: "0 auto", padding: "24px" }}>
       <h1 style={{ margin: "0 0 20px", color: "#173b34" }}>My bookings</h1>
 
-      <section aria-labelledby="my-bookings-title">
-        <h2 id="my-bookings-title" style={{ color: "#173b34" }}>
-          Your bookings
-        </h2>
-        {bookingsQuery.isLoading ? (
-          <p role="status">Loading your bookings...</p>
-        ) : bookingsQuery.isError ? (
-          <div role="alert">
-            <p>Your bookings could not be loaded.</p>
-            <button type="button" onClick={() => void bookingsQuery.refetch()}>
-              Retry
-            </button>
-          </div>
-        ) : !bookingsQuery.data?.length ? (
-          <section aria-live="polite">
-            <p>You don’t have any bookings yet.</p>
-            <Link to="/units">Browse available units</Link>
-          </section>
-        ) : (
-          <div style={{ display: "grid", gap: "12px" }}>
-            {bookingsQuery.data.map((booking) => (
-              <MyBookingCard
-                key={booking.id}
-                booking={booking}
-                currencies={currencies}
-                actionsMode="guest"
-              />
-            ))}
-          </div>
-        )}
-      </section>
+      {isGuest && (
+        <section aria-labelledby="my-bookings-title">
+          <h2 id="my-bookings-title" style={{ color: "#173b34" }}>
+            Your bookings
+          </h2>
+          {bookingsQuery.isLoading ? (
+            <p role="status">Loading your bookings...</p>
+          ) : bookingsQuery.isError ? (
+            <div role="alert">
+              <p>Your bookings could not be loaded.</p>
+              <button
+                type="button"
+                onClick={() => void bookingsQuery.refetch()}
+              >
+                Retry
+              </button>
+            </div>
+          ) : !bookingsQuery.data?.length ? (
+            <EmptyState
+              icon="▤"
+              title="No bookings yet"
+              description="Your stays will appear here once you book a unit."
+              action={<Link to="/units">Browse available units</Link>}
+            />
+          ) : (
+            <div style={{ display: "grid", gap: "12px" }}>
+              {bookingsQuery.data.map((booking) => (
+                <MyBookingCard
+                  key={booking.id}
+                  booking={booking}
+                  currencies={currencies}
+                  actionsMode="guest"
+                />
+              ))}
+            </div>
+          )}
+        </section>
+      )}
 
       {canManageBookings && (
         <section
@@ -165,7 +175,11 @@ export default function MyBookingsPage() {
               </button>
             </div>
           ) : !hostBookingsQuery.data?.length ? (
-            <p>No booking requests for your units.</p>
+            <EmptyState
+              icon="▤"
+              title="No booking requests"
+              description="Guest requests for your units will appear here."
+            />
           ) : (
             <div style={{ display: "grid", gap: "12px" }}>
               {hostBookingsQuery.data.map((booking) => (

@@ -7,6 +7,7 @@ import {
   UnitPhotoUpload,
   type UploadedUnitPhoto,
 } from "../components/features/units/UnitPhotoUpload";
+import { EmptyState } from "../components/ui/EmptyState";
 import { useHostUnitMutations } from "../hooks/useHostUnitMutations";
 import { getApiErrorMessage } from "../lib/getApiErrorMessage";
 import { catalogKeys } from "../queries/catalogKeys";
@@ -149,7 +150,16 @@ export default function HostUnitsPage() {
           </button>
         </div>
       ) : units.length === 0 ? (
-        <p className="host-empty-state">You haven’t listed any units yet.</p>
+        <EmptyState
+          icon="⌂"
+          title="No units listed yet"
+          description="Create a listing to start welcoming guests."
+          action={
+            <button type="button" onClick={() => setIsCreating(true)}>
+              Add your first unit
+            </button>
+          }
+        />
       ) : (
         <div className="host-list">
           {units.map((unit) => (
