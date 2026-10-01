@@ -1,6 +1,6 @@
-import { useIsMutating, useQueryClient } from "@tanstack/react-query";
+import { useIsMutating } from "@tanstack/react-query";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { unitQueryOptions } from "../../../hooks/useUnitsQuery";
+import { useUnitQuery } from "../../../hooks/useUnitsQuery";
 import {
   favoriteQueryKeys,
   useFavoriteUnitIds,
@@ -17,9 +17,13 @@ interface UnitCardProps {
 }
 
 export function UnitCard({ unit, cityName, categoryName }: UnitCardProps) {
-  const queryClient = useQueryClient();
   const navigate = useNavigate();
   const location = useLocation();
+  const {
+    data: unitDetails,
+    isLoading: isPhotoLoading,
+    isError: isPhotoError,
+  } = useUnitQuery(unit.id);
   const isAuthenticated = useAuthStore(
     (state) => state.authStatus === "authenticated",
   );
@@ -37,13 +41,10 @@ export function UnitCard({ unit, cityName, categoryName }: UnitCardProps) {
     }) > 0;
   const isFavorite = favoritesQuery.data?.includes(unit.id) ?? false;
 
-  const prefetchUnit = () => {
-    void queryClient.prefetchQuery(unitQueryOptions(unit.id));
-  };
+  const coverPhoto = unitDetails?.photos?.[0];
 
   return (
     <article
-      onMouseEnter={prefetchUnit}
       style={{
         position: "relative",
         border: "1px solid #dfe6e3",
@@ -55,25 +56,40 @@ export function UnitCard({ unit, cityName, categoryName }: UnitCardProps) {
     >
       <Link
         to={`/units/${unit.id}`}
-        onFocus={prefetchUnit}
         style={{ display: "block", color: "inherit", textDecoration: "none" }}
       >
         <div
           style={{
             height: "180px",
             background: "linear-gradient(135deg, #dfeae6, #c9d9d3)",
-            display: "grid",
-            placeItems: "center",
-            color: "#173b34",
-            fontSize: "12px",
-            fontWeight: 700,
-            letterSpacing: "0.08em",
-            textTransform: "uppercase",
-            padding: "12px",
-            textAlign: "center",
           }}
         >
-          Listing
+          {coverPhoto ? (
+            <img
+              src={coverPhoto.url}
+              alt={`${unit.title} cover photo`}
+              loading="lazy"
+              style={{ width: "100%", height: "100%", objectFit: "cover" }}
+            />
+          ) : (
+            <div
+              style={{
+                display: "grid",
+                width: "100%",
+                height: "100%",
+                placeItems: "center",
+                color: "#173b34",
+                fontSize: "12px",
+                fontWeight: 700,
+              }}
+            >
+              {isPhotoLoading
+                ? "Loading photo..."
+                : isPhotoError
+                  ? "Photo unavailable"
+                  : "No photo available"}
+            </div>
+          )}
         </div>
 
         <div style={{ padding: "16px" }}>

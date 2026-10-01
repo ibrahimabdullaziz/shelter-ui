@@ -1,20 +1,22 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQueries } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
-import { getUnit } from "../api/units";
 import { UnitCard } from "../components/features/units/UnitCard";
 import { EmptyState } from "../components/ui/EmptyState";
 import { QueryErrorState } from "../components/ui/QueryErrorState";
 import { useFavoriteUnitIds } from "../hooks/useFavorites";
+import { unitQueryOptions } from "../hooks/useUnitsQuery";
 
 export default function FavoritesPage() {
   const favoritesQuery = useFavoriteUnitIds(true);
   const favoriteIds = favoritesQuery.data ?? [];
-  const unitsQuery = useQuery({
-    queryKey: ["favorite-units", favoriteIds],
-    queryFn: () => Promise.all(favoriteIds.map((id) => getUnit(id))),
-    enabled: favoritesQuery.isSuccess && favoriteIds.length > 0,
-    staleTime: 30_000,
+  const unitQueries = useQueries({
+    queries: favoriteIds.map((id) => unitQueryOptions(id)),
   });
+  const units = unitQueries.flatMap((query) =>
+    query.data ? [query.data] : [],
+  );
+  const isLoadingUnits = unitQueries.some((query) => query.isLoading);
+  const unitErrorQuery = unitQueries.find((query) => query.isError);
 
   return (
     <main style={{ maxWidth: "1200px", margin: "0 auto", padding: "24px" }}>
@@ -34,12 +36,12 @@ export default function FavoritesPage() {
           description="Save stays you like and they’ll be collected here."
           action={<Link to="/units">Explore stays</Link>}
         />
-      ) : unitsQuery.isLoading ? (
+      ) : isLoadingUnits ? (
         <p role="status">Loading saved stays...</p>
-      ) : unitsQuery.isError ? (
+      ) : unitErrorQuery ? (
         <QueryErrorState
-          error={unitsQuery.error}
-          onRetry={() => void unitsQuery.refetch()}
+          error={unitErrorQuery.error}
+          onRetry={() => void unitErrorQuery.refetch()}
         />
       ) : (
         <div
@@ -49,7 +51,7 @@ export default function FavoritesPage() {
             gap: "16px",
           }}
         >
-          {(unitsQuery.data ?? []).map((unit) => (
+          {units.map((unit) => (
             <UnitCard key={unit.id} unit={unit} />
           ))}
         </div>

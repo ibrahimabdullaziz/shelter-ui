@@ -107,6 +107,7 @@ export interface Unit {
   currencyId: string;
   isActive?: boolean;
   ownerId?: string;
+  photos?: UnitPhoto[];
 }
 
 export interface UnitFilters {

@@ -1,22 +1,45 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 interface GalleryProps {
   images?: string[];
   alt?: string;
 }
 
-const defaultImages = [
-  "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=1200&q=80",
-  "https://images.unsplash.com/photo-1494526585095-c41746248156?auto=format&fit=crop&w=1200&q=80",
-  "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?auto=format&fit=crop&w=1200&q=80",
-  "https://images.unsplash.com/photo-1484154218962-a197022b5858?auto=format&fit=crop&w=1200&q=80",
-];
-
 export function Gallery({
-  images = defaultImages,
+  images = [],
   alt = "Unit gallery image",
 }: GalleryProps) {
   const [activeIndex, setActiveIndex] = useState(0);
+
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.defaultPrevented) return;
+
+      const target = event.target;
+      if (target instanceof HTMLElement) {
+        const isWithinGallery =
+          target.closest('[aria-label="Photo gallery"]') !== null;
+        const isInteractive = target.closest(
+          'input, textarea, select, button, a, [contenteditable="true"]',
+        );
+        if (isInteractive && !isWithinGallery) return;
+      }
+
+      if (event.key === "ArrowRight") {
+        event.preventDefault();
+        setActiveIndex((current) => (current + 1) % images.length);
+      }
+      if (event.key === "ArrowLeft") {
+        event.preventDefault();
+        setActiveIndex(
+          (current) => (current - 1 + images.length) % images.length,
+        );
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [images.length]);
 
   if (!images.length) {
     return (
@@ -46,16 +69,6 @@ export function Gallery({
     <div
       role="region"
       aria-label="Photo gallery"
-      onKeyDown={(event) => {
-        if (event.key === "ArrowRight") {
-          event.preventDefault();
-          showNext();
-        }
-        if (event.key === "ArrowLeft") {
-          event.preventDefault();
-          showPrevious();
-        }
-      }}
       style={{ display: "grid", gap: "12px" }}
     >
       <div

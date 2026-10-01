@@ -97,12 +97,16 @@ export default function UnitsPage() {
   );
 
   useEffect(() => {
-    updateParam("minPrice", debouncedMinPrice);
-  }, [debouncedMinPrice, updateParam]);
+    if (minPrice !== debouncedMinPrice) {
+      updateParam("minPrice", debouncedMinPrice);
+    }
+  }, [debouncedMinPrice, minPrice, updateParam]);
 
   useEffect(() => {
-    updateParam("maxPrice", debouncedMaxPrice);
-  }, [debouncedMaxPrice, updateParam]);
+    if (maxPrice !== debouncedMaxPrice) {
+      updateParam("maxPrice", debouncedMaxPrice);
+    }
+  }, [debouncedMaxPrice, maxPrice, updateParam]);
 
   useEffect(() => {
     const syncDraftsFromHistory = () => {

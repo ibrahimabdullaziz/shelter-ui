@@ -109,7 +109,10 @@ export default function UnitDetailPage() {
         }}
       >
         <div style={{ padding: "20px" }}>
-          <Gallery alt={unit.title} />
+          <Gallery
+            alt={unit.title}
+            images={unit.photos?.map((photo) => photo.url) ?? []}
+          />
         </div>
 
         <div style={{ padding: "24px" }}>
