@@ -107,16 +107,16 @@ export default function UnitsPage() {
   );
 
   useEffect(() => {
-    if (minPrice !== debouncedMinPrice) {
+    if (minPriceInput === debouncedMinPrice && minPrice !== debouncedMinPrice) {
       updateParam("minPrice", debouncedMinPrice);
     }
-  }, [debouncedMinPrice, minPrice, updateParam]);
+  }, [debouncedMinPrice, minPrice, minPriceInput, updateParam]);
 
   useEffect(() => {
-    if (maxPrice !== debouncedMaxPrice) {
+    if (maxPriceInput === debouncedMaxPrice && maxPrice !== debouncedMaxPrice) {
       updateParam("maxPrice", debouncedMaxPrice);
     }
-  }, [debouncedMaxPrice, maxPrice, updateParam]);
+  }, [debouncedMaxPrice, maxPrice, maxPriceInput, updateParam]);
 
   useEffect(() => {
     const syncDraftsFromHistory = () => {
@@ -237,6 +237,7 @@ export default function UnitsPage() {
               <button
                 className="filter-chip"
                 type="button"
+                aria-label={`Remove city filter: ${cityNameMap.get(cityId) ?? cityId}`}
                 onClick={() => updateParam("cityId", "")}
               >
                 {cityNameMap.get(cityId) ?? "City"}{" "}
@@ -247,6 +248,7 @@ export default function UnitsPage() {
               <button
                 className="filter-chip"
                 type="button"
+                aria-label={`Remove category filter: ${categoryNameMap.get(categoryId) ?? categoryId}`}
                 onClick={() => updateParam("categoryId", "")}
               >
                 {categoryNameMap.get(categoryId) ?? "Category"}{" "}
@@ -257,6 +259,7 @@ export default function UnitsPage() {
               <button
                 className="filter-chip"
                 type="button"
+                aria-label={`Remove minimum price filter: ${minPrice}`}
                 onClick={() => {
                   setMinPriceInput("");
                   updateParam("minPrice", "");
@@ -269,6 +272,7 @@ export default function UnitsPage() {
               <button
                 className="filter-chip"
                 type="button"
+                aria-label={`Remove maximum price filter: ${maxPrice}`}
                 onClick={() => {
                   setMaxPriceInput("");
                   updateParam("maxPrice", "");
@@ -292,11 +296,11 @@ export default function UnitsPage() {
       {error ? (
         <QueryErrorState error={error} onRetry={() => void refetch()} />
       ) : isLoading ? (
-        <div className="discovery-grid" aria-label="Loading stay results">
+        <section className="discovery-grid" aria-label="Loading stay results">
           {Array.from({ length: 6 }).map((_, index) => (
             <UnitCardSkeleton key={index} />
           ))}
-        </div>
+        </section>
       ) : !units.length ? (
         <EmptyState
           icon="⌕"
@@ -312,7 +316,7 @@ export default function UnitsPage() {
         />
       ) : (
         <>
-          <div className="discovery-grid" aria-label="Stay results">
+          <section className="discovery-grid" aria-label="Stay results">
             {units.map((unit) => (
               <UnitCard
                 key={unit.id}
@@ -324,7 +328,7 @@ export default function UnitsPage() {
                 currencyCode={currencyCodeMap.get(unit.currencyId)}
               />
             ))}
-          </div>
+          </section>
 
           <nav className="discovery-pagination" aria-label="Unit result pages">
             <Button

@@ -1,5 +1,6 @@
 import { useIsMutating } from "@tanstack/react-query";
 import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Button } from "../../ui/Button";
 import { useUnitQuery } from "../../../hooks/useUnitsQuery";
 import {
   favoriteQueryKeys,
@@ -48,57 +49,35 @@ export function UnitCard({
   const isFavorite = favoritesQuery.data?.includes(unit.id) ?? false;
 
   const coverPhoto = unitDetails?.photos?.[0];
-  const nightlyPrice = currencyCode
-    ? new Intl.NumberFormat(undefined, {
+  let nightlyPrice = new Intl.NumberFormat(undefined, {
+    maximumFractionDigits: 2,
+  }).format(unit.pricePerNight);
+  if (currencyCode) {
+    try {
+      nightlyPrice = new Intl.NumberFormat(undefined, {
         style: "currency",
         currency: currencyCode,
-      }).format(unit.pricePerNight)
-    : new Intl.NumberFormat(undefined, {
-        maximumFractionDigits: 2,
       }).format(unit.pricePerNight);
+    } catch {
+      nightlyPrice = `${nightlyPrice} ${currencyCode}`;
+    }
+  }
 
   return (
-    <article
-      style={{
-        position: "relative",
-        border: "1px solid #dfe6e3",
-        borderRadius: "12px",
-        background: "#fff",
-        overflow: "hidden",
-        boxShadow: "0 4px 14px rgba(17, 24, 39, 0.04)",
-      }}
-    >
-      <Link
-        to={`/units/${unit.id}`}
-        style={{ display: "block", color: "inherit", textDecoration: "none" }}
-      >
-        <div
-          style={{
-            height: "180px",
-            background: "linear-gradient(135deg, #dfeae6, #c9d9d3)",
-          }}
-        >
+    <article className="unit-card">
+      <Link className="unit-card-link" to={`/units/${unit.id}`}>
+        <div className="unit-card-media">
           {coverPhoto ? (
             <img
               src={coverPhoto.url}
               alt={`${unit.title} cover photo`}
               loading="lazy"
-              style={{ width: "100%", height: "100%", objectFit: "cover" }}
+              decoding="async"
             />
           ) : (
-            <div
-              style={{
-                display: "grid",
-                width: "100%",
-                height: "100%",
-                placeItems: "center",
-                color: "#173b34",
-                fontSize: "12px",
-                fontWeight: 700,
-              }}
-            >
+            <div className="unit-card-photo-placeholder" role="status">
               {isPhotoLoading
-                ? "Loading photo..."
+                ? "Loading photo"
                 : isPhotoError
                   ? "Photo unavailable"
                   : "No photo available"}
@@ -106,38 +85,25 @@ export function UnitCard({
           )}
         </div>
 
-        <div style={{ padding: "16px" }}>
-          <h3 style={{ margin: "0 0 8px", color: "#173b34" }}>{unit.title}</h3>
-
-          <p style={{ margin: "0 0 12px", color: "#536760", lineHeight: 1.5 }}>
-            {unit.description}
+        <div className="unit-card-body">
+          <p className="unit-card-meta">
+            <span>{cityName ?? unit.cityId}</span>
+            <span aria-hidden="true">·</span>
+            <span>{categoryName ?? unit.categoryId}</span>
           </p>
+          <h2 className="unit-card-title">{unit.title}</h2>
+          <p className="unit-card-description">{unit.description}</p>
 
-          <p style={{ margin: "0 0 6px", color: "#536760" }}>
-            City: {cityName ?? unit.cityId}
-          </p>
-
-          <p style={{ margin: "0 0 12px", color: "#536760" }}>
-            Category: {categoryName ?? unit.categoryId}
-          </p>
-
-          <div
-            style={{
-              display: "flex",
-              alignItems: "baseline",
-              justifyContent: "space-between",
-              gap: "12px",
-            }}
-          >
-            <span style={{ color: "#1f594c", fontWeight: 700 }}>
-              {nightlyPrice}
-            </span>
-            <span style={{ color: "#6b7a75", fontSize: "12px" }}>/ night</span>
+          <div className="unit-card-price-row">
+            <span className="unit-card-price">{nightlyPrice}</span>
+            <span className="unit-card-price-unit">/ night</span>
           </div>
         </div>
       </Link>
 
-      <button
+      <Button
+        className="unit-favorite-toggle"
+        variant="secondary"
         type="button"
         aria-pressed={isFavorite}
         aria-busy={isFavoritePending}
@@ -155,33 +121,25 @@ export function UnitCard({
           }
           favoriteMutation.mutate({ unitId: unit.id, isFavorite });
         }}
-        style={{
-          position: "absolute",
-          top: "12px",
-          right: "12px",
-          zIndex: 1,
-          minWidth: "72px",
-          minHeight: "36px",
-          border: "1px solid #dfe6e3",
-          borderRadius: "18px",
-          background: isFavorite ? "#1f594c" : "#fff",
-          color: isFavorite ? "#fff" : "#173b34",
-          cursor: isAuthenticated ? "pointer" : "pointer",
-        }}
       >
-        {isFavorite ? "Saved" : "Save"}
-      </button>
+        {isFavorite ? "♥" : "♡"}
+      </Button>
 
       {favoritesQuery.isError && isAuthenticated && (
-        <p role="alert" style={{ margin: "0 12px 12px", color: "#a43129" }}>
+        <p className="unit-card-feedback" role="alert">
           {getApiErrorMessage(favoritesQuery.error)}{" "}
-          <button type="button" onClick={() => void favoritesQuery.refetch()}>
+          <Button
+            type="button"
+            variant="quiet"
+            size="small"
+            onClick={() => void favoritesQuery.refetch()}
+          >
             Retry favorites
-          </button>
+          </Button>
         </p>
       )}
       {favoriteMutation.isError && (
-        <p role="alert" style={{ margin: "0 12px 12px", color: "#a43129" }}>
+        <p className="unit-card-feedback" role="alert">
           {getApiErrorMessage(favoriteMutation.error)}
         </p>
       )}
