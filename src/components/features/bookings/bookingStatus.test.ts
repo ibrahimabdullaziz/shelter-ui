@@ -2,11 +2,9 @@ import { describe, expect, it } from "vitest";
 import { getAvailableBookingActions } from "./bookingStatus";
 
 describe("booking status actions", () => {
-  it("allows guests to cancel pending and confirmed bookings only", () => {
+  it("allows guests to cancel pending bookings only", () => {
     expect(getAvailableBookingActions("PENDING", "guest")).toEqual(["cancel"]);
-    expect(getAvailableBookingActions("CONFIRMED", "guest")).toEqual([
-      "cancel",
-    ]);
+    expect(getAvailableBookingActions("CONFIRMED", "guest")).toEqual([]);
     expect(getAvailableBookingActions("REJECTED", "guest")).toEqual([]);
     expect(getAvailableBookingActions("CANCELLED", "guest")).toEqual([]);
     expect(getAvailableBookingActions("COMPLETED", "guest")).toEqual([]);

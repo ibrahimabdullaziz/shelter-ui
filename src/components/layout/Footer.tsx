@@ -6,7 +6,8 @@ export function Footer() {
   const authStatus = useAuthStore((state) => state.authStatus);
   const user = useCurrentUserQuery().data;
   const isAuthenticated = authStatus === "authenticated" && Boolean(user);
-  const canHost = user?.role === "HOST" || user?.role === "ADMIN";
+  const canHost = user?.role === "HOST";
+  const canAccessBookings = user?.role === "GUEST" || user?.role === "HOST";
   const isAdmin = user?.role === "ADMIN";
 
   return (
@@ -23,8 +24,8 @@ export function Footer() {
           <Link to="/">Explore stays</Link>
           {isAuthenticated ? (
             <>
-              <Link to="/bookings">My bookings</Link>
-              <Link to="/favorites">Favorites</Link>
+              {canAccessBookings && <Link to="/bookings">My bookings</Link>}
+              {user?.role === "GUEST" && <Link to="/favorites">Favorites</Link>}
               {canHost && <Link to="/host">Host dashboard</Link>}
               {isAdmin && <Link to="/admin">Admin</Link>}
             </>

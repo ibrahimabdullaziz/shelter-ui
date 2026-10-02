@@ -19,6 +19,7 @@ export default function Register() {
   const {
     register,
     handleSubmit,
+    getValues,
     formState: { errors },
   } = useForm<RegisterFormValues>({ resolver: zodResolver(registerSchema) });
 
@@ -48,6 +49,14 @@ export default function Register() {
         {mutation.isError && (
           <p className="form-error form-error-summary" role="alert">
             {getApiErrorMessage(mutation.error)}
+          </p>
+        )}
+        {mutation.isSuccess && (
+          <p className="auth-feedback-success" role="status">
+            {mutation.data.message}{" "}
+            <Link to="/verify-email" state={{ email: getValues("email") }}>
+              Enter your verification code
+            </Link>
           </p>
         )}
 

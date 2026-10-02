@@ -102,9 +102,7 @@ function MyBookingCard({
 
 export default function MyBookingsPage() {
   const currentUserQuery = useCurrentUserQuery();
-  const canManageBookings = ["HOST", "ADMIN"].includes(
-    currentUserQuery.data?.role ?? "GUEST",
-  );
+  const canManageBookings = currentUserQuery.data?.role === "HOST";
   const isGuest = currentUserQuery.data?.role === "GUEST";
   const bookingsQuery = useQuery({
     queryKey: bookingKeys.mine(),

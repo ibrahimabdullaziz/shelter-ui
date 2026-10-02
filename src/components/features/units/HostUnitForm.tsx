@@ -181,7 +181,8 @@ export function HostUnitForm({
               )}
             {currencies.map((currency) => (
               <option key={currency.id} value={currency.id}>
-                {currency.code} - {currency.name}
+                {currency.code} -{" "}
+                {currency.symbol ?? currency.name ?? currency.code}
               </option>
             ))}
           </select>

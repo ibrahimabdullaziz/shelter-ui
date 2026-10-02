@@ -19,7 +19,7 @@ export function getAvailableBookingActions(
   status: BookingStatus,
   actor: BookingActor,
 ): BookingAction[] {
-  if (actor === "guest" && ["PENDING", "CONFIRMED"].includes(status)) {
+  if (actor === "guest" && status === "PENDING") {
     return ["cancel"];
   }
 
@@ -28,18 +28,4 @@ export function getAvailableBookingActions(
   }
 
   return [];
-}
-
-export function getBookingStatusTone(status: BookingStatus) {
-  switch (status) {
-    case "PENDING":
-      return { background: "#fff2d8", color: "#79510a" };
-    case "CONFIRMED":
-      return { background: "#e0f2e9", color: "#1c6245" };
-    case "REJECTED":
-    case "CANCELLED":
-      return { background: "#fbe8e5", color: "#8e3028" };
-    case "COMPLETED":
-      return { background: "#e7eef5", color: "#34566f" };
-  }
 }

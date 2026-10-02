@@ -6,6 +6,7 @@ import type {
   CreateCategoryPayload,
   CreateCityPayload,
   CreateCountryPayload,
+  CreateCurrencyPayload,
   Currency,
 } from "../types/api";
 import client from "./client";
@@ -30,12 +31,23 @@ export async function listCities(): Promise<City[]> {
   return response.data.data;
 }
 
-export async function createCity(payload: CreateCityPayload): Promise<void> {
-  await client.post("/api/cities", payload);
+export async function createCity(payload: CreateCityPayload): Promise<City> {
+  const response = await client.post<ApiResponse<City>>("/api/cities", payload);
+  return response.data.data;
 }
 
 export async function listCurrencies(): Promise<Currency[]> {
   const response = await client.get<ApiResponse<Currency[]>>("/api/currencies");
+  return response.data.data;
+}
+
+export async function createCurrency(
+  payload: CreateCurrencyPayload,
+): Promise<Currency> {
+  const response = await client.post<ApiResponse<Currency>>(
+    "/api/currencies",
+    payload,
+  );
   return response.data.data;
 }
 
@@ -48,6 +60,10 @@ export async function listCategories(): Promise<Category[]> {
 
 export async function createCategory(
   payload: CreateCategoryPayload,
-): Promise<void> {
-  await client.post("/api/unit-categories", payload);
+): Promise<Category> {
+  const response = await client.post<ApiResponse<Category>>(
+    "/api/unit-categories",
+    payload,
+  );
+  return response.data.data;
 }

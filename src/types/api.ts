@@ -58,6 +58,11 @@ export interface AuthTokens {
   user: User;
 }
 
+export interface RegisterResponse {
+  status: number;
+  message: string;
+}
+
 export interface ApiResponse<T> {
   status: number | string;
   message: string;
@@ -88,7 +93,8 @@ export interface City {
 export interface Currency {
   id: string;
   code: string;
-  name: string;
+  symbol?: string;
+  name?: string;
 }
 
 export interface Category {
@@ -171,6 +177,16 @@ export interface CreateCityPayload {
 
 export interface CreateCategoryPayload {
   name: string;
+}
+
+export interface CreateCurrencyPayload {
+  code: string;
+  symbol: string;
+}
+
+export interface CreateReviewPayload {
+  rating: number;
+  comment?: string;
 }
 
 export interface Review {

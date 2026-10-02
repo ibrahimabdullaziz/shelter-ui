@@ -281,11 +281,11 @@
 .unit-photo-progress progress {
   width: 100%;
   min-width: 0;
-  accent-color: #1f594c;
+  accent-color: var(--color-primary);
 }
 
 .unit-photo-error {
-  color: #a43129 !important;
+  color: var(--color-danger) !important;
   white-space: normal !important;
 }
 
@@ -299,28 +299,6 @@
   margin: 4px 0 10px;
   color: var(--color-ink);
   font-size: 13px;
-}
-
-.host-unit-actions .host-danger-button {
-  border-color: var(--color-danger-soft);
-  color: var(--color-danger);
-}
-
-.host-primary-button {
-  min-height: 44px;
-  padding: 0 14px;
-  border: 0;
-  border-radius: var(--radius-control);
-  background: var(--color-primary);
-  color: #fff;
-  cursor: pointer;
-  font-size: 13px;
-  font-weight: 700;
-}
-
-.host-primary-button:disabled {
-  cursor: wait;
-  opacity: 0.65;
 }
 
 .host-unit-form {
@@ -391,26 +369,6 @@
   background: var(--color-danger-soft);
   color: var(--color-danger);
   font-size: 13px;
-}
-
-.host-status {
-  flex: 0 0 auto;
-  padding: 5px 8px;
-  background: var(--color-success-soft);
-  color: var(--color-success);
-  font-size: 11px;
-  font-weight: 700;
-  text-transform: capitalize;
-}
-
-.host-status.is-inactive {
-  background: var(--color-surface-muted);
-  color: var(--color-muted);
-}
-
-.host-status.is-unknown {
-  background: var(--color-surface-muted);
-  color: var(--color-muted);
 }
 
 .host-booking-actions {
@@ -496,20 +454,6 @@
   margin-top: 14px;
 }
 
-.host-empty-state {
-  padding: 18px;
-  color: var(--color-muted);
-}
-
-.host-empty-state p {
-  margin: 0 0 12px;
-}
-
-.host-empty-state .ui-button {
-  min-height: 38px;
-  padding: 0 12px;
-}
-
 @media (max-width: 720px) {
   .host-header {
     min-height: 96px;
@@ -552,7 +496,6 @@
   .unit-photo-toggle,
   .unit-photo-panel > .ui-button,
   .unit-photo-item .ui-button,
-  .host-empty-state .ui-button,
   .host-booking-actions .ui-button--small {
     min-height: 44px;
   }
@@ -606,7 +549,6 @@
   .host-unit-form-heading .ui-button,
   .unit-photo-toggle,
   .unit-photo-item .ui-button,
-  .host-empty-state .ui-button,
   .host-booking-actions .ui-button--small {
     min-height: 44px;
   }

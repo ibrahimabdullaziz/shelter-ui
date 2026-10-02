@@ -5,6 +5,7 @@ import type {
   ForgotPasswordPayload,
   LoginPayload,
   RegisterPayload,
+  RegisterResponse,
   ResetPasswordPayload,
   User,
   VerifyEmailPayload,
@@ -23,12 +24,14 @@ export async function login(payload: LoginPayload): Promise<AuthTokens> {
   return storeAuth(response.data);
 }
 
-export async function register(payload: RegisterPayload): Promise<AuthTokens> {
-  const response = await client.post<AuthResponse>(
+export async function register(
+  payload: RegisterPayload,
+): Promise<RegisterResponse> {
+  const response = await client.post<RegisterResponse>(
     "/api/auth/register",
     payload,
   );
-  return storeAuth(response.data);
+  return response.data;
 }
 
 export async function getCurrentUser(): Promise<User> {

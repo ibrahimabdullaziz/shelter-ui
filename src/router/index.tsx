@@ -16,6 +16,7 @@ import {
   VerifyEmailPage,
 } from "../pages/AuthFlows";
 import BookingConfirmationPage from "../pages/BookingConfirmation";
+import AdminCatalogPage from "../pages/AdminCatalogPage";
 import FavoritesPage from "../pages/FavoritesPage";
 import MyBookingsPage from "../pages/MyBookings";
 import UnitDetailPage from "../pages/UnitDetail";
@@ -45,12 +46,20 @@ export const router = createBrowserRouter([
           { path: "account", element: <p>Account page</p> },
           { path: "favorites", element: <FavoritesPage /> },
           {
-            path: "bookings/:id/confirmation",
-            element: <BookingConfirmationPage />,
+            element: <ProtectedRoute allowedRoles={["GUEST"]} />,
+            children: [
+              {
+                path: "bookings/:id/confirmation",
+                element: <BookingConfirmationPage />,
+              },
+            ],
           },
-          { path: "bookings", element: <MyBookingsPage /> },
           {
-            element: <ProtectedRoute allowedRoles={["HOST", "ADMIN"]} />,
+            element: <ProtectedRoute allowedRoles={["GUEST", "HOST"]} />,
+            children: [{ path: "bookings", element: <MyBookingsPage /> }],
+          },
+          {
+            element: <ProtectedRoute allowedRoles={["HOST"]} />,
             children: [
               {
                 path: "host",
@@ -79,7 +88,7 @@ export const router = createBrowserRouter([
           },
           {
             element: <ProtectedRoute allowedRoles={["ADMIN"]} />,
-            children: [{ path: "admin", element: <p>Admin dashboard</p> }],
+            children: [{ path: "admin", element: <AdminCatalogPage /> }],
           },
         ],
       },

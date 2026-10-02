@@ -16,7 +16,9 @@ export function Navbar() {
   const logoutMutation = useLogoutMutation();
   const user = currentUserQuery.data;
   const isAuthenticated = authStatus === "authenticated" && Boolean(user);
-  const canHost = user?.role === "HOST" || user?.role === "ADMIN";
+  const canHost = user?.role === "HOST";
+  const canAccessBookings = user?.role === "GUEST" || user?.role === "HOST";
+  const canUseFavorites = user?.role === "GUEST";
   const isAdmin = user?.role === "ADMIN";
 
   useEffect(() => {
@@ -73,7 +75,7 @@ export function Navbar() {
             >
               Explore stays
             </NavLink>
-            {isAuthenticated && (
+            {isAuthenticated && canAccessBookings && (
               <NavLink
                 className={({ isActive }) =>
                   `site-nav-link${isActive ? " is-active" : ""}`
@@ -84,7 +86,7 @@ export function Navbar() {
                 My bookings
               </NavLink>
             )}
-            {isAuthenticated && (
+            {isAuthenticated && canUseFavorites && (
               <NavLink
                 className={({ isActive }) =>
                   `site-nav-link${isActive ? " is-active" : ""}`

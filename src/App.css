@@ -472,6 +472,71 @@
   max-width: 1240px;
 }
 
+.admin-catalog-page {
+  padding-block: 36px 56px;
+}
+
+.admin-catalog-heading {
+  padding-bottom: 22px;
+  border-bottom: 1px solid var(--color-border);
+  margin-bottom: 24px;
+}
+
+.admin-catalog-heading h1 {
+  margin: 0;
+  color: var(--color-ink);
+  font-family: var(--font-display);
+  font-size: 34px;
+  font-weight: 400;
+}
+
+.admin-catalog-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  column-gap: 36px;
+}
+
+.admin-catalog-section {
+  min-width: 0;
+  padding: 22px 0;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.admin-catalog-section h2 {
+  margin: 0 0 14px;
+  color: var(--color-ink);
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 400;
+}
+
+.admin-catalog-form {
+  display: grid;
+  gap: 12px;
+}
+
+.admin-catalog-items {
+  display: flex;
+  max-height: 124px;
+  flex-wrap: wrap;
+  gap: 6px;
+  overflow-y: auto;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.admin-catalog-items li {
+  max-width: 100%;
+  padding: 6px 9px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-control);
+  background: var(--color-surface-muted);
+  color: var(--color-text);
+  font-size: 11px;
+  overflow-wrap: anywhere;
+}
+
 .booking-list-heading,
 .favorites-heading {
   display: flex;
@@ -1395,6 +1460,91 @@
   overflow-wrap: anywhere;
 }
 
+.unit-review-eligibility {
+  margin: 18px 0 0;
+  color: var(--color-muted);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.unit-review-eligibility a {
+  color: var(--color-primary);
+  font-weight: 700;
+  text-underline-offset: 3px;
+}
+
+.unit-review-feedback {
+  margin-top: 18px;
+}
+
+.unit-review-form {
+  display: grid;
+  gap: 14px;
+  margin-top: 24px;
+  padding-top: 22px;
+  border-top: 1px solid var(--color-border);
+}
+
+.unit-review-form h3 {
+  margin: 0;
+  color: var(--color-ink);
+  font-family: var(--font-display);
+  font-size: 21px;
+  font-weight: 400;
+}
+
+.unit-review-form .form-field textarea {
+  width: 100%;
+  min-height: 104px;
+  padding: 10px 12px;
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-control);
+  background: var(--color-surface);
+  color: var(--color-ink);
+  font: inherit;
+  font-size: 14px;
+  resize: vertical;
+}
+
+.unit-review-form .form-field textarea:focus-visible {
+  border-color: var(--color-primary);
+  box-shadow: var(--focus-ring);
+}
+
+.unit-review-rating-fieldset {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.unit-review-rating-fieldset legend {
+  margin-bottom: 8px;
+  color: var(--color-text);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.unit-review-rating-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.unit-review-rating-option {
+  width: 48px;
+  padding: 0;
+  color: var(--color-accent);
+  font-size: 19px;
+}
+
+.unit-review-rating-option[aria-pressed="true"] {
+  border-color: var(--color-accent);
+  background: var(--color-accent-soft);
+}
+
 .unit-confirmation-page {
   display: grid;
   min-height: 58vh;
@@ -1671,6 +1821,14 @@
 
   .booking-facts {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .admin-catalog-page {
+    padding-block: 26px 44px;
+  }
+
+  .admin-catalog-grid {
+    grid-template-columns: 1fr;
   }
 
   .unit-detail-page {

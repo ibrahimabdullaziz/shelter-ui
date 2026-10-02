@@ -8,6 +8,7 @@ import {
   useToggleFavoriteMutation,
 } from "../../../hooks/useFavorites";
 import { useAuthStore } from "../../../store/authStore";
+import { useCurrentUserQuery } from "../../../hooks/useAuthQueries";
 import { getApiErrorMessage } from "../../../lib/getApiErrorMessage";
 import type { Unit } from "../../../types/api";
 
@@ -34,7 +35,10 @@ export function UnitCard({
   const isAuthenticated = useAuthStore(
     (state) => state.authStatus === "authenticated",
   );
-  const favoritesQuery = useFavoriteUnitIds(isAuthenticated);
+  const currentUserQuery = useCurrentUserQuery();
+  const isGuest = currentUserQuery.data?.role === "GUEST";
+  const canSaveFavorite = !isAuthenticated || isGuest;
+  const favoritesQuery = useFavoriteUnitIds(isGuest);
   const favoriteMutation = useToggleFavoriteMutation();
   const isFavoritePending =
     useIsMutating({
@@ -101,31 +105,34 @@ export function UnitCard({
         </div>
       </Link>
 
-      <Button
-        className="unit-favorite-toggle"
-        variant="secondary"
-        type="button"
-        aria-pressed={isFavorite}
-        aria-busy={isFavoritePending}
-        aria-label={
-          isFavorite
-            ? `Remove ${unit.title} from favorites`
-            : `Add ${unit.title} to favorites`
-        }
-        title={isAuthenticated ? undefined : "Sign in to save this unit"}
-        disabled={isFavoritePending}
-        onClick={() => {
-          if (!isAuthenticated) {
-            navigate("/login", { state: { from: location } });
-            return;
+      {canSaveFavorite && (
+        <Button
+          className="unit-favorite-toggle"
+          variant="secondary"
+          type="button"
+          aria-pressed={isFavorite}
+          aria-busy={isFavoritePending}
+          aria-label={
+            isFavorite
+              ? `Remove ${unit.title} from favorites`
+              : `Add ${unit.title} to favorites`
           }
-          favoriteMutation.mutate({ unitId: unit.id, isFavorite });
-        }}
-      >
-        {isFavorite ? "♥" : "♡"}
-      </Button>
+          title={isAuthenticated ? undefined : "Sign in to save this unit"}
+          disabled={isFavoritePending}
+          onClick={() => {
+            if (!isAuthenticated) {
+              navigate("/login", { state: { from: location } });
+              return;
+            }
+            if (isGuest)
+              favoriteMutation.mutate({ unitId: unit.id, isFavorite });
+          }}
+        >
+          {isFavorite ? "♥" : "♡"}
+        </Button>
+      )}
 
-      {favoritesQuery.isError && isAuthenticated && (
+      {favoritesQuery.isError && isGuest && (
         <p className="unit-card-feedback" role="alert">
           {getApiErrorMessage(favoritesQuery.error)}{" "}
           <Button

@@ -41,22 +41,9 @@ export function useLoginMutation() {
 }
 
 export function useRegisterMutation() {
-  const queryClient = useQueryClient();
-
   return useMutation({
     mutationKey: authQueryKeys.register,
     mutationFn: (payload: RegisterPayload) => register(payload),
-    onMutate: async () => {
-      await queryClient.cancelQueries({
-        queryKey: authQueryKeys.currentUser,
-      });
-      queryClient.removeQueries({ queryKey: authQueryKeys.currentUser });
-    },
-    onSuccess: async () => {
-      await queryClient.invalidateQueries({
-        queryKey: authQueryKeys.currentUser,
-      });
-    },
   });
 }
 
