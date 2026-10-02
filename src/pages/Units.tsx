@@ -1,9 +1,10 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { listCategories, listCities } from "../api/catalog";
+import { listCategories, listCities, listCurrencies } from "../api/catalog";
 import { UnitCard } from "../components/features/units/UnitCard";
 import { UnitCardSkeleton } from "../components/features/units/UnitCardSkeleton";
+import { Button } from "../components/ui/Button";
 import { EmptyState } from "../components/ui/EmptyState";
 import { QueryErrorState } from "../components/ui/QueryErrorState";
 import { useDebounce } from "../hooks/useDebounce";
@@ -38,21 +39,30 @@ export default function UnitsPage() {
     queryFn: listCategories,
     staleTime: 5 * 60_000,
   });
+  const currenciesQuery = useQuery({
+    queryKey: catalogKeys.currencies(),
+    queryFn: listCurrencies,
+    staleTime: 5 * 60_000,
+  });
   const cities = citiesQuery.data ?? [];
   const categories = categoriesQuery.data ?? [];
-  const catalogError = citiesQuery.error ?? categoriesQuery.error;
+  const currencies = currenciesQuery.data ?? [];
+  const catalogError =
+    citiesQuery.error ?? categoriesQuery.error ?? currenciesQuery.error;
   const retryCatalogQueries = () => {
-    void Promise.all([citiesQuery.refetch(), categoriesQuery.refetch()]);
+    void Promise.all([
+      citiesQuery.refetch(),
+      categoriesQuery.refetch(),
+      currenciesQuery.refetch(),
+    ]);
   };
 
-  const cityNameMap = useMemo(
-    () => new Map(cities.map((city) => [city.id, city.name])),
-    [cities],
+  const cityNameMap = new Map(cities.map((city) => [city.id, city.name]));
+  const categoryNameMap = new Map(
+    categories.map((category) => [category.id, category.name]),
   );
-
-  const categoryNameMap = useMemo(
-    () => new Map(categories.map((category) => [category.id, category.name])),
-    [categories],
+  const currencyCodeMap = new Map(
+    currencies.map((currency) => [currency.id, currency.code]),
   );
 
   const safePage = Number.isFinite(page) && page > 0 ? page : 1;
@@ -141,98 +151,148 @@ export default function UnitsPage() {
     });
   };
 
-  if (error) {
-    return (
-      <main style={{ padding: "24px" }}>
-        <h1>Units</h1>
-        <QueryErrorState error={error} onRetry={() => void refetch()} />
-      </main>
-    );
-  }
-
   return (
-    <main style={{ padding: "24px" }}>
-      <h1>Units</h1>
+    <main className="discovery-page">
+      <header className="discovery-heading">
+        <div>
+          <p className="discovery-eyebrow">SHELTER / STAYS</p>
+          <h1>Find your next place</h1>
+          <p>Thoughtful stays for the time you want to spend away.</p>
+        </div>
+        <p className="discovery-result-count" aria-live="polite">
+          {isLoading
+            ? "Loading stays..."
+            : isFetching
+              ? "Updating stays..."
+              : `${units.length} ${units.length === 1 ? "stay" : "stays"} on this page`}
+        </p>
+      </header>
+
       {catalogError && (
         <QueryErrorState error={catalogError} onRetry={retryCatalogQueries} />
       )}
 
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
-          gap: "16px",
-          marginTop: "20px",
-          marginBottom: "24px",
-        }}
-      >
-        <label style={{ display: "grid", gap: "6px" }}>
-          <span>City</span>
-          <select
-            value={cityId}
-            onChange={(event) => updateParam("cityId", event.target.value)}
-          >
-            <option value="">All cities</option>
-            {cities.map((city) => (
-              <option key={city.id} value={city.id}>
-                {city.name}
-              </option>
-            ))}
-          </select>
-        </label>
+      <section className="discovery-filter-panel" aria-label="Filter stays">
+        <div className="discovery-filter-grid">
+          <label className="discovery-field">
+            <span>City</span>
+            <select
+              value={cityId}
+              onChange={(event) => updateParam("cityId", event.target.value)}
+            >
+              <option value="">All cities</option>
+              {cities.map((city) => (
+                <option key={city.id} value={city.id}>
+                  {city.name}
+                </option>
+              ))}
+            </select>
+          </label>
 
-        <label style={{ display: "grid", gap: "6px" }}>
-          <span>Category</span>
-          <select
-            value={categoryId}
-            onChange={(event) => updateParam("categoryId", event.target.value)}
-          >
-            <option value="">All categories</option>
-            {categories.map((category) => (
-              <option key={category.id} value={category.id}>
-                {category.name}
-              </option>
-            ))}
-          </select>
-        </label>
+          <label className="discovery-field">
+            <span>Category</span>
+            <select
+              value={categoryId}
+              onChange={(event) =>
+                updateParam("categoryId", event.target.value)
+              }
+            >
+              <option value="">All categories</option>
+              {categories.map((category) => (
+                <option key={category.id} value={category.id}>
+                  {category.name}
+                </option>
+              ))}
+            </select>
+          </label>
 
-        <label style={{ display: "grid", gap: "6px" }}>
-          <span>Min price</span>
-          <input
-            type="number"
-            value={minPriceInput}
-            onChange={(event) => setMinPriceInput(event.target.value)}
-            placeholder="0"
-          />
-        </label>
+          <label className="discovery-field">
+            <span>Minimum price</span>
+            <input
+              type="number"
+              min="0"
+              step="0.01"
+              value={minPriceInput}
+              onChange={(event) => setMinPriceInput(event.target.value)}
+              placeholder="0"
+            />
+          </label>
 
-        <label style={{ display: "grid", gap: "6px" }}>
-          <span>Max price</span>
-          <input
-            type="number"
-            value={maxPriceInput}
-            onChange={(event) => setMaxPriceInput(event.target.value)}
-            placeholder="500"
-          />
-        </label>
-      </div>
-
-      {hasActiveFilters && (
-        <div style={{ marginBottom: "20px" }}>
-          <button type="button" onClick={clearFilters}>
-            Clear filters
-          </button>
+          <label className="discovery-field">
+            <span>Maximum price</span>
+            <input
+              type="number"
+              min="0"
+              step="0.01"
+              value={maxPriceInput}
+              onChange={(event) => setMaxPriceInput(event.target.value)}
+              placeholder="500"
+            />
+          </label>
         </div>
-      )}
 
-      {isLoading ? (
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
-            gap: "16px",
-          }}
-        >
+        {hasActiveFilters && (
+          <div className="discovery-active-filters" aria-label="Active filters">
+            {cityId && (
+              <button
+                className="filter-chip"
+                type="button"
+                onClick={() => updateParam("cityId", "")}
+              >
+                {cityNameMap.get(cityId) ?? "City"}{" "}
+                <span aria-hidden="true">×</span>
+              </button>
+            )}
+            {categoryId && (
+              <button
+                className="filter-chip"
+                type="button"
+                onClick={() => updateParam("categoryId", "")}
+              >
+                {categoryNameMap.get(categoryId) ?? "Category"}{" "}
+                <span aria-hidden="true">×</span>
+              </button>
+            )}
+            {minPrice && (
+              <button
+                className="filter-chip"
+                type="button"
+                onClick={() => {
+                  setMinPriceInput("");
+                  updateParam("minPrice", "");
+                }}
+              >
+                From {minPrice} <span aria-hidden="true">×</span>
+              </button>
+            )}
+            {maxPrice && (
+              <button
+                className="filter-chip"
+                type="button"
+                onClick={() => {
+                  setMaxPriceInput("");
+                  updateParam("maxPrice", "");
+                }}
+              >
+                Up to {maxPrice} <span aria-hidden="true">×</span>
+              </button>
+            )}
+            <Button
+              type="button"
+              variant="quiet"
+              size="small"
+              onClick={clearFilters}
+            >
+              Clear all
+            </Button>
+          </div>
+        )}
+      </section>
+
+      {error ? (
+        <QueryErrorState error={error} onRetry={() => void refetch()} />
+      ) : isLoading ? (
+        <div className="discovery-grid" aria-label="Loading stay results">
           {Array.from({ length: 6 }).map((_, index) => (
             <UnitCardSkeleton key={index} />
           ))}
@@ -244,21 +304,15 @@ export default function UnitsPage() {
           description="No stays match your current filters. Try changing them."
           action={
             hasActiveFilters ? (
-              <button type="button" onClick={clearFilters}>
+              <Button type="button" variant="secondary" onClick={clearFilters}>
                 Clear filters
-              </button>
+              </Button>
             ) : undefined
           }
         />
       ) : (
         <>
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
-              gap: "16px",
-            }}
-          >
+          <div className="discovery-grid" aria-label="Stay results">
             {units.map((unit) => (
               <UnitCard
                 key={unit.id}
@@ -267,37 +321,34 @@ export default function UnitsPage() {
                 categoryName={
                   categoryNameMap.get(unit.categoryId) ?? unit.categoryId
                 }
+                currencyCode={currencyCodeMap.get(unit.currencyId)}
               />
             ))}
           </div>
 
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              gap: "12px",
-              marginTop: "24px",
-            }}
-          >
-            <button
+          <nav className="discovery-pagination" aria-label="Unit result pages">
+            <Button
+              variant="secondary"
+              size="small"
               type="button"
               onClick={() => handlePageChange(safePage - 1)}
               disabled={safePage === 1 || isFetching}
             >
               Previous
-            </button>
+            </Button>
 
-            <span>Page {safePage}</span>
+            <span aria-current="page">Page {safePage}</span>
 
-            <button
+            <Button
+              variant="secondary"
+              size="small"
               type="button"
               onClick={() => handlePageChange(safePage + 1)}
               disabled={isFetching || units.length < PAGE_SIZE}
             >
               Next
-            </button>
-          </div>
+            </Button>
+          </nav>
         </>
       )}
     </main>

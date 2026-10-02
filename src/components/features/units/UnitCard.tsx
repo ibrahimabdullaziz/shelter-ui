@@ -14,9 +14,15 @@ interface UnitCardProps {
   unit: Unit;
   cityName?: string;
   categoryName?: string;
+  currencyCode?: string;
 }
 
-export function UnitCard({ unit, cityName, categoryName }: UnitCardProps) {
+export function UnitCard({
+  unit,
+  cityName,
+  categoryName,
+  currencyCode,
+}: UnitCardProps) {
   const navigate = useNavigate();
   const location = useLocation();
   const {
@@ -42,6 +48,14 @@ export function UnitCard({ unit, cityName, categoryName }: UnitCardProps) {
   const isFavorite = favoritesQuery.data?.includes(unit.id) ?? false;
 
   const coverPhoto = unitDetails?.photos?.[0];
+  const nightlyPrice = currencyCode
+    ? new Intl.NumberFormat(undefined, {
+        style: "currency",
+        currency: currencyCode,
+      }).format(unit.pricePerNight)
+    : new Intl.NumberFormat(undefined, {
+        maximumFractionDigits: 2,
+      }).format(unit.pricePerNight);
 
   return (
     <article
@@ -116,7 +130,7 @@ export function UnitCard({ unit, cityName, categoryName }: UnitCardProps) {
             }}
           >
             <span style={{ color: "#1f594c", fontWeight: 700 }}>
-              ${unit.pricePerNight}
+              {nightlyPrice}
             </span>
             <span style={{ color: "#6b7a75", fontSize: "12px" }}>/ night</span>
           </div>
