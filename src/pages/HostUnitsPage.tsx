@@ -156,7 +156,11 @@ export default function HostUnitsPage() {
           title="No units listed yet"
           description="Create a listing to start welcoming guests."
           action={
-            <Button type="button" variant="primary" onClick={() => setIsCreating(true)}>
+            <Button
+              type="button"
+              variant="primary"
+              onClick={() => setIsCreating(true)}
+            >
               Add your first unit
             </Button>
           }

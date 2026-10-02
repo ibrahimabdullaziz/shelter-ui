@@ -1,4 +1,5 @@
-import { Link, NavLink } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { Link, NavLink, useLocation } from "react-router-dom";
 import {
   useCurrentUserQuery,
   useLogoutMutation,
@@ -6,12 +7,32 @@ import {
 import { useAuthStore } from "../../store/authStore";
 
 export function Navbar() {
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const { pathname } = useLocation();
   const authStatus = useAuthStore((state) => state.authStatus);
   const currentUserQuery = useCurrentUserQuery();
   const logoutMutation = useLogoutMutation();
   const user = currentUserQuery.data;
   const isAuthenticated = authStatus === "authenticated" && Boolean(user);
   const canHost = user?.role === "HOST" || user?.role === "ADMIN";
+  const isAdmin = user?.role === "ADMIN";
+
+  useEffect(() => {
+    setIsMenuOpen(false);
+  }, [pathname]);
+
+  useEffect(() => {
+    if (!isMenuOpen) return;
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setIsMenuOpen(false);
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isMenuOpen]);
+
+  const closeMenu = () => setIsMenuOpen(false);
 
   return (
     <header className="site-header">
@@ -20,73 +41,112 @@ export function Navbar() {
           shelter<span>.</span>
         </Link>
 
-        <nav className="site-nav" aria-label="Main navigation">
-          <NavLink
-            className={({ isActive }) =>
-              `site-nav-link${isActive ? " is-active" : ""}`
-            }
-            end
-            to="/"
-          >
-            Explore stays
-          </NavLink>
-          {isAuthenticated && (
-            <NavLink
-              className={({ isActive }) =>
-                `site-nav-link${isActive ? " is-active" : ""}`
-              }
-              to="/bookings"
-            >
-              My bookings
-            </NavLink>
-          )}
-          {isAuthenticated && (
-            <NavLink
-              className={({ isActive }) =>
-                `site-nav-link${isActive ? " is-active" : ""}`
-              }
-              to="/favorites"
-            >
-              Favorites
-            </NavLink>
-          )}
-          {isAuthenticated && canHost && (
-            <NavLink
-              className={({ isActive }) =>
-                `site-nav-link${isActive ? " is-active" : ""}`
-              }
-              to="/host"
-            >
-              Host dashboard
-            </NavLink>
-          )}
-        </nav>
+        <button
+          className={`site-menu-toggle${isMenuOpen ? " is-open" : ""}`}
+          type="button"
+          aria-label="Toggle navigation"
+          aria-expanded={isMenuOpen}
+          aria-controls="site-header-menu"
+          onClick={() => setIsMenuOpen((open) => !open)}
+        >
+          <span className="site-menu-icon" aria-hidden="true">
+            <span />
+            <span />
+            <span />
+          </span>
+        </button>
 
-        <div className="site-nav-actions">
-          {isAuthenticated ? (
-            <>
-              <span className="site-user-name">
-                {user?.firstName} {user?.lastName}
-              </span>
-              <button
-                className="site-nav-button"
-                disabled={logoutMutation.isPending}
-                onClick={() => logoutMutation.mutate()}
-                type="button"
+        <div
+          className={`site-header-menu${isMenuOpen ? " is-open" : ""}`}
+          id="site-header-menu"
+        >
+          <nav className="site-nav" aria-label="Main navigation">
+            <NavLink
+              className={({ isActive }) =>
+                `site-nav-link${isActive ? " is-active" : ""}`
+              }
+              end
+              to="/"
+              onClick={closeMenu}
+            >
+              Explore stays
+            </NavLink>
+            {isAuthenticated && (
+              <NavLink
+                className={({ isActive }) =>
+                  `site-nav-link${isActive ? " is-active" : ""}`
+                }
+                to="/bookings"
+                onClick={closeMenu}
               >
-                {logoutMutation.isPending ? "Signing out..." : "Sign out"}
-              </button>
-            </>
-          ) : (
-            <>
-              <Link className="site-nav-link" to="/login">
-                Sign in
-              </Link>
-              <Link className="site-nav-join" to="/register">
-                Join Shelter
-              </Link>
-            </>
-          )}
+                My bookings
+              </NavLink>
+            )}
+            {isAuthenticated && (
+              <NavLink
+                className={({ isActive }) =>
+                  `site-nav-link${isActive ? " is-active" : ""}`
+                }
+                to="/favorites"
+                onClick={closeMenu}
+              >
+                Favorites
+              </NavLink>
+            )}
+            {isAuthenticated && canHost && (
+              <NavLink
+                className={({ isActive }) =>
+                  `site-nav-link${isActive ? " is-active" : ""}`
+                }
+                to="/host"
+                onClick={closeMenu}
+              >
+                Host dashboard
+              </NavLink>
+            )}
+            {isAuthenticated && isAdmin && (
+              <NavLink
+                className={({ isActive }) =>
+                  `site-nav-link${isActive ? " is-active" : ""}`
+                }
+                to="/admin"
+                onClick={closeMenu}
+              >
+                Admin
+              </NavLink>
+            )}
+          </nav>
+
+          <div className="site-nav-actions">
+            {isAuthenticated ? (
+              <>
+                <span className="site-user-name">
+                  {user?.firstName} {user?.lastName}
+                </span>
+                <button
+                  className="site-nav-button"
+                  disabled={logoutMutation.isPending}
+                  onClick={() => logoutMutation.mutate()}
+                  type="button"
+                >
+                  {logoutMutation.isPending ? "Signing out..." : "Sign out"}
+                </button>
+              </>
+            ) : (
+              <>
+                <Link className="site-nav-link" to="/login" onClick={closeMenu}>
+                  Sign in
+                </Link>
+                <Link
+                  className="site-nav-join"
+                  to="/register"
+                  onClick={closeMenu}
+                >
+                  Join Shelter
+                </Link>
+              </>
+            )}
+          </div>
         </div>
       </div>
     </header>
