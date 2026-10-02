@@ -137,6 +137,9 @@ export default function Register() {
       <p className="auth-switch">
         Already have an account? <Link to="/login">Log in</Link>
       </p>
+      <p className="auth-switch auth-switch-secondary">
+        Have a verification code? <Link to="/verify-email">Verify email</Link>
+      </p>
     </AuthFormLayout>
   );
 }

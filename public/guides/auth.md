@@ -9,12 +9,20 @@ This implementation uses a layered, token-based auth architecture:
 
 The key design choice is that a token alone does not mean “authenticated.” The app treats the server-validated current-user query as the proof of an active session.
 
+## User-facing authentication flows
+
+- Sign in and registration remain available at `/login` and `/register`.
+- Email verification is available at `/verify-email`. The user provides the email address and six-digit code; the route does not change the existing registration redirect or enforce verification as a sign-in gate.
+- Password recovery starts at `/forgot-password`, which requests a reset code. The user enters the email, code, and new password at `/reset-password`.
+- Forms display field validation, pending, API error, and success feedback. A successful password reset returns the user to sign in; verification also links back to sign in.
+- Verification and recovery use the API operations in the OpenAPI contract. Eligibility and delivery details remain server-owned; the UI does not infer them.
+
 ## Zustand vs. TanStack Query
 
 Zustand is for client session state, not remote user data:
 
-- Access token: short-lived and memory-only.
-- Refresh token: persisted across reloads.
+- Access token: persisted in local storage with the session state.
+- Refresh token: persisted across reloads and used by the Axios refresh flow.
 - Hydration and auth status: coordinates startup and routing.
 - Imperative access via `useAuthStore.getState()` lets Axios interceptors read and update tokens outside React.
 
@@ -29,14 +37,14 @@ This separation prevents two sources of truth. Zustand knows whether the browser
 
 ## Auth bootstrap and hydration
 
-Only the refresh token is persisted. On app reload:
+Both tokens are included in the persisted Zustand state. On app reload:
 
 1. Zustand hydrates the persisted refresh token.
 2. The app remains in `initializing` until hydration completes.
 3. `AuthBootstrap` checks whether any token exists:
    - none → `unauthenticated`
    - token(s) exist → fetch `/auth/me`
-4. If the access token is missing or expired, that request receives a `401`, which triggers refresh automatically.
+4. If the access token is missing or expired, the current-user request receives a `401`, which triggers refresh automatically.
 5. A successful `/me` response establishes `authenticated`.
 
 Rendering waits for hydration before mounting, and the bootstrap component also guards the transitional state. That avoids the classic “redirect to login for one frame, then restore the session” bug.
@@ -65,7 +73,7 @@ Key safeguards:
 - `refreshPromise` makes concurrent `401`s share one refresh request, preventing a refresh storm and token races.
 - Failure clears both tokens and the cached current user, so no stale identity remains visible.
 
-A useful security posture here is to persist the longer-lived recovery credential, while keeping the access token out of persistent browser storage. In production, an `HttpOnly`, `Secure`, `SameSite` cookie for refresh is often stronger than storing a refresh token in `localStorage`.
+The current implementation persists both tokens in local storage. A stricter future security posture would keep the access token out of persistent browser storage and use an `HttpOnly`, `Secure`, `SameSite` cookie for refresh where the backend supports it. That would be a separate auth/security change; the UI redesign does not alter token storage or refresh behavior.
 
 ## Protected Route pattern
 
@@ -94,7 +102,7 @@ The client-side role guard improves navigation and UX, but the API must enforce 
 - Stale logged-in UI after logout → one session-clear helper removes tokens and Query cache.
 - Multiple competing refresh calls → shared refresh promise.
 - Infinite `401` → refresh → `401` loops → one-retry marker and auth-endpoint exclusion.
-- Access token silently disappearing after reload → persisted refresh credential reconstructs a new access token.
+- Reloaded session state → persisted tokens are hydrated, and the refresh flow obtains new tokens when the access token expires.
 - Mistaking a token for verified identity → current user is fetched from the API.
 - Showing protected content before a role check → route-level authentication and role boundaries.
 - Transient refetch failure logging users out → preserved successful current-user data can keep the session authenticated during a later refetch failure.
@@ -105,7 +113,7 @@ The client-side role guard improves navigation and UX, but the API must enforce 
 
 ```ts
 const sessionStore = {
-  accessToken: null,
+  accessToken: "persisted",
   refreshToken: "persisted",
   status: "initializing",
 };

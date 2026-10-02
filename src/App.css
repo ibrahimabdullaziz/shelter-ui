@@ -172,6 +172,7 @@
   justify-self: center;
   align-self: center;
   padding: 56px clamp(28px, 6vw, 84px);
+  animation: auth-content-enter 220ms ease both;
 }
 
 .auth-brand {
@@ -270,6 +271,37 @@
   width: 100%;
 }
 
+.auth-recovery-links {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 8px 16px;
+  margin-top: -5px;
+  font-size: 12px;
+}
+
+.auth-recovery-links a {
+  color: var(--color-primary);
+  font-weight: 600;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+}
+
+.auth-feedback-success {
+  margin: 0;
+  padding: 11px 12px;
+  border-left: 3px solid var(--color-success);
+  background: var(--color-success-soft);
+  color: var(--color-success);
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.5;
+}
+
+.auth-switch-secondary {
+  margin-top: 10px;
+}
+
 .auth-switch {
   margin: 22px 0 0;
   color: var(--color-muted);
@@ -358,6 +390,18 @@
   padding: 24px;
   color: var(--color-ink);
   text-align: center;
+}
+
+@keyframes auth-content-enter {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .booking-actions {

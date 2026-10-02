@@ -93,6 +93,11 @@ export default function Login() {
           )}
         </label>
 
+        <div className="auth-recovery-links">
+          <Link to="/forgot-password">Forgot password?</Link>
+          <Link to="/verify-email">Verify email</Link>
+        </div>
+
         <Button
           className="auth-submit"
           type="submit"

@@ -10,6 +10,11 @@ import {
 } from "./hostPages";
 import Login from "../pages/Login";
 import Register from "../pages/Register";
+import {
+  ForgotPasswordPage,
+  ResetPasswordPage,
+  VerifyEmailPage,
+} from "../pages/AuthFlows";
 import BookingConfirmationPage from "../pages/BookingConfirmation";
 import FavoritesPage from "../pages/FavoritesPage";
 import MyBookingsPage from "../pages/MyBookings";
@@ -23,6 +28,9 @@ export const router = createBrowserRouter([
     children: [
       { path: "login", element: <Login /> },
       { path: "register", element: <Register /> },
+      { path: "verify-email", element: <VerifyEmailPage /> },
+      { path: "forgot-password", element: <ForgotPasswordPage /> },
+      { path: "reset-password", element: <ResetPasswordPage /> },
       {
         path: "403",
         element: (

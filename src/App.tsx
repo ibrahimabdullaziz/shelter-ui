@@ -3,9 +3,17 @@ import { Footer } from "./components/layout/Footer";
 import { Navbar } from "./components/layout/Navbar";
 import "./App.css";
 
+const authPaths = new Set([
+  "/login",
+  "/register",
+  "/verify-email",
+  "/forgot-password",
+  "/reset-password",
+]);
+
 function App() {
   const { pathname } = useLocation();
-  const isAuthPage = pathname === "/login" || pathname === "/register";
+  const isAuthPage = authPaths.has(pathname);
 
   if (isAuthPage) return <Outlet />;
 
