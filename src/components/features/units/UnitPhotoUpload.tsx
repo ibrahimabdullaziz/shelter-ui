@@ -1,4 +1,5 @@
 import { useState, type ChangeEvent } from "react";
+import { Button } from "../../ui/Button";
 import {
   useUnitPhotoUpload,
   type UploadedUnitPhoto,
@@ -39,11 +40,10 @@ export function UnitPhotoUpload({
 
   return (
     <div className="unit-photo-upload">
-      <button
-        <Button
+      <Button
         className="unit-photo-toggle"
-          variant="secondary"
-          size="small"
+        variant="secondary"
+        size="small"
         type="button"
         aria-expanded={isOpen}
         onClick={() => setIsOpen((open) => !open)}
@@ -51,7 +51,7 @@ export function UnitPhotoUpload({
         {isOpen
           ? "Close photos"
           : `Manage photos${photos.length ? ` (${photos.length})` : ""}`}
-      </button>
+      </Button>
 
       {isOpen && (
         <section className="unit-photo-panel" aria-label="Unit photos">
@@ -84,7 +84,7 @@ export function UnitPhotoUpload({
                 aria-label="Selected photo previews"
               >
                 {selectedPhotos.map((selected, index) => (
-                  <div className="unit-photo-item" key={selected.id}>
+                  <div className="unit-photo-item ui-surface" key={selected.id}>
                     <img
                       src={selected.previewUrl}
                       alt={`Selected photo preview ${index + 1}`}

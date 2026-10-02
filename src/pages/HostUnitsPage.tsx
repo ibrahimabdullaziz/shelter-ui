@@ -5,15 +5,17 @@ import { listMyUnits } from "../api/units";
 import { HostUnitForm } from "../components/features/units/HostUnitForm";
 import {
   UnitPhotoUpload,
-          {!isCreating && !editingUnit && (
-            <Button
-              variant="primary"
-              type="button"
-              onClick={() => setIsCreating(true)}
-            >
-              Add unit
-            </Button>
-          )}
+  type UploadedUnitPhoto,
+} from "../components/features/units/UnitPhotoUpload";
+import { Button } from "../components/ui/Button";
+import { EmptyState } from "../components/ui/EmptyState";
+import { QueryErrorState } from "../components/ui/QueryErrorState";
+import { StatusBadge } from "../components/ui/StatusBadge";
+import { useHostUnitMutations } from "../hooks/useHostUnitMutations";
+import { getApiErrorMessage } from "../lib/getApiErrorMessage";
+import { catalogKeys } from "../queries/catalogKeys";
+import { unitKeys } from "../queries/unitKeys";
+import type { CreateUnitPayload, Unit } from "../types/api";
 
 export default function HostUnitsPage() {
   const [isCreating, setIsCreating] = useState(false);
@@ -99,13 +101,13 @@ export default function HostUnitsPage() {
             <p>Manage the places you share with guests.</p>
           </div>
           {!isCreating && !editingUnit && (
-            <button
-              className="host-primary-button"
+            <Button
+              variant="primary"
               type="button"
               onClick={() => setIsCreating(true)}
             >
               Add unit
-            </button>
+            </Button>
           )}
         </div>
       </div>
@@ -154,9 +156,9 @@ export default function HostUnitsPage() {
           title="No units listed yet"
           description="Create a listing to start welcoming guests."
           action={
-            <button type="button" onClick={() => setIsCreating(true)}>
+            <Button type="button" variant="primary" onClick={() => setIsCreating(true)}>
               Add your first unit
-            </button>
+            </Button>
           }
         />
       ) : (
@@ -260,13 +262,22 @@ function UnitRow({
           </p>
         </div>
         <div className="host-unit-controls">
-            <StatusBadge
-              tone={unit.isActive === undefined || !unit.isActive ? "neutral" : "positive"}
-            >
-              {status}
-            </StatusBadge>
+          <StatusBadge
+            tone={
+              unit.isActive === undefined || !unit.isActive
+                ? "neutral"
+                : "positive"
+            }
+          >
+            {status}
+          </StatusBadge>
           <div className="host-unit-actions">
-            <Button type="button" size="small" disabled={isMutating} onClick={onEdit}>
+            <Button
+              type="button"
+              size="small"
+              disabled={isMutating}
+              onClick={onEdit}
+            >
               Edit
             </Button>
             {unit.isActive ? (
@@ -279,7 +290,12 @@ function UnitRow({
                 Deactivate
               </Button>
             ) : (
-              <Button size="small" type="button" disabled={isMutating} onClick={onActivate}>
+              <Button
+                size="small"
+                type="button"
+                disabled={isMutating}
+                onClick={onActivate}
+              >
                 Activate
               </Button>
             )}

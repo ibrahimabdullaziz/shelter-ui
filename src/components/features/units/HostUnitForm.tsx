@@ -1,4 +1,5 @@
 import { useState, type FormEvent } from "react";
+import { Button } from "../../ui/Button";
 import { getApiErrorMessage } from "../../../lib/getApiErrorMessage";
 import type {
   Category,
@@ -56,12 +57,17 @@ export function HostUnitForm({
   };
 
   return (
-    <form className="host-unit-form" onSubmit={handleSubmit}>
+    <form className="host-unit-form ui-surface" onSubmit={handleSubmit}>
       <div className="host-unit-form-heading">
         <h3>{unit ? "Edit unit" : "Add a unit"}</h3>
-          <Button type="button" size="small" onClick={onCancel} disabled={isPending}>
+        <Button
+          type="button"
+          size="small"
+          onClick={onCancel}
+          disabled={isPending}
+        >
           Cancel
-          </Button>
+        </Button>
       </div>
 
       {catalogsLoading && <p role="status">Loading form options...</p>}

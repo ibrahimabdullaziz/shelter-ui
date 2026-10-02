@@ -44,7 +44,7 @@ export default function HostOverviewPage() {
           </strong>
           <span className="host-stat-link">View listings</span>
         </Link>
-        <Link className="host-stat" to="/host/bookings">
+        <Link className="host-stat ui-surface" to="/host/bookings">
           <span className="host-stat-label">Pending requests</span>
           <strong>
             {getQueryCount(
