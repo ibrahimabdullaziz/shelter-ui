@@ -1,11 +1,16 @@
 import { useQuery } from "@tanstack/react-query";
 import { Link, useLocation, useParams } from "react-router-dom";
 import { listMyBookings } from "../api/bookings";
+import { listCurrencies } from "../api/catalog";
 import { useUnitQuery } from "../hooks/useUnitsQuery";
-import { calculateBookingPrice } from "../components/features/bookings/bookingDateUtils";
+import {
+  calculateBookingPrice,
+  formatBookingDate,
+} from "../components/features/bookings/bookingDateUtils";
 import { QueryErrorState } from "../components/ui/QueryErrorState";
 import { BookingStatusBadge } from "../components/features/bookings/BookingStatusBadge";
 import { bookingKeys } from "../queries/bookingKeys";
+import { catalogKeys } from "../queries/catalogKeys";
 import type { Booking } from "../types/api";
 
 interface BookingConfirmationState {
@@ -80,6 +85,12 @@ export default function BookingConfirmationPage() {
     error: unitError,
     refetch: refetchUnit,
   } = useUnitQuery(booking?.unitId ?? "");
+  const currenciesQuery = useQuery({
+    queryKey: catalogKeys.currencies(),
+    queryFn: listCurrencies,
+    enabled: Boolean(unit?.currencyId),
+    staleTime: 5 * 60_000,
+  });
 
   if (!booking && bookingsQuery.isLoading) {
     return (
@@ -111,7 +122,11 @@ export default function BookingConfirmationPage() {
     );
   }
 
-  const amount = formatBookingTotal(booking.totalPrice, state?.currencyCode);
+  const currencyCode =
+    state?.currencyCode ??
+    currenciesQuery.data?.find((currency) => currency.id === unit?.currencyId)
+      ?.code;
+  const amount = formatBookingTotal(booking.totalPrice, currencyCode);
   const nights = calculateBookingPrice(
     booking.checkIn,
     booking.checkOut,
@@ -145,11 +160,19 @@ export default function BookingConfirmationPage() {
           </div>
           <div>
             <dt>Check-in</dt>
-            <dd>{booking.checkIn}</dd>
+            <dd>
+              <time dateTime={booking.checkIn}>
+                {formatBookingDate(booking.checkIn)}
+              </time>
+            </dd>
           </div>
           <div>
             <dt>Check-out</dt>
-            <dd>{booking.checkOut}</dd>
+            <dd>
+              <time dateTime={booking.checkOut}>
+                {formatBookingDate(booking.checkOut)}
+              </time>
+            </dd>
           </div>
           <div>
             <dt>Number of nights</dt>

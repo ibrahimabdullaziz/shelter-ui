@@ -1,4 +1,8 @@
-import { useMutation, useQueryClient, type QueryKey } from "@tanstack/react-query";
+import {
+  useMutation,
+  useQueryClient,
+  type QueryKey,
+} from "@tanstack/react-query";
 import {
   cancelBooking,
   confirmBooking,
@@ -89,10 +93,20 @@ export function useBookingActions(
         );
       });
     },
-    onSettled: () => queryClient.invalidateQueries({ queryKey: bookingKeys.all }),
+    onSettled: () =>
+      queryClient.invalidateQueries({ queryKey: bookingKeys.all }),
   });
 
   const availableActions = getAvailableBookingActions(status, actor);
+  const successMessageByAction: Record<BookingAction, string> = {
+    cancel: "Booking cancelled.",
+    confirm: "Booking confirmed.",
+    reject: "Booking rejected.",
+  };
+  const successMessage =
+    mutation.isSuccess && mutation.variables
+      ? successMessageByAction[mutation.variables.action]
+      : undefined;
   const runAction = (action: BookingAction) => {
     if (mutation.isPending || !availableActions.includes(action)) return;
     mutation.mutate({ bookingId, action });
@@ -102,6 +116,7 @@ export function useBookingActions(
     availableActions,
     isPending: mutation.isPending,
     error: mutation.error,
+    successMessage,
     runAction,
   };
 }

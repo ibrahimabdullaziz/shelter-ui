@@ -8,7 +8,11 @@ import { EmptyState } from "../components/ui/EmptyState";
 import { QueryErrorState } from "../components/ui/QueryErrorState";
 import { useCurrentUserQuery } from "../hooks/useAuthQueries";
 import { useUnitQuery } from "../hooks/useUnitsQuery";
-import { formatCurrency } from "../components/features/bookings/bookingDateUtils";
+import {
+  calculateBookingPrice,
+  formatBookingDate,
+  formatCurrency,
+} from "../components/features/bookings/bookingDateUtils";
 import { bookingKeys } from "../queries/bookingKeys";
 import { catalogKeys } from "../queries/catalogKeys";
 import type { Booking, Currency } from "../types/api";
@@ -37,59 +41,58 @@ function MyBookingCard({
     (currency) => currency.id === unit?.currencyId,
   )?.code;
   const total = formatCurrency(Number(booking.totalPrice), currencyCode);
+  const nights = calculateBookingPrice(
+    booking.checkIn,
+    booking.checkOut,
+    1,
+  ).nights;
   const unitLabel =
     unit?.title ??
     (isUnitLoading ? "Loading unit..." : "Unit details unavailable");
 
   return (
-    <article
-      style={{
-        padding: "18px",
-        border: "1px solid #dfe6e3",
-        borderRadius: "6px",
-        background: "#fff",
-      }}
-    >
-      <h2 style={{ margin: "0 0 14px", color: "#173b34", fontSize: "18px" }}>
-        <Link to={`/units/${booking.unitId}`} style={{ color: "inherit" }}>
-          {unitLabel}
-        </Link>
-      </h2>
+    <article className="booking-card ui-surface">
+      <div className="booking-card-heading">
+        <div>
+          <p className="booking-card-label">
+            {actionsMode === "host" ? "Guest request" : "Your stay"}
+          </p>
+          <h3>
+            <Link to={`/units/${booking.unitId}`}>{unitLabel}</Link>
+          </h3>
+        </div>
+        <BookingStatusBadge status={booking.status} />
+      </div>
       {isUnitError && (
         <QueryErrorState error={unitError} onRetry={() => void refetchUnit()} />
       )}
 
-      <dl
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))",
-          gap: "12px",
-          margin: 0,
-        }}
-      >
+      <dl className="booking-facts">
         <div>
-          <dt style={{ color: "#6b7a75", fontSize: "13px" }}>Check-in</dt>
-          <dd style={{ margin: "4px 0 0", color: "#34443f" }}>
-            <time dateTime={booking.checkIn}>{booking.checkIn}</time>
+          <dt>Check-in</dt>
+          <dd>
+            <time dateTime={booking.checkIn}>
+              {formatBookingDate(booking.checkIn)}
+            </time>
           </dd>
         </div>
         <div>
-          <dt style={{ color: "#6b7a75", fontSize: "13px" }}>Check-out</dt>
-          <dd style={{ margin: "4px 0 0", color: "#34443f" }}>
-            <time dateTime={booking.checkOut}>{booking.checkOut}</time>
+          <dt>Check-out</dt>
+          <dd>
+            <time dateTime={booking.checkOut}>
+              {formatBookingDate(booking.checkOut)}
+            </time>
           </dd>
         </div>
         <div>
-          <dt style={{ color: "#6b7a75", fontSize: "13px" }}>Total price</dt>
-          <dd style={{ margin: "4px 0 0", color: "#34443f", fontWeight: 700 }}>
-            {total}
+          <dt>Length of stay</dt>
+          <dd>
+            {nights} {nights === 1 ? "night" : "nights"}
           </dd>
         </div>
         <div>
-          <dt style={{ color: "#6b7a75", fontSize: "13px" }}>Status</dt>
-          <dd style={{ margin: "4px 0 0", color: "#34443f" }}>
-            <BookingStatusBadge status={booking.status} />
-          </dd>
+          <dt>Total price</dt>
+          <dd className="booking-facts-total">{total}</dd>
         </div>
       </dl>
       <BookingActions booking={booking} actor={actionsMode} />
@@ -123,8 +126,12 @@ export default function MyBookingsPage() {
   const currencies = currenciesQuery.data ?? [];
 
   return (
-    <main style={{ maxWidth: "960px", margin: "0 auto", padding: "24px" }}>
-      <h1 style={{ margin: "0 0 20px", color: "#173b34" }}>My bookings</h1>
+    <main className="booking-list-page">
+      <header className="booking-list-heading">
+        <p className="booking-list-eyebrow">YOUR TRIPS</p>
+        <h1>Bookings</h1>
+        <p>Review dates, totals, and the current status of each stay.</p>
+      </header>
       {currenciesQuery.isError && (
         <QueryErrorState
           error={currenciesQuery.error}
@@ -133,10 +140,16 @@ export default function MyBookingsPage() {
       )}
 
       {isGuest && (
-        <section aria-labelledby="my-bookings-title">
-          <h2 id="my-bookings-title" style={{ color: "#173b34" }}>
-            Your bookings
-          </h2>
+        <section
+          className="booking-list-section"
+          aria-labelledby="my-bookings-title"
+        >
+          <div className="booking-section-heading">
+            <h2 id="my-bookings-title">Your reservations</h2>
+            {bookingsQuery.data && (
+              <span>{bookingsQuery.data.length} total</span>
+            )}
+          </div>
           {bookingsQuery.isLoading ? (
             <p role="status">Loading your bookings...</p>
           ) : bookingsQuery.isError ? (
@@ -152,7 +165,7 @@ export default function MyBookingsPage() {
               action={<Link to="/units">Browse available units</Link>}
             />
           ) : (
-            <div style={{ display: "grid", gap: "12px" }}>
+            <div className="booking-list-grid">
               {bookingsQuery.data.map((booking) => (
                 <MyBookingCard
                   key={booking.id}
@@ -168,12 +181,15 @@ export default function MyBookingsPage() {
 
       {canManageBookings && (
         <section
+          className="booking-list-section"
           aria-labelledby="host-bookings-title"
-          style={{ marginTop: "32px" }}
         >
-          <h2 id="host-bookings-title" style={{ color: "#173b34" }}>
-            Requests for your units
-          </h2>
+          <div className="booking-section-heading">
+            <h2 id="host-bookings-title">Requests for your units</h2>
+            {hostBookingsQuery.data && (
+              <span>{hostBookingsQuery.data.length} total</span>
+            )}
+          </div>
           {hostBookingsQuery.isLoading ? (
             <p role="status">Loading booking requests...</p>
           ) : hostBookingsQuery.isError ? (
@@ -188,7 +204,7 @@ export default function MyBookingsPage() {
               description="Guest requests for your units will appear here."
             />
           ) : (
-            <div style={{ display: "grid", gap: "12px" }}>
+            <div className="booking-list-grid">
               {hostBookingsQuery.data.map((booking) => (
                 <MyBookingCard
                   key={booking.id}

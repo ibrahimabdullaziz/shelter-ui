@@ -33,6 +33,16 @@ export function toApiDateOnly(value: string): string | null {
     : new Date(timestamp).toISOString().slice(0, 10);
 }
 
+export function formatBookingDate(value: string): string {
+  const timestamp = parseDateOnlyUtc(value);
+  if (timestamp === null) return value;
+
+  return new Intl.DateTimeFormat(undefined, {
+    dateStyle: "medium",
+    timeZone: "UTC",
+  }).format(timestamp);
+}
+
 export function getLocalDateToday(): string {
   const date = new Date();
   const year = date.getFullYear();

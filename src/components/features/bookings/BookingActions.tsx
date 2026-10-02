@@ -19,16 +19,20 @@ const actionConfig: Record<
 };
 
 export function BookingActions({ booking, actor }: BookingActionsProps) {
-  const { availableActions, isPending, error, runAction } = useBookingActions(
-    booking.id,
-    booking.status,
-    actor,
-  );
-  if (!availableActions.length && !isPending && !error) return null;
+  const { availableActions, isPending, error, successMessage, runAction } =
+    useBookingActions(booking.id, booking.status, actor);
+  if (!availableActions.length && !isPending && !error && !successMessage) {
+    return null;
+  }
 
   return (
     <div className="booking-actions">
       {isPending && <p role="status">Updating booking...</p>}
+      {successMessage && (
+        <p className="ui-feedback ui-feedback--success" role="status">
+          {successMessage}
+        </p>
+      )}
       {availableActions.map((action) => {
         const { label, variant } = actionConfig[action];
 
