@@ -5,15 +5,15 @@ import { listMyUnits } from "../api/units";
 import { HostUnitForm } from "../components/features/units/HostUnitForm";
 import {
   UnitPhotoUpload,
-  type UploadedUnitPhoto,
-} from "../components/features/units/UnitPhotoUpload";
-import { EmptyState } from "../components/ui/EmptyState";
-import { QueryErrorState } from "../components/ui/QueryErrorState";
-import { useHostUnitMutations } from "../hooks/useHostUnitMutations";
-import { getApiErrorMessage } from "../lib/getApiErrorMessage";
-import { catalogKeys } from "../queries/catalogKeys";
-import { unitKeys } from "../queries/unitKeys";
-import type { CreateUnitPayload, Unit } from "../types/api";
+          {!isCreating && !editingUnit && (
+            <Button
+              variant="primary"
+              type="button"
+              onClick={() => setIsCreating(true)}
+            >
+              Add unit
+            </Button>
+          )}
 
 export default function HostUnitsPage() {
   const [isCreating, setIsCreating] = useState(false);
@@ -260,42 +260,38 @@ function UnitRow({
           </p>
         </div>
         <div className="host-unit-controls">
-          <span
-            className={`host-status${
-              unit.isActive === undefined
-                ? " is-unknown"
-                : unit.isActive
-                  ? ""
-                  : " is-inactive"
-            }`}
-          >
-            {status}
-          </span>
+            <StatusBadge
+              tone={unit.isActive === undefined || !unit.isActive ? "neutral" : "positive"}
+            >
+              {status}
+            </StatusBadge>
           <div className="host-unit-actions">
-            <button type="button" disabled={isMutating} onClick={onEdit}>
+            <Button type="button" size="small" disabled={isMutating} onClick={onEdit}>
               Edit
-            </button>
+            </Button>
             {unit.isActive ? (
-              <button
+              <Button
+                size="small"
                 type="button"
                 disabled={isMutating}
                 onClick={onDeactivate}
               >
                 Deactivate
-              </button>
+              </Button>
             ) : (
-              <button type="button" disabled={isMutating} onClick={onActivate}>
+              <Button size="small" type="button" disabled={isMutating} onClick={onActivate}>
                 Activate
-              </button>
+              </Button>
             )}
-            <button
-              className="host-danger-button"
+            <Button
+              variant="danger"
+              size="small"
               type="button"
               disabled={isMutating}
               onClick={onDelete}
             >
               Delete
-            </button>
+            </Button>
             <UnitPhotoUpload
               unitId={unit.id}
               photos={uploadedPhotos}

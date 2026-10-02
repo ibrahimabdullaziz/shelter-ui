@@ -59,9 +59,9 @@ export function HostUnitForm({
     <form className="host-unit-form" onSubmit={handleSubmit}>
       <div className="host-unit-form-heading">
         <h3>{unit ? "Edit unit" : "Add a unit"}</h3>
-        <button type="button" onClick={onCancel} disabled={isPending}>
+          <Button type="button" size="small" onClick={onCancel} disabled={isPending}>
           Cancel
-        </button>
+          </Button>
       </div>
 
       {catalogsLoading && <p role="status">Loading form options...</p>}
@@ -192,13 +192,13 @@ export function HostUnitForm({
       </div>
 
       <div className="host-unit-form-actions">
-        <button
-          className="host-primary-button"
+        <Button
+          variant="primary"
           type="submit"
           disabled={isPending || !catalogsReady}
         >
           {isPending ? "Saving..." : unit ? "Save changes" : "Create unit"}
-        </button>
+        </Button>
       </div>
     </form>
   );

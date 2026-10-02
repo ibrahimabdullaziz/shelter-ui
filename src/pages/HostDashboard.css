@@ -1,6 +1,6 @@
 .host-dashboard {
   min-height: 100vh;
-  background: #f6f5f0;
+  background: var(--color-canvas);
 }
 
 .host-header {
@@ -10,21 +10,21 @@
   justify-content: space-between;
   gap: 20px;
   padding: 20px max(24px, calc((100vw - 1180px) / 2));
-  border-bottom: 1px solid #dfe6e3;
-  background: #fff;
+  border-bottom: 1px solid var(--color-border);
+  background: var(--color-surface);
 }
 
 .host-header h1 {
   margin: 4px 0 0;
-  color: #173b34;
-  font-family: "DM Serif Display", Georgia, serif;
+  color: var(--color-ink);
+  font-family: var(--font-display);
   font-size: 30px;
   font-weight: 400;
 }
 
 .host-kicker {
   margin: 0;
-  color: #9b5537;
+  color: var(--color-accent);
   font-size: 11px;
   font-weight: 700;
   letter-spacing: 1px;
@@ -32,7 +32,7 @@
 }
 
 .host-marketplace-link {
-  color: #1f594c;
+  color: var(--color-primary);
   font-size: 13px;
   font-weight: 700;
   text-underline-offset: 3px;
@@ -57,21 +57,21 @@
 .host-nav-link {
   padding: 12px 14px;
   border-left: 3px solid transparent;
-  color: #536760;
+  color: var(--color-muted);
   font-size: 14px;
   font-weight: 600;
   text-decoration: none;
 }
 
 .host-nav-link:hover {
-  background: #eeeee7;
-  color: #173b34;
+  background: var(--color-surface-muted);
+  color: var(--color-ink);
 }
 
 .host-nav-link.is-active {
-  border-left-color: #d26a43;
-  background: #fff;
-  color: #173b34;
+  border-left-color: var(--color-accent);
+  background: var(--color-surface);
+  color: var(--color-ink);
 }
 
 .host-content {
@@ -92,15 +92,15 @@
 
 .host-page-heading h2 {
   margin: 7px 0 8px;
-  color: #173b34;
-  font-family: "DM Serif Display", Georgia, serif;
+  color: var(--color-ink);
+  font-family: var(--font-display);
   font-size: 32px;
   font-weight: 400;
 }
 
 .host-page-heading > p:last-child {
   margin: 0;
-  color: #62716c;
+  color: var(--color-muted);
   font-size: 14px;
   line-height: 1.6;
 }
@@ -117,36 +117,34 @@
   align-content: start;
   gap: 10px;
   padding: 20px;
-  border: 1px solid #dfe6e3;
-  background: #fff;
   text-decoration: none;
 }
 
 .host-stat:hover {
-  border-color: #9caf9f;
+  border-color: var(--color-primary);
 }
 
 .host-stat-label {
-  color: #62716c;
+  color: var(--color-muted);
   font-size: 13px;
   font-weight: 600;
 }
 
 .host-stat strong {
-  color: #173b34;
+  color: var(--color-ink);
   font-size: 28px;
   font-weight: 600;
 }
 
 .host-stat-link {
-  color: #1f594c;
+  color: var(--color-primary);
   font-size: 12px;
   font-weight: 700;
 }
 
 .host-list {
   display: grid;
-  border-top: 1px solid #dfe6e3;
+  border-top: 1px solid var(--color-border);
 }
 
 .host-list-row {
@@ -156,12 +154,12 @@
   justify-content: space-between;
   gap: 20px;
   padding: 18px 0;
-  border-bottom: 1px solid #dfe6e3;
+  border-bottom: 1px solid var(--color-border);
 }
 
 .host-list-row h3 {
   margin: 0;
-  color: #173b34;
+  color: var(--color-ink);
   font-size: 15px;
   font-weight: 600;
   overflow-wrap: anywhere;
@@ -169,7 +167,7 @@
 
 .host-list-row p {
   margin: 6px 0 0;
-  color: #62716c;
+  color: var(--color-muted);
   font-size: 13px;
 }
 
@@ -187,22 +185,16 @@
   gap: 8px;
 }
 
-.host-unit-actions button,
-.host-unit-form-heading button,
-.host-operation-error button {
+.host-unit-actions .ui-button,
+.host-unit-form-heading .ui-button,
+.host-operation-error .ui-button {
   min-height: 36px;
   padding: 0 10px;
-  border: 1px solid #b9c9c2;
-  border-radius: 4px;
-  background: #fff;
-  color: #173b34;
-  cursor: pointer;
   font-size: 12px;
-  font-weight: 600;
 }
 
-.host-unit-actions button:disabled,
-.host-unit-form-heading button:disabled {
+.host-unit-actions .ui-button:disabled,
+.host-unit-form-heading .ui-button:disabled {
   cursor: wait;
   opacity: 0.6;
 }
@@ -212,15 +204,7 @@
 }
 
 .unit-photo-toggle {
-  min-height: 36px;
-  padding: 0 10px;
-  border: 1px solid #b9c9c2;
-  border-radius: 4px;
-  background: #fff;
-  color: #173b34;
-  cursor: pointer;
-  font-size: 12px;
-  font-weight: 600;
+  white-space: nowrap;
 }
 
 .unit-photo-panel {
@@ -228,12 +212,12 @@
   gap: 12px;
   margin-top: 16px;
   padding: 16px 0;
-  border-top: 1px solid #dfe6e3;
+  border-top: 1px solid var(--color-border);
 }
 
 .unit-photo-help {
   margin: -6px 0 0;
-  color: #62716c;
+  color: var(--color-muted);
   font-size: 12px;
 }
 
@@ -247,8 +231,6 @@
   min-width: 0;
   margin: 0;
   padding: 8px;
-  border: 1px solid #dfe6e3;
-  background: #fff;
 }
 
 .unit-photo-item img {
@@ -256,31 +238,24 @@
   width: 100%;
   aspect-ratio: 1;
   object-fit: cover;
-  background: #edf3f1;
+  background: var(--color-surface-muted);
 }
 
 .unit-photo-item > p,
 .unit-photo-item figcaption {
   overflow: hidden;
   margin: 7px 0;
-  color: #536760;
+  color: var(--color-muted);
   font-size: 11px;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.unit-photo-item button {
-  min-height: 30px;
-  padding: 0 8px;
-  border: 1px solid #b9c9c2;
-  border-radius: 4px;
-  background: #fff;
-  color: #173b34;
-  cursor: pointer;
+.unit-photo-item .ui-button {
   font-size: 11px;
 }
 
-.unit-photo-item button:disabled {
+.unit-photo-item .ui-button:disabled {
   cursor: wait;
   opacity: 0.6;
 }
@@ -289,7 +264,7 @@
   display: flex;
   align-items: center;
   gap: 6px;
-  color: #536760;
+  color: var(--color-muted);
   font-size: 11px;
 }
 
@@ -306,21 +281,21 @@
 
 .unit-uploaded-photos h4 {
   margin: 4px 0 10px;
-  color: #173b34;
+  color: var(--color-ink);
   font-size: 13px;
 }
 
 .host-unit-actions .host-danger-button {
-  border-color: #e0b8b0;
-  color: #9a382d;
+  border-color: var(--color-danger-soft);
+  color: var(--color-danger);
 }
 
 .host-primary-button {
   min-height: 40px;
   padding: 0 14px;
   border: 0;
-  border-radius: 4px;
-  background: #1f594c;
+  border-radius: var(--radius-control);
+  background: var(--color-primary);
   color: #fff;
   cursor: pointer;
   font-size: 13px;
@@ -335,8 +310,6 @@
 .host-unit-form {
   margin: 0 0 24px;
   padding: 20px;
-  border: 1px solid #dfe6e3;
-  background: #fff;
 }
 
 .host-unit-form-heading {
@@ -349,7 +322,7 @@
 
 .host-unit-form-heading h3 {
   margin: 0;
-  color: #173b34;
+  color: var(--color-ink);
   font-size: 18px;
 }
 
@@ -363,7 +336,7 @@
   display: grid;
   min-width: 0;
   gap: 7px;
-  color: #34443f;
+  color: var(--color-text);
   font-size: 13px;
   font-weight: 600;
 }
@@ -374,10 +347,10 @@
   width: 100%;
   min-height: 42px;
   padding: 9px 10px;
-  border: 1px solid #ccd5d0;
-  border-radius: 4px;
-  background: #fff;
-  color: #172724;
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-control);
+  background: var(--color-surface);
+  color: var(--color-ink);
   font: inherit;
   font-weight: 400;
 }
@@ -398,30 +371,30 @@
 .host-operation-error {
   margin: 0 0 16px;
   padding: 12px;
-  border-left: 3px solid #b43c32;
-  background: #fff0ec;
-  color: #7a2b25;
+  border-left: 3px solid var(--color-danger);
+  background: var(--color-danger-soft);
+  color: var(--color-danger);
   font-size: 13px;
 }
 
 .host-status {
   flex: 0 0 auto;
   padding: 5px 8px;
-  background: #e5efe8;
-  color: #285c43;
+  background: var(--color-success-soft);
+  color: var(--color-success);
   font-size: 11px;
   font-weight: 700;
   text-transform: capitalize;
 }
 
 .host-status.is-inactive {
-  background: #eeeae4;
-  color: #665e53;
+  background: var(--color-surface-muted);
+  color: var(--color-muted);
 }
 
 .host-status.is-unknown {
-  background: #f1eee6;
-  color: #665e53;
+  background: var(--color-surface-muted);
+  color: var(--color-muted);
 }
 
 .host-booking-actions {
@@ -437,23 +410,16 @@
 
 .host-empty-state {
   padding: 18px;
-  border: 1px solid #dfe6e3;
-  background: #fff;
-  color: #536760;
+  color: var(--color-muted);
 }
 
 .host-empty-state p {
   margin: 0 0 12px;
 }
 
-.host-empty-state button {
+.host-empty-state .ui-button {
   min-height: 38px;
   padding: 0 12px;
-  border: 1px solid #b9c9c2;
-  border-radius: 4px;
-  background: #fff;
-  color: #173b34;
-  cursor: pointer;
 }
 
 @media (max-width: 720px) {
@@ -478,7 +444,7 @@
     gap: 0;
     overflow-x: auto;
     padding: 12px 0 0;
-    border-bottom: 1px solid #dfe6e3;
+    border-bottom: 1px solid var(--color-border);
   }
 
   .host-nav-link {
@@ -489,7 +455,7 @@
   }
 
   .host-nav-link.is-active {
-    border-bottom-color: #d26a43;
+    border-bottom-color: var(--color-accent);
   }
 
   .host-content {

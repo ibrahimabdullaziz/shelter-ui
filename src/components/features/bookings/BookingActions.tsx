@@ -9,7 +9,10 @@ interface BookingActionsProps {
   actor: BookingActor;
 }
 
-const actionConfig: Record<BookingAction, { label: string; variant: "primary" | "danger" }> = {
+const actionConfig: Record<
+  BookingAction,
+  { label: string; variant: "primary" | "danger" }
+> = {
   cancel: { label: "Cancel booking", variant: "danger" },
   confirm: { label: "Confirm", variant: "primary" },
   reject: { label: "Reject", variant: "danger" },
@@ -24,9 +27,7 @@ export function BookingActions({ booking, actor }: BookingActionsProps) {
   if (!availableActions.length && !isPending && !error) return null;
 
   return (
-    <div
-      className="booking-actions"
-    >
+    <div className="booking-actions">
       {isPending && <p role="status">Updating booking...</p>}
       {availableActions.map((action) => {
         const { label, variant } = actionConfig[action];

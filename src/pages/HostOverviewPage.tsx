@@ -33,7 +33,7 @@ export default function HostOverviewPage() {
         <p>Keep track of your listings and incoming booking requests.</p>
       </div>
       <div className="host-stat-grid">
-        <Link className="host-stat" to="/host/units">
+        <Link className="host-stat ui-surface" to="/host/units">
           <span className="host-stat-label">My units</span>
           <strong>
             {getQueryCount(

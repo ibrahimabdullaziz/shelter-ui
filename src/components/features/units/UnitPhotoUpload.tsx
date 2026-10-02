@@ -40,7 +40,10 @@ export function UnitPhotoUpload({
   return (
     <div className="unit-photo-upload">
       <button
+        <Button
         className="unit-photo-toggle"
+          variant="secondary"
+          size="small"
         type="button"
         aria-expanded={isOpen}
         onClick={() => setIsOpen((open) => !open)}
@@ -102,24 +105,25 @@ export function UnitPhotoUpload({
                         {uploadErrors[selected.id]}
                       </p>
                     )}
-                    <button
+                    <Button
+                      size="small"
                       type="button"
                       disabled={isUploading}
                       onClick={() => removeSelected(selected.id)}
                     >
                       Remove
-                    </button>
+                    </Button>
                   </div>
                 ))}
               </div>
-              <button
-                className="host-primary-button"
+              <Button
+                variant="primary"
                 type="button"
                 disabled={isUploading || !selectedPhotos.length}
                 onClick={() => void uploadSelected()}
               >
                 {isUploading ? "Uploading..." : "Upload photos"}
-              </button>
+              </Button>
             </>
           )}
 
@@ -128,7 +132,7 @@ export function UnitPhotoUpload({
               <h4>Uploaded photos</h4>
               <div className="unit-photo-grid">
                 {photos.map(({ photo, fileName }, index) => (
-                  <figure className="unit-photo-item" key={photo.id}>
+                  <figure className="unit-photo-item ui-surface" key={photo.id}>
                     <img
                       src={photo.url}
                       alt={`Uploaded photo preview ${index + 1}`}
