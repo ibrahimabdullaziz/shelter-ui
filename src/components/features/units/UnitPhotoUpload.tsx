@@ -1,5 +1,9 @@
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState, type ChangeEvent } from "react";
+import { deleteUnitPhoto } from "../../../api/units";
 import { Button } from "../../ui/Button";
+import { getApiErrorMessage } from "../../../lib/getApiErrorMessage";
+import { unitKeys } from "../../../queries/unitKeys";
 import {
   useUnitPhotoUpload,
   type UploadedUnitPhoto,
@@ -11,13 +15,16 @@ interface UnitPhotoUploadProps {
   unitId: string;
   photos: UploadedUnitPhoto[];
   onPhotoUploaded: (photo: UploadedUnitPhoto) => void;
+  onPhotoDeleted: (photoId: string) => void;
 }
 
 export function UnitPhotoUpload({
   unitId,
   photos,
   onPhotoUploaded,
+  onPhotoDeleted,
 }: UnitPhotoUploadProps) {
+  const queryClient = useQueryClient();
   const [isOpen, setIsOpen] = useState(false);
   const {
     selectedPhotos,
@@ -32,6 +39,21 @@ export function UnitPhotoUpload({
     unitId,
     onPhotoUploaded,
   });
+  const deletePhotoMutation = useMutation({
+    mutationKey: [...unitKeys.mutations(), "photo-delete", unitId],
+    mutationFn: deleteUnitPhoto,
+    onSuccess: async (_result, photoId) => {
+      onPhotoDeleted(photoId);
+      await queryClient.invalidateQueries({ queryKey: unitKeys.all });
+    },
+  });
+
+  const handleDeleteUploaded = (photoId: string) => {
+    if (!window.confirm("Delete this uploaded photo? This cannot be undone.")) {
+      return;
+    }
+    deletePhotoMutation.mutate(photoId);
+  };
 
   const handleSelection = (event: ChangeEvent<HTMLInputElement>) => {
     appendFiles(event.currentTarget.files);
@@ -61,7 +83,7 @@ export function UnitPhotoUpload({
               type="file"
               accept="image/jpeg,image/png,image/webp"
               multiple
-              disabled={isUploading}
+              disabled={isUploading || deletePhotoMutation.isPending}
               onChange={handleSelection}
             />
           </label>
@@ -127,6 +149,17 @@ export function UnitPhotoUpload({
             </>
           )}
 
+          {deletePhotoMutation.isError && (
+            <p className="unit-photo-error" role="alert">
+              {getApiErrorMessage(deletePhotoMutation.error)}
+            </p>
+          )}
+          {deletePhotoMutation.isSuccess && (
+            <p className="unit-photo-success" role="status">
+              Photo deleted.
+            </p>
+          )}
+
           {photos.length > 0 && (
             <div className="unit-uploaded-photos">
               <h4>Uploaded photos</h4>
@@ -138,6 +171,16 @@ export function UnitPhotoUpload({
                       alt={`Uploaded photo preview ${index + 1}`}
                     />
                     <figcaption title={fileName}>{fileName}</figcaption>
+                    <Button
+                      type="button"
+                      variant="danger"
+                      size="small"
+                      disabled={isUploading || deletePhotoMutation.isPending}
+                      aria-label={`Delete uploaded photo ${index + 1}`}
+                      onClick={() => handleDeleteUploaded(photo.id)}
+                    >
+                      Delete
+                    </Button>
                   </figure>
                 ))}
               </div>

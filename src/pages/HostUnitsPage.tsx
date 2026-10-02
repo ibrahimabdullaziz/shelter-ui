@@ -20,6 +20,7 @@ import type { CreateUnitPayload, Unit } from "../types/api";
 export default function HostUnitsPage() {
   const [isCreating, setIsCreating] = useState(false);
   const [editingUnit, setEditingUnit] = useState<Unit | null>(null);
+  const [operationSuccess, setOperationSuccess] = useState<string | null>(null);
   const [uploadedPhotosByUnit, setUploadedPhotosByUnit] = useState<
     Record<string, UploadedUnitPhoto[]>
   >({});
@@ -81,13 +82,24 @@ export default function HostUnitsPage() {
     ]);
   };
   const handleSubmit = (payload: CreateUnitPayload) => {
+    setOperationSuccess(null);
     if (editingUnit) {
       unitMutations.update.mutate(
         { id: editingUnit.id, payload },
-        { onSuccess: closeEditor },
+        {
+          onSuccess: () => {
+            setOperationSuccess("Listing updated.");
+            closeEditor();
+          },
+        },
       );
     } else {
-      unitMutations.create.mutate(payload, { onSuccess: closeEditor });
+      unitMutations.create.mutate(payload, {
+        onSuccess: () => {
+          setOperationSuccess("Listing created.");
+          closeEditor();
+        },
+      });
     }
   };
 
@@ -104,7 +116,10 @@ export default function HostUnitsPage() {
             <Button
               variant="primary"
               type="button"
-              onClick={() => setIsCreating(true)}
+              onClick={() => {
+                setOperationSuccess(null);
+                setIsCreating(true);
+              }}
             >
               Add unit
             </Button>
@@ -135,6 +150,14 @@ export default function HostUnitsPage() {
           {getApiErrorMessage(operationError)}
         </p>
       )}
+      {operationSuccess && (
+        <p
+          className="ui-feedback ui-feedback--success host-operation-success"
+          role="status"
+        >
+          {operationSuccess}
+        </p>
+      )}
       {catalogsHaveError && !isCreating && !editingUnit && (
         <QueryErrorState
           error={
@@ -159,7 +182,10 @@ export default function HostUnitsPage() {
             <Button
               type="button"
               variant="primary"
-              onClick={() => setIsCreating(true)}
+              onClick={() => {
+                setOperationSuccess(null);
+                setIsCreating(true);
+              }}
             >
               Add your first unit
             </Button>
@@ -183,19 +209,42 @@ export default function HostUnitsPage() {
                   [unit.id]: [...(current[unit.id] ?? []), uploadedPhoto],
                 }));
               }}
+              onPhotoDeleted={(photoId) => {
+                setUploadedPhotosByUnit((current) => ({
+                  ...current,
+                  [unit.id]: (current[unit.id] ?? []).filter(
+                    ({ photo }) => photo.id !== photoId,
+                  ),
+                }));
+              }}
               onEdit={() => {
                 unitMutations.create.reset();
                 unitMutations.update.reset();
+                setOperationSuccess(null);
                 setIsCreating(false);
                 setEditingUnit(unit);
               }}
-              onActivate={() =>
-                unitMutations.setActive.mutate({ id: unit.id, isActive: true })
-              }
-              onDeactivate={() =>
-                unitMutations.setActive.mutate({ id: unit.id, isActive: false })
-              }
+              onActivate={() => {
+                setOperationSuccess(null);
+                unitMutations.setActive.mutate(
+                  { id: unit.id, isActive: true },
+                  {
+                    onSuccess: () => setOperationSuccess("Listing activated."),
+                  },
+                );
+              }}
+              onDeactivate={() => {
+                setOperationSuccess(null);
+                unitMutations.setActive.mutate(
+                  { id: unit.id, isActive: false },
+                  {
+                    onSuccess: () =>
+                      setOperationSuccess("Listing deactivated."),
+                  },
+                );
+              }}
               onDelete={() => {
+                setOperationSuccess(null);
                 if (
                   window.confirm(
                     `Delete "${unit.title}"? This cannot be undone.`,
@@ -203,6 +252,7 @@ export default function HostUnitsPage() {
                 ) {
                   unitMutations.remove.mutate(unit.id, {
                     onSuccess: () => {
+                      setOperationSuccess("Listing deleted.");
                       setUploadedPhotosByUnit((current) => {
                         const next = { ...current };
                         delete next[unit.id];
@@ -226,6 +276,7 @@ interface UnitRowProps {
   isMutating: boolean;
   uploadedPhotos: UploadedUnitPhoto[];
   onPhotoUploaded: (photo: UploadedUnitPhoto) => void;
+  onPhotoDeleted: (photoId: string) => void;
   onEdit: () => void;
   onActivate: () => void;
   onDeactivate: () => void;
@@ -238,6 +289,7 @@ function UnitRow({
   isMutating,
   uploadedPhotos,
   onPhotoUploaded,
+  onPhotoDeleted,
   onEdit,
   onActivate,
   onDeactivate,
@@ -316,6 +368,7 @@ function UnitRow({
               unitId={unit.id}
               photos={uploadedPhotos}
               onPhotoUploaded={onPhotoUploaded}
+              onPhotoDeleted={onPhotoDeleted}
             />
           </div>
         </div>

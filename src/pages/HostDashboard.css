@@ -171,6 +171,10 @@
   font-size: 13px;
 }
 
+.host-operation-success {
+  margin-bottom: 16px;
+}
+
 .host-unit-controls {
   display: flex;
   flex: 0 0 auto;
@@ -277,6 +281,12 @@
 .unit-photo-error {
   color: #a43129 !important;
   white-space: normal !important;
+}
+
+.unit-photo-success {
+  margin: 0;
+  color: var(--color-success);
+  font-size: 12px;
 }
 
 .unit-uploaded-photos h4 {
@@ -408,6 +418,78 @@
   margin-top: 0 !important;
 }
 
+.host-booking-list {
+  display: grid;
+  gap: 14px;
+}
+
+.host-booking-card {
+  min-width: 0;
+  padding: 20px;
+}
+
+.host-booking-card-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.host-booking-card-heading h3 {
+  margin: 0;
+  color: var(--color-ink);
+  font-size: 16px;
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+
+.host-booking-label,
+.host-booking-reference {
+  margin: 0 0 6px;
+  color: var(--color-muted);
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.host-booking-reference {
+  margin: 5px 0 0;
+  font-weight: 400;
+  overflow-wrap: anywhere;
+}
+
+.host-booking-facts {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin: 18px 0 0;
+  padding-top: 14px;
+  border-top: 1px solid var(--color-border);
+}
+
+.host-booking-facts > div {
+  min-width: 0;
+}
+
+.host-booking-facts dt {
+  margin-bottom: 5px;
+  color: var(--color-muted);
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.host-booking-facts dd {
+  margin: 0;
+  color: var(--color-text);
+  font-size: 13px;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.host-booking-actions {
+  margin-top: 14px;
+}
+
 .host-empty-state {
   padding: 18px;
   color: var(--color-muted);
@@ -478,6 +560,19 @@
   .host-booking-actions {
     align-items: flex-start;
     flex-direction: column;
+  }
+
+  .host-booking-card-heading {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .host-booking-card {
+    padding: 16px;
+  }
+
+  .host-booking-facts {
+    grid-template-columns: 1fr;
   }
 
   .host-page-heading-row {
