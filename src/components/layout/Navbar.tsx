@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link, NavLink, useLocation } from "react-router-dom";
 import {
   useCurrentUserQuery,
@@ -7,8 +7,10 @@ import {
 import { useAuthStore } from "../../store/authStore";
 
 export function Navbar() {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [menuPath, setMenuPath] = useState<string | null>(null);
+  const menuToggleRef = useRef<HTMLButtonElement>(null);
   const { pathname } = useLocation();
+  const isMenuOpen = menuPath === pathname;
   const authStatus = useAuthStore((state) => state.authStatus);
   const currentUserQuery = useCurrentUserQuery();
   const logoutMutation = useLogoutMutation();
@@ -18,21 +20,20 @@ export function Navbar() {
   const isAdmin = user?.role === "ADMIN";
 
   useEffect(() => {
-    setIsMenuOpen(false);
-  }, [pathname]);
-
-  useEffect(() => {
     if (!isMenuOpen) return;
 
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") setIsMenuOpen(false);
+      if (event.key === "Escape") {
+        setMenuPath(null);
+        menuToggleRef.current?.focus();
+      }
     };
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [isMenuOpen]);
 
-  const closeMenu = () => setIsMenuOpen(false);
+  const closeMenu = () => setMenuPath(null);
 
   return (
     <header className="site-header">
@@ -42,12 +43,13 @@ export function Navbar() {
         </Link>
 
         <button
+          ref={menuToggleRef}
           className={`site-menu-toggle${isMenuOpen ? " is-open" : ""}`}
           type="button"
           aria-label="Toggle navigation"
           aria-expanded={isMenuOpen}
           aria-controls="site-header-menu"
-          onClick={() => setIsMenuOpen((open) => !open)}
+          onClick={() => setMenuPath(isMenuOpen ? null : pathname)}
         >
           <span className="site-menu-icon" aria-hidden="true">
             <span />
