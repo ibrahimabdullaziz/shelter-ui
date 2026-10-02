@@ -1,28 +1,23 @@
 import type { BookingStatus } from "../../../types/api";
-import { getBookingStatusLabel, getBookingStatusTone } from "./bookingStatus";
+import { StatusBadge, type StatusBadgeTone } from "../../ui/StatusBadge";
+import { getBookingStatusLabel } from "./bookingStatus";
 
 interface BookingStatusBadgeProps {
   status: BookingStatus;
 }
 
 export function BookingStatusBadge({ status }: BookingStatusBadgeProps) {
-  const tone = getBookingStatusTone(status);
+  const toneByStatus: Record<BookingStatus, StatusBadgeTone> = {
+    PENDING: "warning",
+    CONFIRMED: "positive",
+    REJECTED: "negative",
+    CANCELLED: "negative",
+    COMPLETED: "info",
+  };
 
   return (
-    <span
-      style={{
-        display: "inline-flex",
-        alignItems: "center",
-        minHeight: "26px",
-        padding: "0 9px",
-        borderRadius: "999px",
-        background: tone.background,
-        color: tone.color,
-        fontSize: "12px",
-        fontWeight: 700,
-      }}
-    >
+    <StatusBadge tone={toneByStatus[status]}>
       {getBookingStatusLabel(status)}
-    </span>
+    </StatusBadge>
   );
 }

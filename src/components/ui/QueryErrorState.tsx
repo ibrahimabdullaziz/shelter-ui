@@ -1,4 +1,5 @@
 import { getApiErrorMessage } from "../../lib/getApiErrorMessage";
+import { Button } from "./Button";
 
 interface QueryErrorStateProps {
   error: unknown;
@@ -7,11 +8,11 @@ interface QueryErrorStateProps {
 
 export function QueryErrorState({ error, onRetry }: QueryErrorStateProps) {
   return (
-    <div role="alert">
+    <div className="ui-feedback ui-feedback--error" role="alert">
       <p>{getApiErrorMessage(error)}</p>
-      <button type="button" onClick={onRetry}>
+      <Button type="button" variant="secondary" size="small" onClick={onRetry}>
         Retry
-      </button>
+      </Button>
     </div>
   );
 }

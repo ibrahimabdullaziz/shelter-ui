@@ -1,4 +1,5 @@
 import { useId } from "react";
+import { Button } from "../../ui/Button";
 import { BookingDateField } from "./BookingDateField";
 import { BookingPriceSummary } from "./BookingPriceSummary";
 import { useBookingForm } from "./useBookingForm";
@@ -78,26 +79,13 @@ export function BookingWidget({
           />
         )}
 
-        <button
+        <Button
           type="submit"
+          variant="primary"
           disabled={!bookingForm.validRange || bookingForm.isPending}
-          style={{
-            minHeight: "42px",
-            padding: "0 16px",
-            border: 0,
-            borderRadius: "4px",
-            background: "#1f594c",
-            color: "#fff",
-            cursor:
-              bookingForm.validRange && !bookingForm.isPending
-                ? "pointer"
-                : "not-allowed",
-            opacity:
-              bookingForm.validRange && !bookingForm.isPending ? 1 : 0.65,
-          }}
         >
           {bookingForm.isPending ? "Submitting..." : "Request booking"}
-        </button>
+        </Button>
 
         {bookingForm.isError && (
           <p role="alert" style={{ color: "#a43129" }}>

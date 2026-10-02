@@ -1,5 +1,6 @@
 import { getApiErrorMessage } from "../../../lib/getApiErrorMessage";
 import type { Booking } from "../../../types/api";
+import { Button } from "../../ui/Button";
 import type { BookingActor, BookingAction } from "./bookingStatus";
 import { useBookingActions } from "./useBookingActions";
 
@@ -8,10 +9,10 @@ interface BookingActionsProps {
   actor: BookingActor;
 }
 
-const actionLabels: Record<BookingAction, string> = {
-  cancel: "Cancel booking",
-  confirm: "Confirm",
-  reject: "Reject",
+const actionConfig: Record<BookingAction, { label: string; variant: "primary" | "danger" }> = {
+  cancel: { label: "Cancel booking", variant: "danger" },
+  confirm: { label: "Confirm", variant: "primary" },
+  reject: { label: "Reject", variant: "danger" },
 };
 
 export function BookingActions({ booking, actor }: BookingActionsProps) {
@@ -24,39 +25,27 @@ export function BookingActions({ booking, actor }: BookingActionsProps) {
 
   return (
     <div
-      style={{
-        display: "flex",
-        flexWrap: "wrap",
-        gap: "8px",
-        marginTop: "16px",
-      }}
+      className="booking-actions"
     >
       {isPending && <p role="status">Updating booking...</p>}
       {availableActions.map((action) => {
-        const label = actionLabels[action];
+        const { label, variant } = actionConfig[action];
 
         return (
-          <button
+          <Button
             key={action}
             type="button"
+            variant={variant}
+            size="small"
             disabled={isPending || !availableActions.includes(action)}
             onClick={() => runAction(action)}
-            style={{
-              minHeight: "38px",
-              padding: "0 12px",
-              border: "1px solid #b9c9c2",
-              borderRadius: "4px",
-              background: "#fff",
-              color: "#173b34",
-              cursor: isPending ? "wait" : "pointer",
-            }}
           >
             {label}
-          </button>
+          </Button>
         );
       })}
       {error != null && (
-        <p role="alert" style={{ flexBasis: "100%", color: "#a43129" }}>
+        <p className="ui-feedback ui-feedback--error" role="alert">
           {getApiErrorMessage(error)}
         </p>
       )}

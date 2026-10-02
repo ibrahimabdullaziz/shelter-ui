@@ -14,36 +14,13 @@ export function EmptyState({
   action,
 }: EmptyStateProps) {
   return (
-    <div
-      role="status"
-      style={{
-        display: "grid",
-        justifyItems: "start",
-        gap: "10px",
-        padding: "22px 0",
-        color: "#536760",
-      }}
-    >
-      <span
-        aria-hidden="true"
-        style={{
-          display: "grid",
-          width: "42px",
-          height: "42px",
-          placeItems: "center",
-          borderRadius: "50%",
-          background: "#e6eee9",
-          color: "#1f594c",
-          fontSize: "22px",
-        }}
-      >
+    <div className="ui-empty-state" role="status">
+      <span className="ui-empty-state-icon" aria-hidden="true">
         {icon}
       </span>
       <div>
-        <p style={{ margin: "0 0 4px", color: "#173b34", fontWeight: 700 }}>
-          {title}
-        </p>
-        <p style={{ margin: 0, lineHeight: 1.5 }}>{description}</p>
+        <p className="ui-empty-state-title">{title}</p>
+        <p className="ui-empty-state-description">{description}</p>
       </div>
       {action}
     </div>

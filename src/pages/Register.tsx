@@ -3,6 +3,7 @@ import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { Link, Navigate, useNavigate } from "react-router-dom";
 import { AuthFormLayout } from "../components/auth/AuthFormLayout";
+import { Button } from "../components/ui/Button";
 import { useRegisterMutation } from "../hooks/useAuthQueries";
 import { getApiErrorMessage } from "../lib/getApiErrorMessage";
 import {
@@ -122,13 +123,15 @@ export default function Register() {
           )}
         </label>
 
-        <button
+        <Button
           className="auth-submit"
           type="submit"
+          variant="primary"
+          size="large"
           disabled={mutation.isPending}
         >
           {mutation.isPending ? "Creating account..." : "Create account"}
-        </button>
+        </Button>
       </form>
 
       <p className="auth-switch">

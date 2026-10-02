@@ -3,6 +3,7 @@ import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { Link, Navigate, useLocation, useNavigate } from "react-router-dom";
 import { AuthFormLayout } from "../components/auth/AuthFormLayout";
+import { Button } from "../components/ui/Button";
 import { getApiErrorMessage } from "../lib/getApiErrorMessage";
 import {
   loginSchema,
@@ -92,13 +93,15 @@ export default function Login() {
           )}
         </label>
 
-        <button
+        <Button
           className="auth-submit"
           type="submit"
+          variant="primary"
+          size="large"
           disabled={mutation.isPending}
         >
           {mutation.isPending ? "Signing in..." : "Log in"}
-        </button>
+        </Button>
       </form>
 
       <p className="auth-switch">
