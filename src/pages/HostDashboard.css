@@ -32,6 +32,9 @@
 }
 
 .host-marketplace-link {
+  display: inline-flex;
+  min-height: 44px;
+  align-items: center;
   color: var(--color-primary);
   font-size: 13px;
   font-weight: 700;
@@ -55,6 +58,9 @@
 }
 
 .host-nav-link {
+  display: flex;
+  min-height: 44px;
+  align-items: center;
   padding: 12px 14px;
   border-left: 3px solid transparent;
   color: var(--color-muted);
@@ -301,7 +307,7 @@
 }
 
 .host-primary-button {
-  min-height: 40px;
+  min-height: 44px;
   padding: 0 14px;
   border: 0;
   border-radius: var(--radius-control);
@@ -355,7 +361,7 @@
 .host-form-field select,
 .host-form-field textarea {
   width: 100%;
-  min-height: 42px;
+  min-height: 44px;
   padding: 9px 10px;
   border: 1px solid var(--color-border-strong);
   border-radius: var(--radius-control);
@@ -540,6 +546,17 @@
     border-bottom-color: var(--color-accent);
   }
 
+  .host-unit-actions .ui-button,
+  .host-unit-form-heading .ui-button,
+  .host-unit-form-actions .ui-button,
+  .unit-photo-toggle,
+  .unit-photo-panel > .ui-button,
+  .unit-photo-item .ui-button,
+  .host-empty-state .ui-button,
+  .host-booking-actions .ui-button--small {
+    min-height: 44px;
+  }
+
   .host-content {
     padding: 28px 0 48px;
   }
@@ -583,6 +600,15 @@
   .host-unit-controls {
     align-items: flex-start;
     flex-direction: column;
+  }
+
+  .host-unit-actions .ui-button,
+  .host-unit-form-heading .ui-button,
+  .unit-photo-toggle,
+  .unit-photo-item .ui-button,
+  .host-empty-state .ui-button,
+  .host-booking-actions .ui-button--small {
+    min-height: 44px;
   }
 
   .host-unit-form-grid {

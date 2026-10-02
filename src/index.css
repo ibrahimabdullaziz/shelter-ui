@@ -15,10 +15,10 @@
 
   --color-ink: #192c29;
   --color-text: #344a45;
-  --color-muted: #647872;
+  --color-muted: #596d66;
   --color-primary: #1d5c50;
   --color-primary-hover: #16483f;
-  --color-accent: #c66b49;
+  --color-accent: #9e4d33;
   --color-accent-soft: #f8ece6;
   --color-canvas: #f3f6f3;
   --color-surface: #ffffff;
@@ -121,7 +121,7 @@ textarea {
 
 .ui-button {
   display: inline-flex;
-  min-height: 40px;
+  min-height: 44px;
   align-items: center;
   justify-content: center;
   gap: var(--space-2);
