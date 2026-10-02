@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Button } from "../../ui/Button";
 
 interface GalleryProps {
   images?: string[];
@@ -16,13 +17,12 @@ export function Gallery({
       if (event.defaultPrevented) return;
 
       const target = event.target;
-      if (target instanceof HTMLElement) {
-        const isWithinGallery =
-          target.closest('[aria-label="Photo gallery"]') !== null;
-        const isInteractive = target.closest(
-          'input, textarea, select, button, a, [contenteditable="true"]',
-        );
-        if (isInteractive && !isWithinGallery) return;
+      if (
+        images.length === 0 ||
+        !(target instanceof HTMLElement) ||
+        !target.closest('[aria-label="Photo gallery"]')
+      ) {
+        return;
       }
 
       if (event.key === "ArrowRight") {
@@ -44,14 +44,9 @@ export function Gallery({
   if (!images.length) {
     return (
       <div
-        style={{
-          height: "220px",
-          background: "#edf3f1",
-          borderRadius: "12px",
-          display: "grid",
-          placeItems: "center",
-          color: "#355045",
-        }}
+        className="unit-gallery-empty"
+        role="img"
+        aria-label="No photos available"
       >
         No photos available
       </div>
@@ -66,114 +61,68 @@ export function Gallery({
     setActiveIndex((current) => (current + 1) % images.length);
 
   return (
-    <div
-      role="region"
-      aria-label="Photo gallery"
-      style={{ display: "grid", gap: "12px" }}
-    >
-      <div
-        style={{
-          position: "relative",
-          borderRadius: "12px",
-          overflow: "hidden",
-          border: "1px solid #dfe6e3",
-          background: "#edf3f1",
-        }}
-      >
+    <div className="unit-gallery" role="region" aria-label="Photo gallery">
+      <div className="unit-gallery-stage">
         <img
+          key={`${activeIndex}-${activeImage}`}
+          className="unit-gallery-image"
           src={activeImage}
           alt={alt}
-          style={{
-            display: "block",
-            width: "100%",
-            height: "320px",
-            objectFit: "cover",
-          }}
+          decoding="async"
         />
 
-        <button
-          type="button"
-          aria-label="Previous image"
-          onClick={showPrevious}
-          style={{
-            position: "absolute",
-            left: "12px",
-            top: "50%",
-            transform: "translateY(-50%)",
-            background: "#173b34",
-            color: "#fff",
-            border: "none",
-            borderRadius: "999px",
-            width: "36px",
-            height: "36px",
-            fontSize: "20px",
-            cursor: "pointer",
-          }}
-        >
-          ←
-        </button>
-
-        <button
-          type="button"
-          aria-label="Next image"
-          onClick={showNext}
-          style={{
-            position: "absolute",
-            right: "12px",
-            top: "50%",
-            transform: "translateY(-50%)",
-            background: "#173b34",
-            color: "#fff",
-            border: "none",
-            borderRadius: "999px",
-            width: "36px",
-            height: "36px",
-            fontSize: "20px",
-            cursor: "pointer",
-          }}
-        >
-          →
-        </button>
+        {images.length > 1 && (
+          <>
+            <Button
+              className="unit-gallery-control unit-gallery-control--previous"
+              variant="secondary"
+              type="button"
+              aria-label="Previous image"
+              onClick={showPrevious}
+            >
+              <span aria-hidden="true">←</span>
+            </Button>
+            <Button
+              className="unit-gallery-control unit-gallery-control--next"
+              variant="secondary"
+              type="button"
+              aria-label="Next image"
+              onClick={showNext}
+            >
+              <span aria-hidden="true">→</span>
+            </Button>
+            <span className="unit-gallery-count" aria-live="polite">
+              {activeIndex + 1} / {images.length}
+            </span>
+          </>
+        )}
       </div>
 
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(auto-fit, minmax(68px, 1fr))",
-          gap: "8px",
-        }}
-      >
-        {images.map((image, index) => (
-          <button
-            key={`${image}-${index}`}
-            type="button"
-            aria-label={`View image ${index + 1}`}
-            onClick={() => setActiveIndex(index)}
-            style={{
-              border:
-                index === activeIndex
-                  ? "2px solid #1f594c"
-                  : "1px solid #dfe6e3",
-              borderRadius: "10px",
-              overflow: "hidden",
-              padding: 0,
-              background: "transparent",
-              cursor: "pointer",
-            }}
-          >
-            <img
-              src={image}
-              alt={`${alt} ${index + 1}`}
-              style={{
-                display: "block",
-                width: "100%",
-                height: "68px",
-                objectFit: "cover",
-              }}
-            />
-          </button>
-        ))}
-      </div>
+      {images.length > 1 && (
+        <div
+          className="unit-gallery-thumbnails"
+          aria-label="Gallery thumbnails"
+        >
+          {images.map((image, index) => (
+            <button
+              key={`${image}-${index}`}
+              className={`unit-gallery-thumbnail${index === activeIndex ? " is-active" : ""}`}
+              type="button"
+              aria-label={`View image ${index + 1}`}
+              aria-pressed={index === activeIndex}
+              onClick={() => setActiveIndex(index)}
+            >
+              <img
+                src={image}
+                alt=""
+                aria-hidden="true"
+                loading="lazy"
+                decoding="async"
+              />
+            </button>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

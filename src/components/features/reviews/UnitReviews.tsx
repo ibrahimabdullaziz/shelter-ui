@@ -16,52 +16,34 @@ export function UnitReviews({ unitId }: UnitReviewsProps) {
   });
 
   return (
-    <section aria-labelledby="unit-reviews-title" style={{ marginTop: "28px" }}>
-      <h2
-        id="unit-reviews-title"
-        style={{ margin: "0 0 16px", color: "#173b34" }}
-      >
-        Reviews
-      </h2>
+    <section className="unit-reviews" aria-labelledby="unit-reviews-title">
+      <h2 id="unit-reviews-title">Reviews</h2>
 
       {isLoading ? (
         <p role="status">Loading reviews...</p>
       ) : isError ? (
         <QueryErrorState error={error} onRetry={() => void refetch()} />
       ) : !data?.reviews.length ? (
-        <p>No reviews yet.</p>
+        <p className="unit-reviews-empty">No reviews yet.</p>
       ) : (
         <>
           {typeof data.avgRating?._avg?.rating === "number" && (
-            <p style={{ margin: "0 0 16px", color: "#536760" }}>
-              Average rating: {data.avgRating._avg.rating.toFixed(1)} / 5
+            <p className="unit-reviews-average">
+              <strong>{data.avgRating._avg.rating.toFixed(1)}</strong>
+              <span>Average rating · / 5</span>
             </p>
           )}
 
-          <ul
-            style={{
-              display: "grid",
-              gap: "16px",
-              margin: 0,
-              padding: 0,
-              listStyle: "none",
-            }}
-          >
+          <ul className="unit-review-list">
             {data.reviews.map((review) => (
-              <li
-                key={review.id}
-                style={{
-                  padding: "16px 0",
-                  borderTop: "1px solid #dfe6e3",
-                }}
-              >
-                <p style={{ margin: "0 0 6px", color: "#173b34" }}>
+              <li className="unit-review" key={review.id}>
+                <p className="unit-review-rating">
                   <strong>Rating:</strong> {review.rating} / 5
                 </p>
-                <p style={{ margin: "0 0 6px", color: "#536760" }}>
+                <p className="unit-review-author">
                   <strong>Guest ID:</strong> {review.guestId}
                 </p>
-                <p style={{ margin: 0, color: "#536760", lineHeight: 1.6 }}>
+                <p className="unit-review-comment">
                   {review.comment || "No comment provided."}
                 </p>
               </li>

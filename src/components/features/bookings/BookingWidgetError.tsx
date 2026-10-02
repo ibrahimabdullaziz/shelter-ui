@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { Button } from "../../ui/Button";
 
 interface BookingWidgetErrorProps {
   onRetry: () => void;
@@ -6,25 +7,15 @@ interface BookingWidgetErrorProps {
 
 export function BookingWidgetError({ onRetry }: BookingWidgetErrorProps) {
   return (
-    <section
-      role="alert"
-      style={{
-        marginTop: "24px",
-        padding: "20px",
-        border: "1px solid #f1d6d1",
-        borderRadius: "8px",
-        background: "#fff5f4",
-        color: "#7a2b25",
-      }}
-    >
-      <h2 style={{ margin: "0 0 8px" }}>Booking is unavailable</h2>
-      <p style={{ margin: "0 0 12px" }}>
+    <section className="booking-widget-error" role="alert">
+      <h2>Booking is unavailable</h2>
+      <p>
         This booking section encountered a problem. The rest of the listing is
         still available.
       </p>
-      <button type="button" onClick={onRetry}>
+      <Button type="button" variant="secondary" onClick={onRetry}>
         Retry
-      </button>{" "}
+      </Button>{" "}
       <Link to="/bookings">View your bookings</Link>
     </section>
   );

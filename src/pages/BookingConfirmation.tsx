@@ -4,6 +4,7 @@ import { listMyBookings } from "../api/bookings";
 import { useUnitQuery } from "../hooks/useUnitsQuery";
 import { calculateBookingPrice } from "../components/features/bookings/bookingDateUtils";
 import { QueryErrorState } from "../components/ui/QueryErrorState";
+import { BookingStatusBadge } from "../components/features/bookings/BookingStatusBadge";
 import { bookingKeys } from "../queries/bookingKeys";
 import type { Booking } from "../types/api";
 
@@ -121,11 +122,17 @@ export default function BookingConfirmationPage() {
     (isUnitLoading ? "Loading unit..." : `Unit ${booking.unitId}`);
 
   return (
-    <main className="route-state">
-      <section aria-labelledby="booking-confirmation-title">
+    <main className="unit-confirmation-page">
+      <section
+        className="unit-confirmation-card ui-surface"
+        aria-labelledby="booking-confirmation-title"
+      >
         <h1 id="booking-confirmation-title">Booking confirmation</h1>
-        <p>Your booking is currently {booking.status.toLowerCase()}.</p>
-        <dl>
+        <p className="unit-confirmation-status">
+          <span>Booking status</span>
+          <BookingStatusBadge status={booking.status} />
+        </p>
+        <dl className="unit-confirmation-facts">
           <div>
             <dt>Unit</dt>
             <dd>

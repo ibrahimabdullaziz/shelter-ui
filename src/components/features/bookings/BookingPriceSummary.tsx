@@ -8,8 +8,11 @@ export function BookingPriceSummary({
   total,
 }: BookingPriceSummaryProps) {
   return (
-    <p style={{ margin: "16px 0", color: "#1f594c" }}>
-      {nights} {nights === 1 ? "night" : "nights"} · Estimated total: {total}
-    </p>
+    <div className="booking-price-summary">
+      <span>
+        {nights} {nights === 1 ? "night" : "nights"}
+      </span>
+      <strong>Estimated total: {total}</strong>
+    </div>
   );
 }

@@ -20,7 +20,7 @@ export function BookingDateField({
   onChange,
 }: BookingDateFieldProps) {
   return (
-    <label style={{ display: "grid", gap: "6px", color: "#34443f" }}>
+    <label className="booking-date-field">
       <span>{label}</span>
       <input
         type="date"
@@ -33,7 +33,7 @@ export function BookingDateField({
         aria-describedby={error ? errorId : undefined}
       />
       {error && (
-        <span id={errorId} role="alert" style={{ color: "#a43129" }}>
+        <span className="booking-date-error" id={errorId} role="alert">
           {error}
         </span>
       )}

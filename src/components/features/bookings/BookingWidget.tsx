@@ -1,5 +1,6 @@
 import { useId } from "react";
 import { Button } from "../../ui/Button";
+import { formatCurrency } from "./bookingDateUtils";
 import { BookingDateField } from "./BookingDateField";
 import { BookingPriceSummary } from "./BookingPriceSummary";
 import { useBookingForm } from "./useBookingForm";
@@ -22,28 +23,15 @@ export function BookingWidget({
   const bookingForm = useBookingForm({ unitId, pricePerNight, currencyCode });
 
   return (
-    <section
-      aria-labelledby={titleId}
-      style={{
-        marginTop: "24px",
-        padding: "20px",
-        border: "1px solid #dfe6e3",
-        borderRadius: "8px",
-        background: "#fff",
-      }}
-    >
-      <h2 id={titleId} style={{ margin: "0 0 16px", color: "#173b34" }}>
-        Choose your dates
-      </h2>
+    <section className="booking-panel ui-surface" aria-labelledby={titleId}>
+      <h2 id={titleId}>Choose your dates</h2>
+      <p className="booking-panel-rate">
+        <strong>{formatCurrency(pricePerNight, currencyCode)}</strong>
+        <span>per night</span>
+      </p>
 
       <form onSubmit={bookingForm.handleSubmit}>
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
-            gap: "16px",
-          }}
-        >
+        <div className="booking-date-grid">
           <BookingDateField
             label="Check-in"
             value={bookingForm.checkIn}
@@ -67,7 +55,10 @@ export function BookingWidget({
         </div>
 
         {bookingForm.priceError && (
-          <p role="alert" style={{ color: "#a43129" }}>
+          <p
+            className="ui-feedback ui-feedback--error booking-form-error"
+            role="alert"
+          >
             {bookingForm.priceError}
           </p>
         )}
@@ -80,6 +71,7 @@ export function BookingWidget({
         )}
 
         <Button
+          className="booking-submit"
           type="submit"
           variant="primary"
           disabled={!bookingForm.validRange || bookingForm.isPending}
@@ -88,7 +80,10 @@ export function BookingWidget({
         </Button>
 
         {bookingForm.isError && (
-          <p role="alert" style={{ color: "#a43129" }}>
+          <p
+            className="ui-feedback ui-feedback--error booking-form-error"
+            role="alert"
+          >
             {bookingForm.errorMessage}
           </p>
         )}
