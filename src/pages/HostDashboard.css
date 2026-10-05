@@ -24,7 +24,7 @@
 
 .host-kicker {
   margin: 0;
-  color: var(--color-accent);
+  color: var(--color-primary);
   font-size: 11px;
   font-weight: 700;
   letter-spacing: 1px;
@@ -39,6 +39,13 @@
   font-size: 13px;
   font-weight: 700;
   text-underline-offset: 3px;
+  text-decoration: none;
+  transition: color var(--motion-fast);
+}
+
+.host-marketplace-link:hover {
+  color: var(--color-primary-hover);
+  text-decoration: underline;
 }
 
 .host-layout {
@@ -63,21 +70,23 @@
   align-items: center;
   padding: 12px 14px;
   border-left: 3px solid transparent;
+  border-radius: 0 var(--radius-control) var(--radius-control) 0;
   color: var(--color-muted);
   font-size: 14px;
   font-weight: 600;
   text-decoration: none;
+  transition: all var(--motion-fast);
 }
 
 .host-nav-link:hover {
-  background: var(--color-surface-muted);
+  background: rgba(255, 255, 255, 0.04);
   color: var(--color-ink);
 }
 
 .host-nav-link.is-active {
-  border-left-color: var(--color-accent);
-  background: var(--color-surface);
-  color: var(--color-ink);
+  border-left-color: var(--color-primary);
+  background: rgba(212, 165, 116, 0.08);
+  color: var(--color-primary);
 }
 
 .host-content {

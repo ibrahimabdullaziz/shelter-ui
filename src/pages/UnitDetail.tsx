@@ -1,5 +1,6 @@
 import { Link, useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
+import { motion } from "motion/react";
 import { listCategories, listCities, listCurrencies } from "../api/catalog";
 import { ErrorBoundary } from "../components/errors/ErrorBoundary";
 import { BookingWidgetError } from "../components/features/bookings/BookingWidgetError";
@@ -7,6 +8,10 @@ import { BookingWidget } from "../components/features/bookings/BookingWidget";
 import { UnitReviews } from "../components/features/reviews/UnitReviews";
 import { Gallery } from "../components/features/units/Gallery";
 import { QueryErrorState } from "../components/ui/QueryErrorState";
+import { PageTransition } from "../components/ui/PageTransition";
+import { Modal } from "../components/ui/Modal";
+import { Button } from "../components/ui/Button";
+import { useState } from "react";
 import { formatCurrency } from "../components/features/bookings/bookingDateUtils";
 import { useUnitQuery } from "../hooks/useUnitsQuery";
 import { catalogKeys } from "../queries/catalogKeys";
@@ -81,81 +86,120 @@ export default function UnitDetailPage() {
   )?.code;
   const formatPrice = (amount: number) => formatCurrency(amount, currencyCode);
 
-  return (
-    <main className="unit-detail-page">
-      <Link className="unit-detail-back" to="/units">
-        <span aria-hidden="true">←</span> Back to stays
-      </Link>
-      {catalogError && (
-        <QueryErrorState error={catalogError} onRetry={retryCatalogQueries} />
-      )}
+  const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
 
-      <div className="unit-detail-layout">
-        <div className="unit-detail-content">
-          <Gallery
-            alt={unit.title}
-            images={unit.photos?.map((photo) => photo.url) ?? []}
-          />
-          <section className="unit-summary" aria-labelledby="unit-title">
-            <p className="unit-summary-meta">
-              {cityName ??
-                (citiesError ? "City unavailable" : "Loading city...")}
-              <span aria-hidden="true">·</span>
-              {categoryName ??
-                (categoriesError
-                  ? "Category unavailable"
-                  : "Loading category...")}
-            </p>
-            <h1 id="unit-title">{unit.title}</h1>
-            <dl className="unit-facts">
-              <div>
-                <dt>Location</dt>
-                <dd>
-                  {cityName ?? (citiesError ? "Unavailable" : "Loading...")}
-                </dd>
+  return (
+    <PageTransition>
+      <main className="unit-detail-page">
+        <Link className="unit-detail-back" to="/units">
+          <span aria-hidden="true">←</span> Back to stays
+        </Link>
+        {catalogError && (
+          <QueryErrorState error={catalogError} onRetry={retryCatalogQueries} />
+        )}
+
+        <div className="unit-detail-layout-immersive">
+          <motion.div
+            className="unit-detail-content"
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4, ease: "easeOut" }}
+          >
+            <Gallery
+              alt={unit.title}
+              images={unit.photos?.map((photo) => photo.url) ?? []}
+            />
+            <section className="unit-summary" aria-labelledby="unit-title">
+              <div className="unit-summary-header">
+                <div>
+                  <p className="unit-summary-meta">
+                    {cityName ??
+                      (citiesError ? "City unavailable" : "Loading city...")}
+                    <span aria-hidden="true">·</span>
+                    {categoryName ??
+                      (categoriesError
+                        ? "Category unavailable"
+                        : "Loading category...")}
+                  </p>
+                  <h1 id="unit-title">{unit.title}</h1>
+                </div>
+                <div className="unit-summary-price-badge">
+                  <strong>{formatPrice(unit.pricePerNight)}</strong>
+                  <span>/ night</span>
+                </div>
               </div>
-              <div>
-                <dt>Type</dt>
-                <dd>
-                  {categoryName ??
-                    (categoriesError ? "Unavailable" : "Loading...")}
-                </dd>
-              </div>
-              <div>
-                <dt>Guests</dt>
-                <dd>Up to {unit.maxGuests}</dd>
-              </div>
-              <div>
-                <dt>Price per night</dt>
-                <dd>{formatPrice(unit.pricePerNight)}</dd>
-              </div>
-            </dl>
-            <section
-              className="unit-description"
-              aria-labelledby="unit-about-title"
-            >
-              <h2 id="unit-about-title">About this stay</h2>
-              <p>{unit.description}</p>
+              
+              <dl className="unit-facts">
+                <div>
+                  <dt>Location</dt>
+                  <dd>
+                    {cityName ?? (citiesError ? "Unavailable" : "Loading...")}
+                  </dd>
+                </div>
+                <div>
+                  <dt>Type</dt>
+                  <dd>
+                    {categoryName ??
+                      (categoriesError ? "Unavailable" : "Loading...")}
+                  </dd>
+                </div>
+                <div>
+                  <dt>Guests</dt>
+                  <dd>Up to {unit.maxGuests}</dd>
+                </div>
+              </dl>
+              <section
+                className="unit-description"
+                aria-labelledby="unit-about-title"
+              >
+                <h2 id="unit-about-title">About this stay</h2>
+                <p>{unit.description}</p>
+              </section>
             </section>
-          </section>
+          </motion.div>
+        </div>
+        <UnitReviews unitId={unit.id} />
+
+        {/* Floating Action Bar */}
+        <div className="unit-action-bar">
+          <div className="unit-action-bar-inner">
+            <div className="unit-action-bar-price">
+              <strong>{formatPrice(unit.pricePerNight)}</strong>
+              <span>/ night</span>
+            </div>
+            <Button
+              variant="primary"
+              size="large"
+              onClick={() => setIsBookingModalOpen(true)}
+            >
+              Book this stay
+            </Button>
+          </div>
         </div>
 
-        <aside className="unit-detail-sidebar" aria-label="Booking">
-          <ErrorBoundary
-            resetKeys={[unit.id]}
-            fallback={({ resetErrorBoundary }) => (
-              <BookingWidgetError onRetry={resetErrorBoundary} />
-            )}
-          >
-            <BookingWidget
-              unitId={unit.id}
-              pricePerNight={unit.pricePerNight}
-              currencyCode={currencyCode}
-            />
-          </ErrorBoundary>
-        </aside>
-      </div>
-      <UnitReviews unitId={unit.id} />
-    </main>
+        {/* Booking Modal */}
+        <Modal
+          isOpen={isBookingModalOpen}
+          onClose={() => setIsBookingModalOpen(false)}
+          size="default"
+          label="Book this stay"
+        >
+          <div className="unit-booking-modal-content">
+            <ErrorBoundary
+              resetKeys={[unit.id]}
+              fallback={({ resetErrorBoundary }) => (
+                <BookingWidgetError onRetry={resetErrorBoundary} />
+              )}
+            >
+              <BookingWidget
+                unitId={unit.id}
+                pricePerNight={unit.pricePerNight}
+                currencyCode={currencyCode}
+              />
+            </ErrorBoundary>
+          </div>
+        </Modal>
+      </main>
+    </PageTransition>
   );
 }

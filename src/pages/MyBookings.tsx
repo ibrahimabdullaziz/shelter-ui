@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
+import { PageTransition } from "../components/ui/PageTransition";
 import { listCurrencies } from "../api/catalog";
 import { listHostBookings, listMyBookings } from "../api/bookings";
 import { BookingActions } from "../components/features/bookings/BookingActions";
@@ -124,7 +125,8 @@ export default function MyBookingsPage() {
   const currencies = currenciesQuery.data ?? [];
 
   return (
-    <main className="booking-list-page">
+    <PageTransition>
+      <main className="booking-list-page">
       <header className="booking-list-heading">
         <p className="booking-list-eyebrow">YOUR TRIPS</p>
         <h1>Bookings</h1>
@@ -216,5 +218,6 @@ export default function MyBookingsPage() {
         </section>
       )}
     </main>
+    </PageTransition>
   );
 }

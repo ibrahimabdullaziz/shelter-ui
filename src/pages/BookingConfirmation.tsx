@@ -8,6 +8,7 @@ import {
   formatBookingDate,
 } from "../components/features/bookings/bookingDateUtils";
 import { QueryErrorState } from "../components/ui/QueryErrorState";
+import { PageTransition } from "../components/ui/PageTransition";
 import { BookingStatusBadge } from "../components/features/bookings/BookingStatusBadge";
 import { bookingKeys } from "../queries/bookingKeys";
 import { catalogKeys } from "../queries/catalogKeys";
@@ -137,7 +138,8 @@ export default function BookingConfirmationPage() {
     (isUnitLoading ? "Loading unit..." : `Unit ${booking.unitId}`);
 
   return (
-    <main className="unit-confirmation-page">
+    <PageTransition>
+      <main className="unit-confirmation-page">
       <section
         className="unit-confirmation-card ui-surface"
         aria-labelledby="booking-confirmation-title"
@@ -191,6 +193,7 @@ export default function BookingConfirmationPage() {
         )}
         <Link to={`/units/${booking.unitId}`}>Return to the listing</Link>
       </section>
-    </main>
+      </main>
+    </PageTransition>
   );
 }

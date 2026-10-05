@@ -1,3 +1,4 @@
+import { AnimatePresence } from "motion/react";
 import { Outlet, useLocation } from "react-router-dom";
 import { Footer } from "./components/layout/Footer";
 import { Navbar } from "./components/layout/Navbar";
@@ -12,7 +13,8 @@ const authPaths = new Set([
 ]);
 
 function App() {
-  const { pathname } = useLocation();
+  const location = useLocation();
+  const { pathname } = location;
   const isAuthPage = authPaths.has(pathname);
 
   if (isAuthPage) return <Outlet />;
@@ -21,7 +23,9 @@ function App() {
     <div className="site-shell">
       <Navbar />
       <div className="site-content">
-        <Outlet />
+        <AnimatePresence mode="wait" initial={false}>
+          <Outlet key={pathname} />
+        </AnimatePresence>
       </div>
       <Footer />
     </div>

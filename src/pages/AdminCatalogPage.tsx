@@ -12,6 +12,7 @@ import {
 } from "../api/catalog";
 import { Button } from "../components/ui/Button";
 import { QueryErrorState } from "../components/ui/QueryErrorState";
+import { PageTransition } from "../components/ui/PageTransition";
 import { getApiErrorMessage } from "../lib/getApiErrorMessage";
 import { catalogKeys } from "../queries/catalogKeys";
 
@@ -136,7 +137,8 @@ export default function AdminCatalogPage() {
   };
 
   return (
-    <main className="admin-catalog-page">
+    <PageTransition>
+      <main className="admin-catalog-page">
       <header className="admin-catalog-heading">
         <p className="host-kicker">ADMINISTRATION</p>
         <h1>Catalogs</h1>
@@ -282,7 +284,8 @@ export default function AdminCatalogPage() {
           />
         </CatalogForm>
       </div>
-    </main>
+      </main>
+    </PageTransition>
   );
 }
 

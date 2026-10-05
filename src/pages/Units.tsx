@@ -1,11 +1,14 @@
 import { useCallback, useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
+import { motion } from "motion/react";
 import { listCategories, listCities, listCurrencies } from "../api/catalog";
 import { UnitCard } from "../components/features/units/UnitCard";
 import { UnitCardSkeleton } from "../components/features/units/UnitCardSkeleton";
+import { HeroSection } from "../components/features/units/HeroSection";
 import { Button } from "../components/ui/Button";
 import { EmptyState } from "../components/ui/EmptyState";
+import { PageTransition } from "../components/ui/PageTransition";
 import { QueryErrorState } from "../components/ui/QueryErrorState";
 import { useDebounce } from "../hooks/useDebounce";
 import { useUnitsQuery } from "../hooks/useUnitsQuery";
@@ -152,209 +155,229 @@ export default function UnitsPage() {
   };
 
   return (
-    <main className="discovery-page">
-      <header className="discovery-heading">
-        <div>
-          <p className="discovery-eyebrow">SHELTER / STAYS</p>
-          <h1>Find your next place</h1>
-          <p>Thoughtful stays for the time you want to spend away.</p>
-        </div>
-        <p className="discovery-result-count" aria-live="polite">
-          {isLoading
-            ? "Loading stays..."
-            : isFetching
-              ? "Updating stays..."
-              : `${units.length} ${units.length === 1 ? "stay" : "stays"} on this page`}
-        </p>
-      </header>
+    <PageTransition>
+      <main className="discovery-page">
+        {/* Hero section — shown on page 1 without active filters */}
+        {safePage === 1 && !hasActiveFilters && <HeroSection />}
 
-      {catalogError && (
-        <QueryErrorState error={catalogError} onRetry={retryCatalogQueries} />
-      )}
-
-      <section className="discovery-filter-panel" aria-label="Filter stays">
-        <div className="discovery-filter-grid">
-          <label className="discovery-field">
-            <span>City</span>
-            <select
-              value={cityId}
-              onChange={(event) => updateParam("cityId", event.target.value)}
-            >
-              <option value="">All cities</option>
-              {cities.map((city) => (
-                <option key={city.id} value={city.id}>
-                  {city.name}
-                </option>
-              ))}
-            </select>
-          </label>
-
-          <label className="discovery-field">
-            <span>Category</span>
-            <select
-              value={categoryId}
-              onChange={(event) =>
-                updateParam("categoryId", event.target.value)
-              }
-            >
-              <option value="">All categories</option>
-              {categories.map((category) => (
-                <option key={category.id} value={category.id}>
-                  {category.name}
-                </option>
-              ))}
-            </select>
-          </label>
-
-          <label className="discovery-field">
-            <span>Minimum price</span>
-            <input
-              type="number"
-              min="0"
-              step="0.01"
-              value={minPriceInput}
-              onChange={(event) => setMinPriceInput(event.target.value)}
-              placeholder="0"
-            />
-          </label>
-
-          <label className="discovery-field">
-            <span>Maximum price</span>
-            <input
-              type="number"
-              min="0"
-              step="0.01"
-              value={maxPriceInput}
-              onChange={(event) => setMaxPriceInput(event.target.value)}
-              placeholder="500"
-            />
-          </label>
+        <div id="listings" className="discovery-section-header">
+          <header className="discovery-heading">
+            <div>
+              <p className="discovery-eyebrow">SHELTER / STAYS</p>
+              <h1>Find your next place</h1>
+              <p>Thoughtful stays for the time you want to spend away.</p>
+            </div>
+            <p className="discovery-result-count" aria-live="polite">
+              {isLoading
+                ? "Loading stays..."
+                : isFetching
+                  ? "Updating stays..."
+                  : `${units.length} ${units.length === 1 ? "stay" : "stays"} on this page`}
+            </p>
+          </header>
         </div>
 
-        {hasActiveFilters && (
-          <div className="discovery-active-filters" aria-label="Active filters">
-            {cityId && (
-              <button
-                className="filter-chip"
-                type="button"
-                aria-label={`Remove city filter: ${cityNameMap.get(cityId) ?? cityId}`}
-                onClick={() => updateParam("cityId", "")}
-              >
-                {cityNameMap.get(cityId) ?? "City"}{" "}
-                <span aria-hidden="true">×</span>
-              </button>
-            )}
-            {categoryId && (
-              <button
-                className="filter-chip"
-                type="button"
-                aria-label={`Remove category filter: ${categoryNameMap.get(categoryId) ?? categoryId}`}
-                onClick={() => updateParam("categoryId", "")}
-              >
-                {categoryNameMap.get(categoryId) ?? "Category"}{" "}
-                <span aria-hidden="true">×</span>
-              </button>
-            )}
-            {minPrice && (
-              <button
-                className="filter-chip"
-                type="button"
-                aria-label={`Remove minimum price filter: ${minPrice}`}
-                onClick={() => {
-                  setMinPriceInput("");
-                  updateParam("minPrice", "");
-                }}
-              >
-                From {minPrice} <span aria-hidden="true">×</span>
-              </button>
-            )}
-            {maxPrice && (
-              <button
-                className="filter-chip"
-                type="button"
-                aria-label={`Remove maximum price filter: ${maxPrice}`}
-                onClick={() => {
-                  setMaxPriceInput("");
-                  updateParam("maxPrice", "");
-                }}
-              >
-                Up to {maxPrice} <span aria-hidden="true">×</span>
-              </button>
-            )}
-            <Button
-              type="button"
-              variant="quiet"
-              size="small"
-              onClick={clearFilters}
-            >
-              Clear all
-            </Button>
-          </div>
+        {catalogError && (
+          <QueryErrorState error={catalogError} onRetry={retryCatalogQueries} />
         )}
-      </section>
 
-      {error ? (
-        <QueryErrorState error={error} onRetry={() => void refetch()} />
-      ) : isLoading ? (
-        <section className="discovery-grid" aria-label="Loading stay results">
-          {Array.from({ length: 6 }).map((_, index) => (
-            <UnitCardSkeleton key={index} />
-          ))}
-        </section>
-      ) : !units.length ? (
-        <EmptyState
-          icon="⌕"
-          title="No units found"
-          description="No stays match your current filters. Try changing them."
-          action={
-            hasActiveFilters ? (
-              <Button type="button" variant="secondary" onClick={clearFilters}>
-                Clear filters
-              </Button>
-            ) : undefined
-          }
-        />
-      ) : (
-        <>
-          <section className="discovery-grid" aria-label="Stay results">
-            {units.map((unit) => (
-              <UnitCard
-                key={unit.id}
-                unit={unit}
-                cityName={cityNameMap.get(unit.cityId) ?? unit.cityId}
-                categoryName={
-                  categoryNameMap.get(unit.categoryId) ?? unit.categoryId
+        <section className="discovery-filter-panel" aria-label="Filter stays">
+          <div className="discovery-filter-grid">
+            <label className="discovery-field">
+              <span>City</span>
+              <select
+                value={cityId}
+                onChange={(event) => updateParam("cityId", event.target.value)}
+              >
+                <option value="">All cities</option>
+                {cities.map((city) => (
+                  <option key={city.id} value={city.id}>
+                    {city.name}
+                  </option>
+                ))}
+              </select>
+            </label>
+
+            <label className="discovery-field">
+              <span>Category</span>
+              <select
+                value={categoryId}
+                onChange={(event) =>
+                  updateParam("categoryId", event.target.value)
                 }
-                currencyCode={currencyCodeMap.get(unit.currencyId)}
+              >
+                <option value="">All categories</option>
+                {categories.map((category) => (
+                  <option key={category.id} value={category.id}>
+                    {category.name}
+                  </option>
+                ))}
+              </select>
+            </label>
+
+            <label className="discovery-field">
+              <span>Minimum price</span>
+              <input
+                type="number"
+                min="0"
+                step="0.01"
+                value={minPriceInput}
+                onChange={(event) => setMinPriceInput(event.target.value)}
+                placeholder="0"
               />
+            </label>
+
+            <label className="discovery-field">
+              <span>Maximum price</span>
+              <input
+                type="number"
+                min="0"
+                step="0.01"
+                value={maxPriceInput}
+                onChange={(event) => setMaxPriceInput(event.target.value)}
+                placeholder="500"
+              />
+            </label>
+          </div>
+
+          {hasActiveFilters && (
+            <div className="discovery-active-filters" aria-label="Active filters">
+              {cityId && (
+                <button
+                  className="filter-chip"
+                  type="button"
+                  aria-label={`Remove city filter: ${cityNameMap.get(cityId) ?? cityId}`}
+                  onClick={() => updateParam("cityId", "")}
+                >
+                  {cityNameMap.get(cityId) ?? "City"}{" "}
+                  <span aria-hidden="true">×</span>
+                </button>
+              )}
+              {categoryId && (
+                <button
+                  className="filter-chip"
+                  type="button"
+                  aria-label={`Remove category filter: ${categoryNameMap.get(categoryId) ?? categoryId}`}
+                  onClick={() => updateParam("categoryId", "")}
+                >
+                  {categoryNameMap.get(categoryId) ?? "Category"}{" "}
+                  <span aria-hidden="true">×</span>
+                </button>
+              )}
+              {minPrice && (
+                <button
+                  className="filter-chip"
+                  type="button"
+                  aria-label={`Remove minimum price filter: ${minPrice}`}
+                  onClick={() => {
+                    setMinPriceInput("");
+                    updateParam("minPrice", "");
+                  }}
+                >
+                  From {minPrice} <span aria-hidden="true">×</span>
+                </button>
+              )}
+              {maxPrice && (
+                <button
+                  className="filter-chip"
+                  type="button"
+                  aria-label={`Remove maximum price filter: ${maxPrice}`}
+                  onClick={() => {
+                    setMaxPriceInput("");
+                    updateParam("maxPrice", "");
+                  }}
+                >
+                  Up to {maxPrice} <span aria-hidden="true">×</span>
+                </button>
+              )}
+              <Button
+                type="button"
+                variant="quiet"
+                size="small"
+                onClick={clearFilters}
+              >
+                Clear all
+              </Button>
+            </div>
+          )}
+        </section>
+
+        {error ? (
+          <QueryErrorState error={error} onRetry={() => void refetch()} />
+        ) : isLoading ? (
+          <section className="discovery-grid" aria-label="Loading stay results">
+            {Array.from({ length: 6 }).map((_, index) => (
+              <UnitCardSkeleton key={index} />
             ))}
           </section>
-
-          <nav className="discovery-pagination" aria-label="Unit result pages">
-            <Button
-              variant="secondary"
-              size="small"
-              type="button"
-              onClick={() => handlePageChange(safePage - 1)}
-              disabled={safePage === 1 || isFetching}
+        ) : !units.length ? (
+          <EmptyState
+            icon="⌕"
+            title="No units found"
+            description="No stays match your current filters. Try changing them."
+            action={
+              hasActiveFilters ? (
+                <Button type="button" variant="secondary" onClick={clearFilters}>
+                  Clear filters
+                </Button>
+              ) : undefined
+            }
+          />
+        ) : (
+          <>
+            <motion.section
+              className="discovery-grid"
+              aria-label="Stay results"
             >
-              Previous
-            </Button>
+              {units.map((unit, index) => (
+                <motion.div
+                  key={unit.id}
+                  initial={{ opacity: 0, y: 24 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{
+                    duration: 0.4,
+                    delay: index * 0.055,
+                    ease: "easeOut",
+                  }}
+                >
+                  <UnitCard
+                    unit={unit}
+                    cityName={cityNameMap.get(unit.cityId) ?? unit.cityId}
+                    categoryName={
+                      categoryNameMap.get(unit.categoryId) ?? unit.categoryId
+                    }
+                    currencyCode={currencyCodeMap.get(unit.currencyId)}
+                  />
+                </motion.div>
+              ))}
+            </motion.section>
 
-            <span aria-current="page">Page {safePage}</span>
+            <nav className="discovery-pagination" aria-label="Unit result pages">
+              <Button
+                variant="secondary"
+                size="small"
+                type="button"
+                onClick={() => handlePageChange(safePage - 1)}
+                disabled={safePage === 1 || isFetching}
+              >
+                Previous
+              </Button>
 
-            <Button
-              variant="secondary"
-              size="small"
-              type="button"
-              onClick={() => handlePageChange(safePage + 1)}
-              disabled={isFetching || units.length < PAGE_SIZE}
-            >
-              Next
-            </Button>
-          </nav>
-        </>
-      )}
-    </main>
+              <span aria-current="page">Page {safePage}</span>
+
+              <Button
+                variant="secondary"
+                size="small"
+                type="button"
+                onClick={() => handlePageChange(safePage + 1)}
+                disabled={isFetching || units.length < PAGE_SIZE}
+              >
+                Next
+              </Button>
+            </nav>
+          </>
+        )}
+      </main>
+    </PageTransition>
   );
 }

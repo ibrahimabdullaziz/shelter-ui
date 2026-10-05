@@ -1,5 +1,6 @@
 import { useQueries, useQuery } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
+import { PageTransition } from "../components/ui/PageTransition";
 import { listCategories, listCities, listCurrencies } from "../api/catalog";
 import { UnitCard } from "../components/features/units/UnitCard";
 import { EmptyState } from "../components/ui/EmptyState";
@@ -60,7 +61,8 @@ export default function FavoritesPage() {
   };
 
   return (
-    <main className="favorites-page">
+    <PageTransition>
+      <main className="favorites-page">
       <header className="favorites-heading">
         <div>
           <p className="booking-list-eyebrow">YOUR SHORTLIST</p>
@@ -113,5 +115,6 @@ export default function FavoritesPage() {
         </div>
       )}
     </main>
+    </PageTransition>
   );
 }

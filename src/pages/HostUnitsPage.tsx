@@ -10,6 +10,7 @@ import {
 import { Button } from "../components/ui/Button";
 import { EmptyState } from "../components/ui/EmptyState";
 import { QueryErrorState } from "../components/ui/QueryErrorState";
+import { Modal } from "../components/ui/Modal";
 import { StatusBadge } from "../components/ui/StatusBadge";
 import { useHostUnitMutations } from "../hooks/useHostUnitMutations";
 import { getApiErrorMessage } from "../lib/getApiErrorMessage";
@@ -126,25 +127,32 @@ export default function HostUnitsPage() {
           )}
         </div>
       </div>
-      {(isCreating || editingUnit) && (
-        <HostUnitForm
-          key={editingUnit?.id ?? "new-unit"}
-          unit={editingUnit ?? undefined}
-          cities={cities}
-          categories={categories}
-          currencies={currencies}
-          catalogsLoading={catalogsLoading}
-          catalogsReady={catalogsReady}
-          catalogsHaveError={catalogsHaveError}
-          isPending={
-            unitMutations.create.isPending || unitMutations.update.isPending
-          }
-          error={unitMutations.create.error ?? unitMutations.update.error}
-          onRetryCatalogs={retryCatalogQueries}
-          onSubmit={handleSubmit}
-          onCancel={closeEditor}
-        />
-      )}
+      <Modal
+        isOpen={isCreating || editingUnit !== null}
+        onClose={closeEditor}
+        size="large"
+        label={editingUnit ? "Edit Unit" : "Add Unit"}
+      >
+        <div style={{ padding: "24px" }}>
+          <HostUnitForm
+            key={editingUnit?.id ?? "new-unit"}
+            unit={editingUnit ?? undefined}
+            cities={cities}
+            categories={categories}
+            currencies={currencies}
+            catalogsLoading={catalogsLoading}
+            catalogsReady={catalogsReady}
+            catalogsHaveError={catalogsHaveError}
+            isPending={
+              unitMutations.create.isPending || unitMutations.update.isPending
+            }
+            error={unitMutations.create.error ?? unitMutations.update.error}
+            onRetryCatalogs={retryCatalogQueries}
+            onSubmit={handleSubmit}
+            onCancel={closeEditor}
+          />
+        </div>
+      </Modal>
       {operationError != null && (
         <p className="host-operation-error" role="alert">
           {getApiErrorMessage(operationError)}
