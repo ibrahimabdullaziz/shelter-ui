@@ -224,17 +224,37 @@
 
 .unit-photo-upload {
   position: relative;
-  padding-bottom: 14px;
 }
 
 .unit-photo-panel {
   display: grid;
   gap: 12px;
-  margin-top: 12px;
-  padding: 16px;
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-panel);
-  background: rgba(255, 255, 255, 0.025);
+  padding: 12px 8px 8px;
+}
+
+.unit-photo-heading {
+  display: grid;
+  gap: 6px;
+  padding: 0 36px 14px 0;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.unit-photo-heading .host-kicker,
+.unit-photo-heading h2,
+.unit-photo-heading > p:last-child {
+  margin: 0;
+}
+
+.unit-photo-heading h2 {
+  color: var(--color-ink);
+  font-family: var(--font-display);
+  font-size: 25px;
+  font-weight: 400;
+}
+
+.unit-photo-heading > p:last-child {
+  color: var(--color-muted);
+  font-size: 13px;
 }
 
 .unit-photo-picker {

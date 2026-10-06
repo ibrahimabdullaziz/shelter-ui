@@ -4,6 +4,7 @@ import {
   useCurrentUserQuery,
   useLogoutMutation,
 } from "../../hooks/useAuthQueries";
+import { useFavoriteUnitIds } from "../../hooks/useFavorites";
 import { useAuthStore } from "../../store/authStore";
 
 export function Navbar() {
@@ -20,6 +21,8 @@ export function Navbar() {
   const canAccessBookings = user?.role === "GUEST" || user?.role === "HOST";
   const canUseFavorites = user?.role === "GUEST";
   const isAdmin = user?.role === "ADMIN";
+  const favoritesQuery = useFavoriteUnitIds(isAuthenticated && canUseFavorites);
+  const favoriteCount = favoritesQuery.data?.length ?? 0;
 
   useEffect(() => {
     if (!isMenuOpen) return;
@@ -93,8 +96,14 @@ export function Navbar() {
                 }
                 to="/favorites"
                 onClick={closeMenu}
+                aria-label={`Favorites${favoriteCount ? `, ${favoriteCount} saved` : ""}`}
               >
                 Favorites
+                {favoriteCount > 0 && (
+                  <span className="site-favorites-count" aria-hidden="true">
+                    {favoriteCount}
+                  </span>
+                )}
               </NavLink>
             )}
             {isAuthenticated && canHost && (

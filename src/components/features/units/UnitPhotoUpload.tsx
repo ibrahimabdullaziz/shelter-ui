@@ -1,6 +1,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState, type ChangeEvent } from "react";
 import { deleteUnitPhoto } from "../../../api/units";
+import { Modal } from "../../ui/Modal";
 import { Button } from "../../ui/Button";
 import { getApiErrorMessage } from "../../../lib/getApiErrorMessage";
 import { unitKeys } from "../../../queries/unitKeys";
@@ -75,8 +76,18 @@ export function UnitPhotoUpload({
           : `Manage photos${photos.length ? ` (${photos.length})` : ""}`}
       </Button>
 
-      {isOpen && (
+      <Modal
+        isOpen={isOpen}
+        onClose={() => setIsOpen(false)}
+        size="large"
+        label="Manage unit photos"
+      >
         <section className="unit-photo-panel" aria-label="Unit photos">
+          <header className="unit-photo-heading">
+            <p className="host-kicker">LISTING PHOTOS</p>
+            <h2>Manage photos</h2>
+            <p>Choose clear photos to show guests what this stay offers.</p>
+          </header>
           <div className="unit-photo-picker">
             <input
               id={`unit-photo-input-${unitId}`}
@@ -195,7 +206,7 @@ export function UnitPhotoUpload({
             </div>
           )}
         </section>
-      )}
+      </Modal>
     </div>
   );
 }
