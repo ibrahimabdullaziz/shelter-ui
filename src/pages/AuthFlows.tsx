@@ -1,7 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
 import { useForm, type UseFormRegisterReturn } from "react-hook-form";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { forgotPassword, resetPassword, verifyEmail } from "../api/auth";
 import { AuthFormLayout } from "../components/auth/AuthFormLayout";
 import { Button } from "../components/ui/Button";
@@ -87,13 +87,18 @@ function AuthMutationFeedback({
 }
 
 export function VerifyEmailPage() {
+  const location = useLocation();
   const mutation = useMutation({ mutationFn: verifyEmail });
+  const locationState = location.state as { email?: unknown } | null;
+  const email =
+    typeof locationState?.email === "string" ? locationState.email : "";
   const {
     register,
     handleSubmit,
     formState: { errors },
   } = useForm<VerifyEmailFormValues>({
     resolver: zodResolver(verifyEmailSchema),
+    defaultValues: { email },
   });
   const onSubmit = handleSubmit((values) => mutation.mutate(values));
 

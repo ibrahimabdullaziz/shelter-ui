@@ -28,7 +28,7 @@ export default function Login() {
   } = useForm<LoginFormValues>({ resolver: zodResolver(loginSchema) });
 
   const redirectTo =
-    (location.state as RedirectState | null)?.from?.pathname ?? "/account";
+    (location.state as RedirectState | null)?.from?.pathname ?? "/";
 
   useEffect(() => {
     if (authStatus === "authenticated") {
@@ -37,7 +37,7 @@ export default function Login() {
   }, [authStatus, navigate, redirectTo]);
 
   if (authStatus === "authenticated") {
-    return <main aria-busy="true">Opening your account...</main>;
+    return <main aria-busy="true">Returning to Shelter...</main>;
   }
 
   if (authStatus === "forbidden") {

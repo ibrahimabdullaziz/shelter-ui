@@ -43,7 +43,6 @@ export const router = createBrowserRouter([
       {
         element: <ProtectedRoute />,
         children: [
-          { path: "account", element: <p>Account page</p> },
           { path: "favorites", element: <FavoritesPage /> },
           {
             element: <ProtectedRoute allowedRoles={["GUEST"]} />,

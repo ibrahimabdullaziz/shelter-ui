@@ -19,25 +19,32 @@ export default function Register() {
   const {
     register,
     handleSubmit,
-    getValues,
     formState: { errors },
   } = useForm<RegisterFormValues>({ resolver: zodResolver(registerSchema) });
 
   useEffect(() => {
     if (authStatus === "authenticated") {
-      navigate("/account", { replace: true });
+      navigate("/", { replace: true });
     }
   }, [authStatus, navigate]);
 
   if (authStatus === "authenticated") {
-    return <main aria-busy="true">Opening your account...</main>;
+    return <main aria-busy="true">Returning to Shelter...</main>;
   }
 
   if (authStatus === "forbidden") {
     return <Navigate to="/403" replace />;
   }
 
-  const onSubmit = handleSubmit((values) => mutation.mutate(values));
+  const onSubmit = handleSubmit((values) =>
+    mutation.mutate(values, {
+      onSuccess: () =>
+        navigate("/verify-email", {
+          replace: true,
+          state: { email: values.email },
+        }),
+    }),
+  );
 
   return (
     <AuthFormLayout
@@ -51,15 +58,6 @@ export default function Register() {
             {getApiErrorMessage(mutation.error)}
           </p>
         )}
-        {mutation.isSuccess && (
-          <p className="auth-feedback-success" role="status">
-            {mutation.data.message}{" "}
-            <Link to="/verify-email" state={{ email: getValues("email") }}>
-              Enter your verification code
-            </Link>
-          </p>
-        )}
-
         <div className="form-row">
           <label className="form-field">
             <span>First name</span>

@@ -12,7 +12,7 @@ The key design choice is that a token alone does not mean “authenticated.” T
 ## User-facing authentication flows
 
 - Sign in and registration remain available at `/login` and `/register`.
-- Email verification is available at `/verify-email`. The user provides the email address and six-digit code; the route does not change the existing registration redirect or enforce verification as a sign-in gate.
+- Successful registration opens `/verify-email` with the submitted email prefilled. Users can also open the route directly and enter their email and six-digit code; verification is not enforced as a sign-in gate.
 - Password recovery starts at `/forgot-password`, which requests a reset code. The user enters the email, code, and new password at `/reset-password`.
 - Forms display field validation, pending, API error, and success feedback. A successful password reset returns the user to sign in; verification also links back to sign in.
 - Verification and recovery use the API operations in the OpenAPI contract. Eligibility and delivery details remain server-owned; the UI does not infer them.
