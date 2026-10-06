@@ -1377,7 +1377,6 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
-  animation: unit-gallery-enter 200ms ease both;
 }
 
 .unit-gallery-control {
@@ -1479,18 +1478,6 @@
 
 .unit-gallery-thumbnail:hover {
   opacity: 0.9;
-}
-
-@keyframes unit-gallery-enter {
-  from {
-    opacity: 0.7;
-    transform: scale(1.015);
-  }
-
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
 }
 
 /* ─────────────────────────────────────────────
@@ -1890,7 +1877,9 @@
    REVIEWS
 ───────────────────────────────────────────── */
 .unit-reviews {
+  width: min(100%, 960px);
   margin-top: 48px;
+  margin-inline: auto;
   padding-top: 28px;
   border-top: 1px solid var(--color-border);
 }
@@ -2234,18 +2223,47 @@
 ───────────────────────────────────────────── */
 .discovery-pagination {
   display: flex;
+  width: fit-content;
   align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  margin-top: 36px;
-  padding-top: 20px;
-  border-top: 1px solid var(--color-border);
+  justify-content: center;
+  gap: 16px;
+  margin: 36px auto 0;
+  padding: 8px;
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.03);
 }
 
 .discovery-pagination > span {
+  display: flex;
+  min-width: 56px;
+  flex-direction: column;
+  align-items: center;
+  color: var(--color-ink);
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1.1;
+}
+
+.discovery-pagination-label {
+  margin-bottom: 3px;
   color: var(--color-muted);
-  font-size: 13px;
-  font-weight: 600;
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 1.2px;
+}
+
+.discovery-pagination .discovery-pagination-arrow {
+  width: 40px;
+  min-height: 40px;
+  padding: 0;
+  border-radius: 50%;
+  font-size: 18px;
+  line-height: 1;
+}
+
+.discovery-pagination .discovery-pagination-arrow:disabled {
+  opacity: 0.35;
 }
 
 /* ─────────────────────────────────────────────

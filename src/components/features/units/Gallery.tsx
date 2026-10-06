@@ -21,29 +21,39 @@ export function Gallery({
       if (event.defaultPrevented) return;
 
       const target = event.target;
+      if (images.length === 0 || !(target instanceof HTMLElement)) return;
       if (
-        images.length === 0 ||
-        !(target instanceof HTMLElement) ||
-        !target.closest('[aria-label="Photo gallery"]')
+        target.isContentEditable ||
+        target.closest("input, textarea, select, [contenteditable='true']")
       ) {
         return;
       }
 
       if (event.key === "ArrowRight") {
         event.preventDefault();
-        setActiveIndex((current) => (current + 1) % images.length);
+        if (lightboxOpen) {
+          setLightboxIndex((current) => (current + 1) % images.length);
+        } else {
+          setActiveIndex((current) => (current + 1) % images.length);
+        }
       }
       if (event.key === "ArrowLeft") {
         event.preventDefault();
-        setActiveIndex(
-          (current) => (current - 1 + images.length) % images.length,
-        );
+        if (lightboxOpen) {
+          setLightboxIndex(
+            (current) => (current - 1 + images.length) % images.length,
+          );
+        } else {
+          setActiveIndex(
+            (current) => (current - 1 + images.length) % images.length,
+          );
+        }
       }
     };
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [images.length]);
+  }, [images.length, lightboxOpen]);
 
   const openLightbox = (index: number) => {
     setLightboxIndex(index);
@@ -82,19 +92,13 @@ export function Gallery({
           onClick={() => openLightbox(activeIndex)}
           title="Click to view fullscreen"
         >
-          <AnimatePresence mode="wait" initial={false}>
-            <motion.img
-              key={`${activeIndex}-${activeImage}`}
-              className="unit-gallery-image"
-              src={activeImage}
-              alt={alt}
-              decoding="async"
-              initial={{ opacity: 0, scale: 1.02 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.22 }}
-            />
-          </AnimatePresence>
+          <img
+            key={`${activeIndex}-${activeImage}`}
+            className="unit-gallery-image"
+            src={activeImage}
+            alt={alt}
+            decoding="async"
+          />
 
           {images.length > 1 && (
             <>

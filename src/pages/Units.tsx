@@ -356,25 +356,32 @@ export default function UnitsPage() {
 
             <nav className="discovery-pagination" aria-label="Unit result pages">
               <Button
+                className="discovery-pagination-arrow"
                 variant="secondary"
                 size="small"
                 type="button"
+                aria-label="Previous page"
                 onClick={() => handlePageChange(safePage - 1)}
                 disabled={safePage === 1 || isFetching}
               >
-                Previous
+                <span aria-hidden="true">←</span>
               </Button>
 
-              <span aria-current="page">Page {safePage}</span>
+              <span aria-current="page">
+                <span className="discovery-pagination-label">PAGE</span>
+                {safePage}
+              </span>
 
               <Button
+                className="discovery-pagination-arrow"
                 variant="secondary"
                 size="small"
                 type="button"
+                aria-label="Next page"
                 onClick={() => handlePageChange(safePage + 1)}
                 disabled={isFetching || units.length < PAGE_SIZE}
               >
-                Next
+                <span aria-hidden="true">→</span>
               </Button>
             </nav>
           </>

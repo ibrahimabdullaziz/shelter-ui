@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { useLocation, useOutlet } from "react-router-dom";
 import { Footer } from "./components/layout/Footer";
 import { Navbar } from "./components/layout/Navbar";
@@ -16,6 +17,10 @@ function App() {
   const { pathname } = location;
   const outlet = useOutlet();
   const isAuthPage = authPaths.has(pathname);
+
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+  }, [pathname]);
 
   const routeContent = (
       <div
