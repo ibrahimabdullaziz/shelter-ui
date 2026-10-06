@@ -372,15 +372,15 @@ function UnitRow({
             >
               Delete
             </Button>
-            <UnitPhotoUpload
-              unitId={unit.id}
-              photos={uploadedPhotos}
-              onPhotoUploaded={onPhotoUploaded}
-              onPhotoDeleted={onPhotoDeleted}
-            />
           </div>
         </div>
       </div>
+      <UnitPhotoUpload
+        unitId={unit.id}
+        photos={uploadedPhotos}
+        onPhotoUploaded={onPhotoUploaded}
+        onPhotoDeleted={onPhotoDeleted}
+      />
     </div>
   );
 }

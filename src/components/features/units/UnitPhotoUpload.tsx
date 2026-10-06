@@ -77,16 +77,24 @@ export function UnitPhotoUpload({
 
       {isOpen && (
         <section className="unit-photo-panel" aria-label="Unit photos">
-          <label className="host-form-field">
-            Select photos
+          <div className="unit-photo-picker">
             <input
+              id={`unit-photo-input-${unitId}`}
+              className="unit-photo-input"
               type="file"
               accept="image/jpeg,image/png,image/webp"
               multiple
               disabled={isUploading || deletePhotoMutation.isPending}
               onChange={handleSelection}
             />
-          </label>
+            <label
+              className="unit-photo-select-button"
+              htmlFor={`unit-photo-input-${unitId}`}
+            >
+              <span aria-hidden="true">＋</span>
+              Choose photos
+            </label>
+          </div>
           <p className="unit-photo-help">
             JPEG, PNG, or WebP · up to 5 MB per image
           </p>
