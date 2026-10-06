@@ -1673,6 +1673,16 @@
   margin-top: 12px;
 }
 
+.booking-availability-notice {
+  background: var(--color-warning-soft);
+  color: var(--color-warning);
+  line-height: 1.55;
+}
+
+.booking-availability-notice strong {
+  color: var(--color-text);
+}
+
 .booking-widget-error {
   padding: 20px;
   border: 1px solid rgba(248, 113, 113, 0.2);
@@ -2115,6 +2125,17 @@
   margin: 14px 0 22px;
   color: var(--color-muted);
   font-size: 13px;
+}
+
+.booking-confirmation-message {
+  margin: 14px 0 0;
+  padding: 12px 14px;
+  border-left: 3px solid var(--color-warning);
+  border-radius: 0 var(--radius-control) var(--radius-control) 0;
+  background: var(--color-warning-soft);
+  color: var(--color-text);
+  font-size: 13px;
+  line-height: 1.55;
 }
 
 .unit-confirmation-facts {

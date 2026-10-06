@@ -81,10 +81,27 @@ export function BookingWidget({
 
         {bookingForm.isError && (
           <p
-            className="ui-feedback ui-feedback--error booking-form-error"
+            className={`ui-feedback booking-form-error ${
+              bookingForm.unavailableDates
+                ? "booking-availability-notice"
+                : "ui-feedback--error"
+            }`}
             role="alert"
           >
-            {bookingForm.errorMessage}
+            {bookingForm.unavailableDates ? (
+              <>
+                <strong>
+                  {bookingForm.unavailableDateRange
+                    ? `${bookingForm.unavailableDateRange} is unavailable.`
+                    : "These dates are unavailable."}
+                </strong>{" "}
+                The listing doesn’t provide upcoming available dates. Please
+                contact the host to ask when the stay is free, then choose
+                another date range.
+              </>
+            ) : (
+              bookingForm.errorMessage
+            )}
           </p>
         )}
       </form>

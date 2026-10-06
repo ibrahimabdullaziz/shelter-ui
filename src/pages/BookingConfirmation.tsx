@@ -6,6 +6,7 @@ import { useUnitQuery } from "../hooks/useUnitsQuery";
 import {
   calculateBookingPrice,
   formatBookingDate,
+  parseDateOnlyUtc,
 } from "../components/features/bookings/bookingDateUtils";
 import { QueryErrorState } from "../components/ui/QueryErrorState";
 import { PageTransition } from "../components/ui/PageTransition";
@@ -37,36 +38,75 @@ function formatBookingTotal(
   }
 }
 
-function isValidBooking(value: unknown, expectedId?: string): value is Booking {
-  if (!value || typeof value !== "object") return false;
+function normalizeBookingDate(value: unknown): string | undefined {
+  if (typeof value !== "string") return undefined;
+  const dateOnly = value.slice(0, 10);
+  if (!/^\d{4}-\d{2}-\d{2}(?:$|T)/.test(value)) return undefined;
+  if (value.length > 10 && !Number.isFinite(Date.parse(value))) {
+    return undefined;
+  }
+  return parseDateOnlyUtc(dateOnly) === null ? undefined : dateOnly;
+}
+
+function getValidBooking(
+  value: unknown,
+  expectedId?: string,
+): Booking | undefined {
+  if (!value || typeof value !== "object") return undefined;
 
   const booking = value as Partial<Booking>;
-  const nights =
-    typeof booking.checkIn === "string" && typeof booking.checkOut === "string"
-      ? calculateBookingPrice(booking.checkIn, booking.checkOut, 1).nights
-      : 0;
-  const totalPrice = Number(booking.totalPrice);
+  if (
+    !expectedId ||
+    booking.id !== expectedId ||
+    typeof booking.unitId !== "string" ||
+    !booking.unitId ||
+    typeof booking.guestId !== "string" ||
+    !booking.guestId
+  ) {
+    return undefined;
+  }
 
-  return Boolean(
-    expectedId &&
-    booking.id === expectedId &&
-    typeof booking.unitId === "string" &&
-    booking.unitId &&
-    typeof booking.guestId === "string" &&
-    typeof booking.status === "string" &&
-    nights > 0 &&
-    Number.isFinite(totalPrice) &&
-    totalPrice >= 0,
-  );
+  if (
+    booking.status !== "PENDING" &&
+    booking.status !== "CONFIRMED" &&
+    booking.status !== "REJECTED" &&
+    booking.status !== "CANCELLED" &&
+    booking.status !== "COMPLETED"
+  ) {
+    return undefined;
+  }
+
+  const checkIn = normalizeBookingDate(booking.checkIn);
+  const checkOut = normalizeBookingDate(booking.checkOut);
+  if (!checkIn || !checkOut) return undefined;
+  const nights = calculateBookingPrice(checkIn, checkOut, 1).nights;
+  const totalPrice = Number(booking.totalPrice);
+  if (
+    nights <= 0 ||
+    !Number.isFinite(totalPrice) ||
+    totalPrice < 0 ||
+    (typeof booking.totalPrice !== "number" &&
+      typeof booking.totalPrice !== "string")
+  ) {
+    return undefined;
+  }
+
+  return {
+    id: booking.id,
+    unitId: booking.unitId,
+    guestId: booking.guestId,
+    checkIn,
+    checkOut,
+    totalPrice: booking.totalPrice,
+    status: booking.status,
+  };
 }
 
 export default function BookingConfirmationPage() {
   const { id } = useParams();
   const location = useLocation();
   const state = location.state as BookingConfirmationState | null;
-  const bookingFromState = isValidBooking(state?.booking, id)
-    ? state?.booking
-    : undefined;
+  const bookingFromState = getValidBooking(state?.booking, id);
 
   const bookingsQuery = useQuery({
     queryKey: bookingKeys.mine(),
@@ -75,9 +115,9 @@ export default function BookingConfirmationPage() {
     retry: false,
   });
 
-  const bookingFromApi = bookingsQuery.data?.find((item) =>
-    isValidBooking(item, id),
-  );
+  const bookingFromApi = bookingsQuery.data
+    ?.map((item) => getValidBooking(item, id))
+    .find((item) => item !== undefined);
   const booking = bookingFromState ?? bookingFromApi;
   const {
     data: unit,
@@ -145,6 +185,12 @@ export default function BookingConfirmationPage() {
         aria-labelledby="booking-confirmation-title"
       >
         <h1 id="booking-confirmation-title">Booking confirmation</h1>
+        {booking.status === "PENDING" && (
+          <p className="booking-confirmation-message" role="status">
+            Your request has been sent to the host. You’ll see an update here
+            after they review it.
+          </p>
+        )}
         <p className="unit-confirmation-status">
           <span>Booking status</span>
           <BookingStatusBadge status={booking.status} />

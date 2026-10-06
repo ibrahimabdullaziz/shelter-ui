@@ -7,6 +7,7 @@ import type { CreateBookingPayload } from "../../../types/api";
 import { bookingKeys } from "../../../queries/bookingKeys";
 import {
   calculateBookingPrice,
+  formatBookingDate,
   formatCurrency,
   getBookingDateErrors,
   getLocalDateToday,
@@ -66,6 +67,12 @@ export function useBookingForm({
     checkOut,
     pricePerNight,
   );
+  const errorMessage = bookingMutation.isError
+    ? getApiErrorMessage(bookingMutation.error)
+    : "";
+  const unavailableDates =
+    bookingMutation.isError &&
+    /not available for these dates/i.test(errorMessage);
 
   const handleCheckInChange = (nextCheckIn: string) => {
     const nextCheckInTime = parseDateOnlyUtc(nextCheckIn);
@@ -123,9 +130,12 @@ export function useBookingForm({
     formattedTotal: formatCurrency(totalPrice, currencyCode),
     isPending: bookingMutation.isPending,
     isError: bookingMutation.isError,
-    errorMessage: bookingMutation.isError
-      ? getApiErrorMessage(bookingMutation.error)
-      : "",
+    errorMessage,
+    unavailableDates,
+    unavailableDateRange:
+      unavailableDates && checkIn && checkOut
+        ? `${formatBookingDate(checkIn)} – ${formatBookingDate(checkOut)}`
+        : "",
     refreshToday,
     handleCheckInChange,
     handleCheckOutChange,
