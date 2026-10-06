@@ -111,14 +111,23 @@ export default function BookingConfirmationPage() {
   const bookingsQuery = useQuery({
     queryKey: bookingKeys.mine(),
     queryFn: listMyBookings,
-    enabled: Boolean(id && !bookingFromState),
+    enabled: Boolean(id),
     retry: false,
+    refetchOnMount: "always",
+    refetchInterval: (query) => {
+      const currentBooking = query.state.data?.find(
+        (item) => item.id === id,
+      );
+      return currentBooking && currentBooking.status !== "PENDING"
+        ? false
+        : 5_000;
+    },
   });
 
   const bookingFromApi = bookingsQuery.data
     ?.map((item) => getValidBooking(item, id))
     .find((item) => item !== undefined);
-  const booking = bookingFromState ?? bookingFromApi;
+  const booking = bookingFromApi ?? bookingFromState;
   const {
     data: unit,
     isLoading: isUnitLoading,
@@ -190,6 +199,23 @@ export default function BookingConfirmationPage() {
             Your request has been sent to the host. You’ll see an update here
             after they review it.
           </p>
+        )}
+        {booking.status === "CONFIRMED" && (
+          <p className="booking-confirmation-message" role="status">
+            The host confirmed your booking.
+          </p>
+        )}
+        {booking.status === "REJECTED" && (
+          <p className="booking-confirmation-message" role="status">
+            The host rejected this booking request. Please contact the host if
+            you need more information.
+          </p>
+        )}
+        {bookingsQuery.isError && (
+          <QueryErrorState
+            error={bookingsQuery.error}
+            onRetry={() => void bookingsQuery.refetch()}
+          />
         )}
         <p className="unit-confirmation-status">
           <span>Booking status</span>

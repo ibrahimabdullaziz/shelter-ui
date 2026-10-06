@@ -26,6 +26,19 @@ export function parseDateOnlyUtc(value: string): number | null {
   return date.getTime();
 }
 
+function getBookingDateOnly(value: string): string | null {
+  const dateOnly = value.slice(0, 10);
+  if (parseDateOnlyUtc(dateOnly) === null) return null;
+  if (value.length === 10) return dateOnly;
+  if (!/^T.+(?:Z|[+-]\d{2}:\d{2})$/.test(value.slice(10))) return null;
+  return Number.isFinite(Date.parse(value)) ? dateOnly : null;
+}
+
+function parseBookingDateUtc(value: string): number | null {
+  const dateOnly = getBookingDateOnly(value);
+  return dateOnly === null ? null : parseDateOnlyUtc(dateOnly);
+}
+
 export function toApiDateOnly(value: string): string | null {
   const timestamp = parseDateOnlyUtc(value);
   return timestamp === null
@@ -34,7 +47,9 @@ export function toApiDateOnly(value: string): string | null {
 }
 
 export function formatBookingDate(value: string): string {
-  const timestamp = parseDateOnlyUtc(value);
+  const dateOnly = getBookingDateOnly(value);
+  const timestamp =
+    dateOnly === null ? null : parseDateOnlyUtc(dateOnly);
   if (timestamp === null) return value;
 
   return new Intl.DateTimeFormat(undefined, {
@@ -63,8 +78,8 @@ export function isDateRangeValid(
   checkOut: string,
   today: string,
 ): boolean {
-  const checkInTime = parseDateOnlyUtc(checkIn);
-  const checkOutTime = parseDateOnlyUtc(checkOut);
+  const checkInTime = parseBookingDateUtc(checkIn);
+  const checkOutTime = parseBookingDateUtc(checkOut);
   const todayTime = parseDateOnlyUtc(today);
 
   return (
@@ -82,8 +97,8 @@ export function getBookingDateErrors(
   today: string,
 ) {
   const todayTime = parseDateOnlyUtc(today);
-  const checkInTime = parseDateOnlyUtc(checkIn);
-  const checkOutTime = parseDateOnlyUtc(checkOut);
+  const checkInTime = parseBookingDateUtc(checkIn);
+  const checkOutTime = parseBookingDateUtc(checkOut);
 
   const checkInError = !checkIn
     ? ""
@@ -115,8 +130,8 @@ export function calculateBookingPrice(
     return { nights: 0, totalPrice: 0 };
   }
 
-  const checkInTime = parseDateOnlyUtc(checkIn);
-  const checkOutTime = parseDateOnlyUtc(checkOut);
+  const checkInTime = parseBookingDateUtc(checkIn);
+  const checkOutTime = parseBookingDateUtc(checkOut);
   if (
     checkInTime === null ||
     checkOutTime === null ||

@@ -193,6 +193,7 @@ export interface Review {
   id: string;
   unitId: string;
   guestId: string;
+  guest?: Pick<User, "firstName" | "lastName"> | null;
   rating: number;
   comment?: string;
 }

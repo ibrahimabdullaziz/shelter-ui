@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { listCurrencies } from "../api/catalog";
 import { listHostBookings } from "../api/bookings";
 import {
+  calculateBookingPrice,
   formatBookingDate,
   formatCurrency,
 } from "../components/features/bookings/bookingDateUtils";
@@ -92,6 +93,11 @@ function BookingRow({
   const unitTitle =
     unit?.title ??
     (isUnitLoading ? "Loading listing..." : "Listing details unavailable");
+  const nights = calculateBookingPrice(
+    booking.checkIn,
+    booking.checkOut,
+    1,
+  ).nights;
 
   return (
     <article className="host-booking-card ui-surface">
@@ -99,7 +105,6 @@ function BookingRow({
         <div>
           <p className="host-booking-label">Guest request</p>
           <h3>{unitTitle}</h3>
-          <p className="host-booking-reference">Booking {booking.id}</p>
         </div>
         <BookingStatusBadge status={booking.status} />
       </div>
@@ -121,6 +126,12 @@ function BookingRow({
             <time dateTime={booking.checkOut}>
               {formatBookingDate(booking.checkOut)}
             </time>
+          </dd>
+        </div>
+        <div>
+          <dt>Length of stay</dt>
+          <dd>
+            {nights} {nights === 1 ? "night" : "nights"}
           </dd>
         </div>
         <div>

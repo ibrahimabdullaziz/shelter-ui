@@ -21,6 +21,22 @@ interface UnitReviewsProps {
   unitId: string;
 }
 
+function getReviewerName(
+  firstName: unknown,
+  lastName: unknown,
+): string | undefined {
+  const parts = [firstName, lastName]
+    .filter(
+      (name): name is string =>
+        typeof name === "string" &&
+        name.trim() !== "" &&
+        name.trim().toLowerCase() !== "undefined" &&
+        name.trim().toLowerCase() !== "null",
+    )
+    .map((name) => name.trim());
+  return parts.length ? parts.join(" ") : undefined;
+}
+
 export function UnitReviews({ unitId }: UnitReviewsProps) {
   const location = useLocation();
   const queryClient = useQueryClient();
@@ -29,6 +45,10 @@ export function UnitReviews({ unitId }: UnitReviewsProps) {
     currentUserQuery.data?.role === "GUEST"
       ? currentUserQuery.data.id
       : undefined;
+  const currentUserName = getReviewerName(
+    currentUserQuery.data?.firstName,
+    currentUserQuery.data?.lastName,
+  );
   const bookingsQuery = useQuery({
     queryKey: bookingKeys.mine(),
     queryFn: listMyBookings,
@@ -128,8 +148,14 @@ export function UnitReviews({ unitId }: UnitReviewsProps) {
                 <strong>{review.rating} / 5</strong>
               </div>
               <p className="unit-review-author">
-                <span>Guest ID</span>
-                <code>{review.guestId}</code>
+                <span>
+                  {getReviewerName(
+                    review.guest?.firstName,
+                    review.guest?.lastName,
+                  ) ??
+                    (guestId === review.guestId ? currentUserName : undefined) ??
+                    "Guest"}
+                </span>
               </p>
               <p className="unit-review-comment">
                 {review.comment || "No comment provided."}

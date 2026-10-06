@@ -1,7 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
 import { useForm, type UseFormRegisterReturn } from "react-hook-form";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { forgotPassword, resetPassword, verifyEmail } from "../api/auth";
 import { AuthFormLayout } from "../components/auth/AuthFormLayout";
 import { Button } from "../components/ui/Button";
@@ -152,6 +152,7 @@ export function VerifyEmailPage() {
 }
 
 export function ForgotPasswordPage() {
+  const navigate = useNavigate();
   const mutation = useMutation({ mutationFn: forgotPassword });
   const {
     register,
@@ -160,7 +161,12 @@ export function ForgotPasswordPage() {
   } = useForm<ForgotPasswordFormValues>({
     resolver: zodResolver(forgotPasswordSchema),
   });
-  const onSubmit = handleSubmit((values) => mutation.mutate(values));
+  const onSubmit = handleSubmit((values) =>
+    mutation.mutate(values, {
+      onSuccess: () =>
+        navigate("/reset-password", { state: { email: values.email } }),
+    }),
+  );
 
   return (
     <AuthFormLayout
@@ -195,9 +201,6 @@ export function ForgotPasswordPage() {
           {mutation.isPending ? "Requesting code..." : "Send reset code"}
         </Button>
       </form>
-      <p className="auth-switch">
-        Have a reset code? <Link to="/reset-password">Set a new password</Link>
-      </p>
       <p className="auth-switch auth-switch-secondary">
         <Link to="/login">Back to sign in</Link>
       </p>
@@ -206,6 +209,10 @@ export function ForgotPasswordPage() {
 }
 
 export function ResetPasswordPage() {
+  const location = useLocation();
+  const locationState = location.state as { email?: unknown } | null;
+  const email =
+    typeof locationState?.email === "string" ? locationState.email : "";
   const mutation = useMutation({ mutationFn: resetPassword });
   const {
     register,
@@ -213,6 +220,7 @@ export function ResetPasswordPage() {
     formState: { errors },
   } = useForm<ResetPasswordFormValues>({
     resolver: zodResolver(resetPasswordSchema),
+    defaultValues: { email },
   });
   const onSubmit = handleSubmit(({ email, code, password }) =>
     mutation.mutate({ email, code, password }),
@@ -222,7 +230,11 @@ export function ResetPasswordPage() {
     <AuthFormLayout
       eyebrow="ACCOUNT RECOVERY"
       title="Choose a new password"
-      description="Enter your reset code and create a new password."
+      description={
+        email
+          ? `Enter the reset code sent to ${email}, then choose your new password.`
+          : "Enter your account email and reset code, then choose your new password."
+      }
     >
       <form className="auth-form" onSubmit={onSubmit} noValidate>
         <AuthMutationFeedback
@@ -233,14 +245,18 @@ export function ResetPasswordPage() {
               : undefined
           }
         />
-        <AuthField
-          id="reset-password-email"
-          label="Email"
-          type="email"
-          autoComplete="email"
-          registration={register("email")}
-          error={errors.email?.message}
-        />
+        {email ? (
+          <input type="hidden" {...register("email")} />
+        ) : (
+          <AuthField
+            id="reset-password-email"
+            label="Email"
+            type="email"
+            autoComplete="email"
+            registration={register("email")}
+            error={errors.email?.message}
+          />
+        )}
         <AuthField
           id="reset-password-code"
           label="Reset code"
