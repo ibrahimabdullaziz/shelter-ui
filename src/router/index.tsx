@@ -1,6 +1,10 @@
 import { Suspense } from "react";
-import { createBrowserRouter, Navigate } from "react-router-dom";
+import {
+  createBrowserRouter,
+  Navigate,
+} from "react-router-dom";
 import App from "../App";
+import { RouteErrorPage } from "../components/errors/RouteErrorPage";
 import { ProtectedRoute } from "../components/layout/ProtectedRoute";
 import {
   HostBookingsPage,
@@ -26,6 +30,7 @@ export const router = createBrowserRouter([
   {
     path: "/",
     element: <App />,
+    errorElement: <RouteErrorPage />,
     children: [
       { path: "login", element: <Login /> },
       { path: "register", element: <Register /> },

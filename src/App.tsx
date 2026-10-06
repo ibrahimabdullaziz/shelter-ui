@@ -1,5 +1,4 @@
-import { AnimatePresence } from "motion/react";
-import { Outlet, useLocation } from "react-router-dom";
+import { useLocation, useOutlet } from "react-router-dom";
 import { Footer } from "./components/layout/Footer";
 import { Navbar } from "./components/layout/Navbar";
 import "./App.css";
@@ -15,18 +14,24 @@ const authPaths = new Set([
 function App() {
   const location = useLocation();
   const { pathname } = location;
+  const outlet = useOutlet();
   const isAuthPage = authPaths.has(pathname);
 
-  if (isAuthPage) return <Outlet />;
+  const routeContent = (
+      <div
+        className={isAuthPage ? "auth-route-transition" : "route-transition"}
+        key={pathname}
+      >
+        {outlet}
+      </div>
+  );
+
+  if (isAuthPage) return routeContent;
 
   return (
     <div className="site-shell">
       <Navbar />
-      <div className="site-content">
-        <AnimatePresence mode="wait" initial={false}>
-          <Outlet key={pathname} />
-        </AnimatePresence>
-      </div>
+      <div className="site-content">{routeContent}</div>
       <Footer />
     </div>
   );

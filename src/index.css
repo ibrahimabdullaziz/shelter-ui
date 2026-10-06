@@ -67,6 +67,10 @@ body {
   font-family: var(--font-body);
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
 button,
 input,
 select,

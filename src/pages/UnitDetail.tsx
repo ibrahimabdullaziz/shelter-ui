@@ -1,6 +1,7 @@
 import { Link, useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { motion } from "motion/react";
+import { useState } from "react";
 import { listCategories, listCities, listCurrencies } from "../api/catalog";
 import { ErrorBoundary } from "../components/errors/ErrorBoundary";
 import { BookingWidgetError } from "../components/features/bookings/BookingWidgetError";
@@ -11,13 +12,13 @@ import { QueryErrorState } from "../components/ui/QueryErrorState";
 import { PageTransition } from "../components/ui/PageTransition";
 import { Modal } from "../components/ui/Modal";
 import { Button } from "../components/ui/Button";
-import { useState } from "react";
 import { formatCurrency } from "../components/features/bookings/bookingDateUtils";
 import { useUnitQuery } from "../hooks/useUnitsQuery";
 import { catalogKeys } from "../queries/catalogKeys";
 
 export default function UnitDetailPage() {
   const { id } = useParams();
+  const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
   const { data: unit, isLoading, error, refetch } = useUnitQuery(id ?? "");
   const citiesQuery = useQuery({
     queryKey: catalogKeys.cities(),
@@ -85,8 +86,6 @@ export default function UnitDetailPage() {
     (currency) => currency.id === unit.currencyId,
   )?.code;
   const formatPrice = (amount: number) => formatCurrency(amount, currencyCode);
-
-  const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
 
   return (
     <PageTransition>

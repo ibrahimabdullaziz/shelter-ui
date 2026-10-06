@@ -63,30 +63,39 @@ export function AuthBootstrap({ children }: AuthBootstrapProps) {
     setAuthStatus,
   ]);
 
-  if (authStatus === "initializing") {
-    return (
-      <main aria-busy="true" aria-live="polite">
-        Checking your session...
-      </main>
-    );
-  }
+  const isChecking = authStatus === "initializing";
+  const hasError = authStatus === "error";
 
-  if (authStatus === "error") {
-    return (
-      <main role="alert">
-        <p>We could not check your session.</p>
-        <button
-          type="button"
-          onClick={() => {
-            setAuthStatus("initializing");
-            void currentUserQuery.refetch();
-          }}
+  return (
+    <>
+      {(isChecking || hasError) && (
+        <div
+          className={`session-status-banner${hasError ? " is-error" : ""}`}
+          role={hasError ? "alert" : "status"}
+          aria-live={hasError ? "assertive" : "polite"}
+          aria-busy={isChecking}
         >
-          Retry
-        </button>
-      </main>
-    );
-  }
-
-  return children;
+          <span className="session-status-indicator" aria-hidden="true" />
+          <span>
+            {isChecking
+              ? "Checking your session"
+              : "We could not check your session."}
+          </span>
+          {hasError && (
+            <button
+              className="session-status-retry"
+              type="button"
+              onClick={() => {
+                setAuthStatus("initializing");
+                void currentUserQuery.refetch();
+              }}
+            >
+              Try again
+            </button>
+          )}
+        </div>
+      )}
+      {children}
+    </>
+  );
 }

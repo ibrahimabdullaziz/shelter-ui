@@ -14,17 +14,15 @@ export function ProtectedRoute({ allowedRoles }: ProtectedRouteProps) {
 
   if (authStatus === "initializing") {
     return (
-      <main className="route-state" aria-busy="true" aria-live="polite">
-        Checking your session...
-      </main>
+      <div className="session-route-message" aria-hidden="true" />
     );
   }
 
   if (authStatus === "error") {
     return (
-      <main className="route-state" role="alert">
-        Your session could not be verified. Please retry the session check.
-      </main>
+      <div className="session-route-message" role="alert">
+        This page is unavailable until your session can be verified.
+      </div>
     );
   }
 
@@ -39,9 +37,9 @@ export function ProtectedRoute({ allowedRoles }: ProtectedRouteProps) {
   const user = currentUserQuery.data;
   if (!user) {
     return (
-      <main className="route-state" aria-busy="true" aria-live="polite">
-        Loading your account...
-      </main>
+      <div className="session-route-message" aria-busy="true" role="status">
+        Preparing your page…
+      </div>
     );
   }
 
