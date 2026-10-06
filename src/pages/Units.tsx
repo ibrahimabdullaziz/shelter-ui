@@ -215,9 +215,10 @@ export default function UnitsPage() {
               </select>
             </label>
 
-            <label className="discovery-field">
-              <span>Minimum price</span>
+            <div className="discovery-field">
+              <label htmlFor="minimum-price">Minimum price</label>
               <input
+                id="minimum-price"
                 type="number"
                 min="0"
                 step="0.01"
@@ -225,11 +226,12 @@ export default function UnitsPage() {
                 onChange={(event) => setMinPriceInput(event.target.value)}
                 placeholder="0"
               />
-            </label>
+            </div>
 
-            <label className="discovery-field">
-              <span>Maximum price</span>
+            <div className="discovery-field">
+              <label htmlFor="maximum-price">Maximum price</label>
               <input
+                id="maximum-price"
                 type="number"
                 min="0"
                 step="0.01"
@@ -237,7 +239,7 @@ export default function UnitsPage() {
                 onChange={(event) => setMaxPriceInput(event.target.value)}
                 placeholder="500"
               />
-            </label>
+            </div>
           </div>
 
           {hasActiveFilters && (

@@ -772,7 +772,6 @@
   background: var(--color-primary-hover);
   border-color: var(--color-primary-hover);
   transform: translateY(-2px);
-  box-shadow: 0 10px 28px rgba(212, 165, 116, 0.35);
 }
 
 #listings {
@@ -817,6 +816,11 @@
 ───────────────────────────────────────────── */
 .discovery-page {
   padding-block: 0 56px;
+}
+
+.discovery-page > :not(.hero-section) {
+  width: min(100% - 48px, 1240px);
+  margin-inline: auto;
 }
 
 .discovery-section-header {
@@ -885,6 +889,10 @@
   font-weight: 600;
 }
 
+.discovery-field > label {
+  display: block;
+}
+
 .discovery-field select,
 .discovery-field input {
   width: 100%;
@@ -897,6 +905,18 @@
   color: var(--color-ink);
   font-size: 14px;
   transition: border-color var(--motion-fast), box-shadow var(--motion-fast);
+}
+
+.discovery-field input[type="number"] {
+  appearance: textfield;
+  -moz-appearance: textfield;
+}
+
+.discovery-field input[type="number"]::-webkit-inner-spin-button,
+.discovery-field input[type="number"]::-webkit-outer-spin-button {
+  margin: 0;
+  appearance: none;
+  -webkit-appearance: none;
 }
 
 .discovery-field select option {
@@ -952,12 +972,18 @@
   gap: 24px;
 }
 
+.discovery-grid > div {
+  display: flex;
+  min-width: 0;
+}
+
 /* ─────────────────────────────────────────────
    UNIT CARD — Glassmorphism + gradient overlay
 ───────────────────────────────────────────── */
 .unit-card {
   position: relative;
   display: flex;
+  width: 100%;
   min-width: 0;
   flex-direction: column;
   overflow: hidden;
@@ -1065,16 +1091,13 @@
 }
 
 .unit-card-description {
-  display: -webkit-box;
-  min-height: 4.5em;
+  height: calc(1.55em * 2);
+  min-height: calc(1.55em * 2);
   overflow: hidden;
   margin: 0 0 16px;
   color: var(--color-muted);
   font-size: 13px;
   line-height: 1.55;
-  line-clamp: 3;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 3;
 }
 
 .unit-card-price-row {

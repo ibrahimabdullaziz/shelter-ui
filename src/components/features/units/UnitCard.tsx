@@ -19,6 +19,8 @@ interface UnitCardProps {
   currencyCode?: string;
 }
 
+const DESCRIPTION_LIMIT = 56;
+
 export function UnitCard({
   unit,
   cityName,
@@ -51,6 +53,10 @@ export function UnitCard({
       },
     }) > 0;
   const isFavorite = favoritesQuery.data?.includes(unit.id) ?? false;
+  const description =
+    unit.description.length > DESCRIPTION_LIMIT
+      ? `${unit.description.slice(0, DESCRIPTION_LIMIT).trimEnd()}...`
+      : unit.description;
 
   const coverPhoto = unitDetails?.photos?.[0];
   let nightlyPrice = new Intl.NumberFormat(undefined, {
@@ -96,7 +102,7 @@ export function UnitCard({
             <span>{categoryName ?? unit.categoryId}</span>
           </p>
           <h2 className="unit-card-title">{unit.title}</h2>
-          <p className="unit-card-description">{unit.description}</p>
+          <p className="unit-card-description">{description}</p>
 
           <div className="unit-card-price-row">
             <span className="unit-card-price">{nightlyPrice}</span>
